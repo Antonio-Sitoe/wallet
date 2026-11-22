@@ -1,5 +1,5 @@
 {
-  "name": "@finance/db",
+  "name": "@wallet/db",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -19,7 +19,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@finance/config": "*",
+    "@wallet/config": "*",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "1.0.0-rc.5",
     "typescript": "^6.0.3",

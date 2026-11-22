@@ -1,0 +1,2184 @@
+{
+  "info": {
+    "_postman_id": "79955190-297c-4646-940c-9c6c33ad7286",
+    "name": "Wallet API — Fases 1 e 2",
+    "description": "Contas, categorias, transacções, transferências, orçamento (plano anual + lista do mês) e importação do Wallet.\n\n1. Corra **Auth › Registar** (ou **Entrar**) — o token fica guardado.\n2. Siga as pastas por ordem: os ids criados ficam em variáveis da collection.\n\nTodos os valores são em **centavos** (100 MZN = 10000). Datas em ISO 8601. Meses do orçamento em `AAAA-MM`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "origin",
+      "value": "http://localhost:3001"
+    },
+    {
+      "key": "name",
+      "value": "Postman"
+    },
+    {
+      "key": "email",
+      "value": "postman@example.test"
+    },
+    {
+      "key": "password",
+      "value": "postman-password-123"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "accountId",
+      "value": ""
+    },
+    {
+      "key": "accountId2",
+      "value": ""
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "newCategoryId",
+      "value": ""
+    },
+    {
+      "key": "transactionId",
+      "value": ""
+    },
+    {
+      "key": "transferId",
+      "value": ""
+    },
+    {
+      "key": "importId",
+      "value": ""
+    },
+    {
+      "key": "reviewKey",
+      "value": ""
+    },
+    {
+      "key": "cursor",
+      "value": ""
+    },
+    {
+      "key": "tmpAccountId",
+      "value": ""
+    },
+    {
+      "key": "planYear",
+      "value": "2026"
+    },
+    {
+      "key": "month",
+      "value": "2026-11"
+    },
+    {
+      "key": "planItemId",
+      "value": ""
+    },
+    {
+      "key": "monthItemId",
+      "value": ""
+    },
+    {
+      "key": "paymentTxId",
+      "value": ""
+    },
+    {
+      "key": "unplannedItemId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Registar (sign up)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{origin}}",
+                "description": "O Better Auth só aceita origens de confiança (CORS_ORIGIN)."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/sign-up/email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "sign-up",
+                "email"
+              ]
+            },
+            "description": "Cria o utilizador e guarda o token (header `set-auth-token`) na variável `token`. Só é preciso uma vez.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{name}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const t = pm.response.headers.get(\"set-auth-token\");",
+                  "if (t) pm.collectionVariables.set(\"token\", t);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entrar (sign in)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "{{origin}}",
+                "description": "O Better Auth só aceita origens de confiança (CORS_ORIGIN)."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/sign-in/email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "sign-in",
+                "email"
+              ]
+            },
+            "description": "Guarda o token na variável `token`; todos os outros pedidos usam-no como Bearer.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const t = pm.response.headers.get(\"set-auth-token\");",
+                  "if (t) pm.collectionVariables.set(\"token\", t);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sessão actual",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{origin}}",
+                "description": "O Better Auth só aceita origens de confiança (CORS_ORIGIN)."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/get-session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "get-session"
+              ]
+            },
+            "description": "Mostra o utilizador da sessão."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Contas",
+      "item": [
+        {
+          "name": "Listar contas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts?includeArchived=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts"
+              ],
+              "query": [
+                {
+                  "key": "includeArchived",
+                  "value": "false",
+                  "description": "true para incluir arquivadas"
+                }
+              ]
+            },
+            "description": "Contas com `balance` = saldo inicial + todas as transacções (centavos)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar conta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts"
+              ]
+            },
+            "description": "Tipos: `bank`, `mobile_wallet`, `cash`, `savings`. Valores em centavos. Guarda o id em `accountId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"FCBANK\",\n  \"type\": \"bank\",\n  \"initialBalance\": 0,\n  \"color\": \"#3FB950\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"accountId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar conta (destino)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts"
+              ]
+            },
+            "description": "Segunda conta, usada nas transferências. Guarda o id em `accountId2`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Numerário\",\n  \"type\": \"cash\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"accountId2\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver conta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{accountId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "{{accountId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar conta",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{accountId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "{{accountId}}"
+              ]
+            },
+            "description": "Campos opcionais: name, type, initialBalance, color, archived, sortOrder.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"FCBANK\",\n  \"color\": \"#58A6FF\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Acertar saldo (reconcile)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{accountId}}/reconcile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "{{accountId}}",
+                "reconcile"
+              ]
+            },
+            "description": "Diz quanto a conta tem hoje (centavos); o servidor ajusta o saldo inicial para o saldo bater.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"balance\": 8443100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar conta temporária",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts"
+              ]
+            },
+            "description": "Conta só para experimentar o apagar. Guarda o id em `tmpAccountId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Conta de teste\",\n  \"type\": \"cash\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"tmpAccountId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Apagar conta",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{tmpAccountId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "{{tmpAccountId}}"
+              ]
+            },
+            "description": "Só funciona sem transacções (409 caso contrário: arquive com PATCH archived=true)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Listar categorias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ]
+            },
+            "description": "Árvore de dois níveis (parentId). Na primeira chamada cria as categorias por defeito e o mapeamento do Wallet. Guarda o id de Transporte em `categoryId`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const t = pm.response.json().find(c => c.name === \"Transporte\");",
+                  "if (t) pm.collectionVariables.set(\"categoryId\", t.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar categoria",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ]
+            },
+            "description": "kind: `expense` ou `income`. parentId: uma categoria principal (só há dois níveis). Guarda o id em `newCategoryId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Vovó Ester\",\n  \"kind\": \"expense\",\n  \"parentId\": null,\n  \"color\": \"#D2A8FF\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"newCategoryId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar categoria",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{newCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "{{newCategoryId}}"
+              ]
+            },
+            "description": "Categorias de sistema (Transferência) devolvem 403.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Vovó Ester Sitoe\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Apagar categoria",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{newCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "{{newCategoryId}}"
+              ]
+            },
+            "description": "Só sem subcategorias nem transacções; caso contrário 409 (arquive com archived=true)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mapeamento Wallet → app",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/wallet-map",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "wallet-map"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mapear categoria do Wallet",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/wallet-map",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "wallet-map"
+              ]
+            },
+            "description": "Fica guardado e é usado em todas as importações seguintes.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletName\": \"Mesada de wil\",\n  \"categoryId\": \"{{categoryId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Transacções",
+      "item": [
+        {
+          "name": "Listar transacções",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions?limit=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transactions"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "1–200"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-11-01T00:00:00Z",
+                  "disabled": true,
+                  "description": "inclusivo"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-12-01T00:00:00Z",
+                  "disabled": true,
+                  "description": "exclusivo"
+                },
+                {
+                  "key": "accountId",
+                  "value": "{{accountId}}",
+                  "disabled": true,
+                  "description": "repita para várias"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}",
+                  "disabled": true,
+                  "description": "repita para várias"
+                },
+                {
+                  "key": "type",
+                  "value": "expense",
+                  "disabled": true,
+                  "description": "expense | income | transfer"
+                },
+                {
+                  "key": "referenceMonth",
+                  "value": "2026-11",
+                  "disabled": true,
+                  "description": "mês do orçamento"
+                },
+                {
+                  "key": "payee",
+                  "value": "FCB",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "Ussman",
+                  "disabled": true,
+                  "description": "procura em nota e payee"
+                },
+                {
+                  "key": "cursor",
+                  "value": "{{cursor}}",
+                  "disabled": true,
+                  "description": "página seguinte"
+                }
+              ]
+            },
+            "description": "Paginação por cursor (`nextCursor`). Uma categoria principal inclui as subcategorias. Active os filtros que quiser."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"cursor\", pm.response.json().nextCursor || \"\");"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registar despesa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transactions"
+              ]
+            },
+            "description": "amount sempre positivo em centavos (10000 = 100 MZN); o tipo dá o sinal. referenceMonth é opcional (por defeito o mês da data). Guarda o id em `transactionId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"expense\",\n  \"accountId\": \"{{accountId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"amount\": 10000,\n  \"occurredAt\": \"2026-11-16T10:00:00Z\",\n  \"referenceMonth\": \"2026-11\",\n  \"note\": null,\n  \"payee\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"transactionId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registar entrada",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transactions"
+              ]
+            },
+            "description": "Salário de 55 000 MZN.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"income\",\n  \"accountId\": \"{{accountId}}\",\n  \"amount\": 5500000,\n  \"occurredAt\": \"2026-10-28T10:00:00Z\",\n  \"payee\": \"FCB\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver transacção",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/{{transactionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transactions",
+                "{{transactionId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar transacção",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/{{transactionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transactions",
+                "{{transactionId}}"
+              ]
+            },
+            "description": "Pernas de transferência devolvem 409: edite-as em /transfers.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 15000,\n  \"note\": \"Transporte ida e volta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Apagar transacção",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/{{transactionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transactions",
+                "{{transactionId}}"
+              ]
+            },
+            "description": "Apagar uma perna de transferência apaga a transferência inteira."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Transferências",
+      "item": [
+        {
+          "name": "Criar transferência",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transfers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transfers"
+              ]
+            },
+            "description": "Cria a transferência e as duas transacções (saída e entrada). Guarda o id em `transferId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{accountId2}}\",\n  \"amount\": 200000,\n  \"occurredAt\": \"2026-11-01T08:00:00Z\",\n  \"note\": \"Levantamento\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"transferId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver transferência",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transfers/{{transferId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transfers",
+                "{{transferId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar transferência",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transfers/{{transferId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transfers",
+                "{{transferId}}"
+              ]
+            },
+            "description": "Actualiza as duas pernas de uma vez.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 300000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Apagar transferência",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transfers/{{transferId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transfers",
+                "{{transferId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orçamento",
+      "description": "Fase 2: plano anual + lista do mês. Check = transacção.",
+      "item": [
+        {
+          "name": "Listar planos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "plans"
+              ]
+            },
+            "description": "Anos com plano e se as listas mensais já foram geradas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar plano anual",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "plans"
+              ]
+            },
+            "description": "Um plano por ano. expectedIncome = salário previsto por mês (centavos). Opcional: `copyFrom` (ano a copiar), `copyOneOff` (defeito false) e `copySeasonal` (defeito true).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"year\": {{planYear}},\n  \"expectedIncome\": 5500000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Adicionar item: Moradia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/plans/{{planYear}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "plans",
+                "{{planYear}}",
+                "items"
+              ]
+            },
+            "description": "group: `fixed`, `savings`, `variable`, `oneoff`. frequency: `monthly`, `months` (com `months: [6,7,8]`) ou `once` (com um mês). Para poupança, `toAccountId` faz o pagamento ser uma transferência. Guarda o id em `planItemId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Moradia\",\n  \"group\": \"fixed\",\n  \"categoryId\": null,\n  \"amount\": 500000,\n  \"frequency\": \"monthly\",\n  \"accountId\": \"{{accountId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"planItemId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Adicionar item: Transporte (aos poucos)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/plans/{{planYear}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "plans",
+                "{{planYear}}",
+                "items"
+              ]
+            },
+            "description": "Item parcial: aceita vários lançamentos; `step` é o valor do lançamento rápido (100 MZN). Transacções da categoria Transporte registadas fora da lista também contam.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Transporte\",\n  \"group\": \"variable\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"amount\": 300000,\n  \"accountId\": \"{{accountId}}\",\n  \"partial\": true,\n  \"step\": 10000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gerar listas mensais",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/plans/{{planYear}}/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "plans",
+                "{{planYear}}",
+                "generate"
+              ]
+            },
+            "description": "Cria os itens dos 12 meses a partir do plano. Repetir não duplica nada."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver plano (vista anual)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/plans/{{planYear}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "plans",
+                "{{planYear}}"
+              ],
+              "query": [
+                {
+                  "key": "asOf",
+                  "value": "{{month}}",
+                  "disabled": true,
+                  "description": "mês de referência do ritmo (defeito: mês actual)"
+                }
+              ]
+            },
+            "description": "Por item: projectado no ano, planeado e gasto até `asOf`, ritmo (`within` / `over` / `no_data`) e os valores de cada mês."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver lista do mês",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/months/{{month}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "months",
+                "{{month}}"
+              ]
+            },
+            "description": "A checklist do mês: por item planeado, gasto (da lista + por categoria), falta, estado (`unpaid`, `partial`, `paid`, `over`) e pagamentos; totais, salário recebido e gasto sem item. Guarda o id do item Transporte em `monthItemId`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const t = (pm.response.json().items || []).find(i => i.name === \"Transporte\");",
+                  "if (t) pm.collectionVariables.set(\"monthItemId\", t.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar / lançar (check)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/month-items/{{monthItemId}}/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "month-items",
+                "{{monthItemId}}",
+                "payments"
+              ]
+            },
+            "description": "Cria a transacção (ou transferência, num item de poupança) ligada ao item, com o mês do orçamento da lista. Tudo é opcional: sem `amount` usa o `step` (parciais) ou o que falta; sem `accountId` usa a última conta usada no item. Guarda o id da transacção em `paymentTxId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 10000,\n  \"accountId\": \"{{accountId}}\",\n  \"occurredAt\": \"2026-11-16T10:00:00Z\",\n  \"note\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"paymentTxId\", pm.response.json().payments[0].transactionId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lançar outra vez",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/month-items/{{monthItemId}}/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "month-items",
+                "{{monthItemId}}",
+                "payments"
+              ]
+            },
+            "description": "Sem corpo: lança o valor do `step`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver item do mês",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/month-items/{{monthItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "month-items",
+                "{{monthItemId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Apagar um lançamento",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/month-items/{{monthItemId}}/payments/{{paymentTxId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "month-items",
+                "{{monthItemId}}",
+                "payments",
+                "{{paymentTxId}}"
+              ]
+            },
+            "description": "Apaga só esse pagamento (e a transacção)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desmarcar (uncheck)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/month-items/{{monthItemId}}/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "month-items",
+                "{{monthItemId}}",
+                "payments"
+              ]
+            },
+            "description": "Apaga todos os pagamentos feitos a partir da lista para este item."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar item só neste mês",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/month-items/{{monthItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "month-items",
+                "{{monthItemId}}"
+              ]
+            },
+            "description": "Muda só este mês; o plano fica igual.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plannedAmount\": 350000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Adicionar item não planeado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/months/{{month}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "months",
+                "{{month}}",
+                "items"
+              ]
+            },
+            "description": "Fica marcado como `unplanned` e conta no total do mês. Guarda o id em `unplannedItemId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Presente\",\n  \"group\": \"oneoff\",\n  \"categoryId\": null,\n  \"amount\": 150000,\n  \"accountId\": \"{{accountId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"unplannedItemId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Apagar item do mês",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/month-items/{{unplannedItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "month-items",
+                "{{unplannedItemId}}"
+              ]
+            },
+            "description": "Só sem pagamentos (409 caso contrário: desmarque primeiro)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar item do plano",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/plan-items/{{planItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "plan-items",
+                "{{planItemId}}"
+              ]
+            },
+            "description": "Aplica-se aos meses a partir de `applyFrom` (defeito: mês actual) que ainda não têm pagamentos; os meses anteriores ficam como estavam. Mudar `frequency`/`months` acrescenta ou retira meses.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 600000,\n  \"applyFrom\": \"{{month}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Apagar item do plano",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/plan-items/{{planItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "plan-items",
+                "{{planItemId}}"
+              ],
+              "query": [
+                {
+                  "key": "applyFrom",
+                  "value": "{{month}}",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retira o item do plano e dos meses sem pagamentos a partir de `applyFrom`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar salário previsto",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/plans/{{planYear}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "plans",
+                "{{planYear}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expectedIncome\": 5800000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Apagar plano",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/plans/{{planYear}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "budgets",
+                "plans",
+                "{{planYear}}"
+              ]
+            },
+            "description": "Só sem itens pagos (409 caso contrário)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Importar do Wallet",
+      "item": [
+        {
+          "name": "Enviar CSV do Wallet (pré-visualizar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/imports/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports",
+                "wallet"
+              ]
+            },
+            "description": "Envia um ou mais exports do Wallet como texto. Não grava transacções: devolve a pré-visualização (novas, duplicadas, pares de transferência, Xitique, linhas para rever). Para os ficheiros reais, cole o conteúdo do CSV em `content`. Guarda o id em `importId` e a 1.ª linha para rever em `reviewKey`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"files\": [\n    {\n      \"name\": \"exemplo.csv\",\n      \"content\": \"account;category;currency;amount;ref_currency_amount;type;payment_type;note;date;transfer;payee;labels\\nFCBANK;Income;MZN;55000;55000;Income;Cash;;2026-10-28T10:00:00.000Z;false;FCB;\\nNumerário;Transfer, withdraw;MZN;2000;2000;Income;Cash;;2026-10-27T05:05:41.900Z;true;;\\nFCBANK;Transfer, withdraw;MZN;2000;2000;Expense;Cash;;2026-10-27T05:05:41.900Z;true;;\\nFCBANK;Estique ou xitique;MZN;20000;20000;Expense;Cash;Junho;2026-06-24T18:06:42.221Z;false;;\\nNumerário;Transportation;MZN;2000;2000;Expense;Cash;Abril;2026-05-11T09:32:37.609Z;false;;\\nBIM;Transfer, withdraw;MZN;349;349;Expense;Cash;;2024-03-25T18:25:48.314Z;true;;\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"importId\", pm.response.json().id);",
+                  "const r = pm.response.json().review || [];",
+                  "pm.collectionVariables.set(\"reviewKey\", r.length ? r[0].key : \"\");"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver importação",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/imports/{{importId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports",
+                "{{importId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar importações",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/imports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aplicar importação (commit)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/imports/{{importId}}/commit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports",
+                "{{importId}}",
+                "commit"
+              ]
+            },
+            "description": "categoryMap: nome no Wallet → id de categoria, para nomes sem mapeamento (senão 422 UNMAPPED_CATEGORIES). resolutions: para cada linha a rever, `ignore` (defeito), `keep` (fica como despesa/entrada em Transferência) ou `{\"transferTo\": \"<accountId>\"}` (cria o outro lado).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryMap\": {},\n  \"resolutions\": {\n    \"{{reviewKey}}\": \"keep\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desfazer / descartar importação",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/imports/{{importId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports",
+                "{{importId}}"
+              ]
+            },
+            "description": "Rascunho: apaga-o. Aplicada: apaga todas as transacções e transferências que ela criou."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

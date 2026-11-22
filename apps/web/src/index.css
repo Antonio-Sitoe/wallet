@@ -1,1 +1,72 @@
-@import "@finance/ui/globals.css";
+@import "@wallet/ui/globals.css";
+
+/* Wallet design tokens (dark, macOS-first): see the design canvas "Dark-*" boards. */
+@theme {
+	--font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+	--font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+	--color-canvas: #0a0c0f;
+	--color-panel: #0f1216;
+	--color-panel-2: #0b0e12;
+	--color-hover: #161b22;
+	--color-selected: #1a1f26;
+	--color-line: #1f242b;
+	--color-line-strong: #2d333b;
+	--color-fg: #e6e8eb;
+	--color-fg-2: #adb5bd;
+	--color-dim: #8b949e;
+	--color-faint: #484f58;
+
+	--color-money: #3fb950;
+	--color-money-2: #56d364;
+	--color-money-ink: #04130a;
+	--color-money-bg: #0e1f14;
+	--color-money-line: #1f4d2b;
+	--color-warn: #ffa657;
+	--color-warn-bg: #2a1a0c;
+	--color-warn-line: #5a3416;
+	--color-info: #79c0ff;
+	--color-info-2: #58a6ff;
+	--color-info-bg: #0c1d33;
+	--color-info-line: #1f3f66;
+	--color-danger: #ff7b72;
+	--color-danger-bg: #2a1215;
+	--color-danger-line: #5c2328;
+}
+
+.dark {
+	--background: #0a0c0f;
+	--foreground: #e6e8eb;
+	--card: #0f1216;
+	--card-foreground: #e6e8eb;
+	--popover: #161b22;
+	--popover-foreground: #e6e8eb;
+	--primary: #3fb950;
+	--primary-foreground: #04130a;
+	--muted: #161b22;
+	--muted-foreground: #8b949e;
+	--accent: #1a1f26;
+	--accent-foreground: #e6e8eb;
+	--border: #1f242b;
+	--input: #2d333b;
+	--ring: #58a6ff;
+}
+
+@layer base {
+	html,
+	body {
+		background: var(--color-canvas);
+		color: var(--color-fg);
+		font-family: var(--font-sans);
+		-webkit-font-smoothing: antialiased;
+		font-size: 13px;
+	}
+	/* Money and dates line up in columns. */
+	.num {
+		font-family: var(--font-mono);
+		font-variant-numeric: tabular-nums;
+	}
+	input[type="date"]::-webkit-calendar-picker-indicator {
+		filter: invert(0.7);
+	}
+}

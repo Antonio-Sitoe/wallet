@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@finance/ui/components/button";
-import { Input } from "@finance/ui/components/input";
-import { Textarea } from "@finance/ui/components/textarea";
-import { cn } from "@finance/ui/lib/utils";
+import { Button } from "@wallet/ui/components/button";
+import { Input } from "@wallet/ui/components/input";
+import { Textarea } from "@wallet/ui/components/textarea";
+import { cn } from "@wallet/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 

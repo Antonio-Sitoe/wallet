@@ -1,4 +1,4 @@
-import { cn } from "@finance/ui/lib/utils";
+import { cn } from "@wallet/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 function Empty({ className, ...props }: React.ComponentProps<"div">) {

@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@finance/ui/components/button";
-import { cn } from "@finance/ui/lib/utils";
+import { Button } from "@wallet/ui/components/button";
+import { cn } from "@wallet/ui/lib/utils";
 import {
   MessageScroller as MessageScrollerPrimitive,
   useMessageScroller,

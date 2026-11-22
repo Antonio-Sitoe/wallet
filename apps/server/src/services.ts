@@ -1,7 +1,7 @@
-import { createAuth } from "@finance/auth";
-import { createDb } from "@finance/db";
+import { createAuth } from "@wallet/auth";
+import { createDb } from "@wallet/db";
 
-import { ENV, desktopOrigins } from "./env.server";
+import { desktopOrigins, ENV } from "./env.server";
 
 export const db = createDb(ENV);
 export const auth = createAuth(ENV, db, desktopOrigins);
