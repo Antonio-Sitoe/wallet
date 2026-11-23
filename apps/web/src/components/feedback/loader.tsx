@@ -51,7 +51,14 @@ export function Loader() {
 								rx="9"
 								fill="var(--color-money-line)"
 							/>
-							<rect x="38" y="58" width="84" height="6" rx="3" fill="var(--color-panel-2)" />
+							<rect
+								x="38"
+								y="58"
+								width="84"
+								height="6"
+								rx="3"
+								fill="var(--color-panel-2)"
+							/>
 
 							{COINS.map((delay) => (
 								<g

@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { Toaster } from "@wallet/ui/components/sonner";
+import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 
 export function RootDocument() {
@@ -13,15 +14,23 @@ export function RootDocument() {
 			}),
 	);
 	return (
-		<html lang="pt" className="dark">
+		<html lang="pt" suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
 			<body>
-				<QueryClientProvider client={queryClient}>
-					<Outlet />
-				</QueryClientProvider>
-				<Toaster richColors theme="dark" position="bottom-right" />
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					enableSystem
+					disableTransitionOnChange
+					storageKey="wallet.theme"
+				>
+					<QueryClientProvider client={queryClient}>
+						<Outlet />
+					</QueryClientProvider>
+					<Toaster richColors position="bottom-right" />
+				</ThemeProvider>
 				<Scripts />
 			</body>
 		</html>

@@ -4,22 +4,15 @@ import { Input } from "@wallet/ui/components/input";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useCreateAccount } from "@/actions/accounts/use-create-account";
+import {
+	ACCOUNT_COLORS,
+	ColorSwatches,
+} from "@/components/accounts/color-swatches";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
 import { ACCOUNT_TYPE_LABEL, parseMoney } from "@/utils/format";
-
-export const COLORS = [
-	"#3FB950",
-	"#58A6FF",
-	"#F0883E",
-	"#A371F7",
-	"#39C5BB",
-	"#D29922",
-	"#F778BA",
-	"#8B949E",
-] as const;
 
 const FORM_ID = "new-account-form";
 
@@ -28,7 +21,7 @@ export function NewAccountDialog({ onClose }: { onClose: () => void }) {
 	const [name, setName] = useState("");
 	const [type, setType] = useState<AccountType>("bank");
 	const [initial, setInitial] = useState("");
-	const [color, setColor] = useState<string>(COLORS[0]);
+	const [color, setColor] = useState<string>(ACCOUNT_COLORS[0]);
 	const cents = initial === "" ? 0 : parseMoney(initial);
 	const canSubmit = !!name.trim() && cents !== null && !create.isPending;
 
@@ -103,23 +96,7 @@ export function NewAccountDialog({ onClose }: { onClose: () => void }) {
 				</div>
 				<fieldset className="flex flex-col gap-2 border-0 p-0">
 					<legend className="text-fg-2 mb-2 text-xs">Cor</legend>
-					<div className="flex flex-wrap gap-2">
-						{COLORS.map((c) => (
-							<button
-								key={c}
-								type="button"
-								aria-pressed={c === color}
-								aria-label={c}
-								onClick={() => setColor(c)}
-								className="size-7 cursor-pointer rounded-md"
-								style={{
-									background: c,
-									outline: c === color ? "2px solid #E6E8EB" : "none",
-									outlineOffset: 2,
-								}}
-							/>
-						))}
-					</div>
+					<ColorSwatches value={color} onChange={setColor} />
 				</fieldset>
 			</form>
 		</Dialog>

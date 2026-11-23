@@ -1,6 +1,6 @@
 import type { Category, Transaction } from "@wallet/shared";
 import { Pill } from "@/components/ui/pill";
-import { tint } from "@/utils/color";
+import { ink, tint } from "@/utils/color";
 import { monthLabel, signedMoney } from "@/utils/format";
 
 export function TxRow({
@@ -49,7 +49,7 @@ export function TxRow({
 				style={
 					isTransfer
 						? { background: "var(--color-hover)", color: "var(--color-dim)" }
-						: { background: tint(color), color }
+						: { background: tint(color), color: ink(color) }
 				}
 			>
 				{isAdjustment ? "≈" : isTransfer ? "⇄" : title[0]}

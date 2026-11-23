@@ -20,6 +20,11 @@ import {
 } from "react";
 import { SidebarAccounts } from "@/components/layout/sidebar-accounts";
 import {
+	ThemeCycleButton,
+	ThemeSwitch,
+	useThemeShortcut,
+} from "@/components/layout/theme-switch";
+import {
 	type NewTransactionDefaults,
 	NewTransactionDialog,
 } from "@/components/transactions/new-transaction-dialog";
@@ -46,6 +51,7 @@ export const MOD = isMac ? "⌘" : "Ctrl+";
 
 export function AppShell({ children }: { children: ReactNode }) {
 	const navigate = useNavigate();
+	useThemeShortcut();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const { data: session } = authClient.useSession();
 	const [dialog, setDialog] = useState<{
@@ -111,11 +117,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 								{session?.user.name ?? "—"}
 							</span>
 						</div>
+						<ThemeCycleButton className="text-fg-2 hover:bg-hover ml-auto cursor-pointer rounded-md p-2 md:hidden" />
 						<Button
 							variant="quiet"
 							size="icon-sm"
 							aria-label="Sair"
-							className="text-fg-2 hover:bg-hover ml-auto cursor-pointer rounded-md p-2 md:hidden"
+							className="text-fg-2 hover:bg-hover cursor-pointer rounded-md p-2 md:hidden"
 							onClick={signOut}
 						>
 							<LogOutIcon className="size-4" strokeWidth={1.8} />
@@ -169,7 +176,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 					<SidebarAccounts />
 
 					<div className="border-line mt-auto hidden flex-col gap-1 border-t pt-3 md:flex">
-						<span className="num text-dim truncate px-2 text-[11px]">
+						<ThemeSwitch />
+						<span className="num text-dim truncate px-2 pt-1 text-[11px]">
 							{session?.user.email}
 						</span>
 						<Button

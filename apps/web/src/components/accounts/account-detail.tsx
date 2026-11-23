@@ -10,6 +10,7 @@ import { useUpdateAccount } from "@/actions/accounts/use-update-account";
 import { useCategories } from "@/actions/categories/use-categories";
 import { useTransactionPages } from "@/actions/transactions/use-transaction-pages";
 import { AccountBalanceChart } from "@/components/accounts/account-balance-chart";
+import { ColorSwatches } from "@/components/accounts/color-swatches";
 import { initials } from "@/components/accounts/utils";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
@@ -152,6 +153,19 @@ export function AccountDetail({
 					Guardar
 				</Button>
 			</form>
+
+			<div className="flex flex-col gap-2">
+				<span className="text-fg-2 text-xs">Cor</span>
+				<ColorSwatches
+					value={account.color}
+					disabled={update.isPending}
+					onChange={async (color) => {
+						if (color.toLowerCase() === account.color?.toLowerCase()) return;
+						await update.mutateAsync({ id: account.id, color });
+						toast.success("Cor actualizada");
+					}}
+				/>
+			</div>
 
 			<div className="border-line overflow-hidden rounded-lg border">
 				<div className="border-line bg-panel-2 flex items-center justify-between border-b px-3 py-2">

@@ -152,3 +152,8 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 - [x] Contas: curva do histórico de saldo no detalhe da conta (3 meses / 1 ano / 3 anos); `GET /analytics/balance?accountId=` conta entradas, saídas, transferências e acertos; o saldo total também passa a contar os acertos
 - [x] Versão web estreita revista: os 7 ecrãs a 390 e 768 px sem scroll horizontal; coluna Item fixa no Plano anual, coluna «No Wallet» escondida nas Categorias em ecrã estreito, acções dos cartões passam para baixo do texto no telemóvel
 - [x] Tokens formais em `apps/web/src/index.css`: cores (incluindo estados, séries dos gráficos, superfícies), raios (`check`, `control`, `card`, `overlay`), sombras (`overlay`, `popover`, `focus`) e tamanhos (`sidebar`, `input`, `row`, `check`); as cores fixas da interface passaram a tokens (ficam em hex só as paletas de cores de contas/categorias e a do donut)
+- [x] Modo claro da v2: paleta clara confirmada (fundo #F5F5F7, texto #1D1D1F, verde #0B7A5C, laranja #B4480F, azul #0A63C9, vermelho #C9302C; textos ≥ 4,5:1), tokens sobrepostos com `.light` em `index.css`, ilustrações e gráficos seguem o tema, iniciais das categorias escurecidas para contraste
+
+## Fase 6 — Frontend — 2026-11-23
+
+- [x] Modo claro / escuro / seguir o sistema: `next-themes` (sistema por defeito, guardado em `wallet.theme`), selector com três ícones no fundo da barra lateral, botão no topo em telemóvel, atalho ⇧⌘L para alternar

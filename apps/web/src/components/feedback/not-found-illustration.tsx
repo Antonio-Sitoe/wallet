@@ -49,8 +49,22 @@ export function Illustration() {
 				stroke="var(--color-control)"
 				strokeWidth="2"
 			/>
-			<rect x="112" y="92" width="84" height="14" rx="7" fill="var(--color-money-line)" />
-			<rect x="120" y="97" width="68" height="4" rx="2" fill="var(--color-panel-2)" />
+			<rect
+				x="112"
+				y="92"
+				width="84"
+				height="14"
+				rx="7"
+				fill="var(--color-money-line)"
+			/>
+			<rect
+				x="120"
+				y="97"
+				width="68"
+				height="4"
+				rx="2"
+				fill="var(--color-panel-2)"
+			/>
 			<rect
 				x="174"
 				y="114"

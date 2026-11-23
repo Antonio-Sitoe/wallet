@@ -219,6 +219,14 @@ export function NewTransactionDialog({
 	}, [open, defaults]);
 
 	const activeAccounts = accounts.filter((a) => !a.archived);
+	const accountsLoaded = accounts.length > 0;
+	const isActive = (id: string) => activeAccounts.some((a) => a.id === id);
+
+	useEffect(() => {
+		if (!open || !accountsLoaded) return;
+		if (accountId && !isActive(accountId)) setAccountId("");
+		if (toAccountId && !isActive(toAccountId)) setToAccountId("");
+	});
 	const accountName = (id: string | null) =>
 		accounts.find((a) => a.id === id)?.name ?? "—";
 

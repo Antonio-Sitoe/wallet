@@ -42,7 +42,14 @@ export function Illustration({ ledColor }: { ledColor: string }) {
 				stroke="var(--color-control)"
 				strokeWidth="2"
 			/>
-			<rect x="96" y="92" width="6" height="16" rx="2" fill="var(--color-line-overlay)" />
+			<rect
+				x="96"
+				y="92"
+				width="6"
+				height="16"
+				rx="2"
+				fill="var(--color-line-overlay)"
+			/>
 			<path
 				d="M128 90 H143 M128 110 H143"
 				stroke="var(--color-fg-2)"
@@ -59,8 +66,22 @@ export function Illustration({ ledColor }: { ledColor: string }) {
 				stroke="var(--color-control)"
 				strokeWidth="2"
 			/>
-			<rect x="180" y="87" width="7" height="6" rx="1.5" fill="var(--color-canvas)" />
-			<rect x="180" y="107" width="7" height="6" rx="1.5" fill="var(--color-canvas)" />
+			<rect
+				x="180"
+				y="87"
+				width="7"
+				height="6"
+				rx="1.5"
+				fill="var(--color-canvas)"
+			/>
+			<rect
+				x="180"
+				y="107"
+				width="7"
+				height="6"
+				rx="1.5"
+				fill="var(--color-canvas)"
+			/>
 			<circle cx="211" cy="91" r="3.5" fill={ledColor} />
 			<path
 				d="M224 100 C260 100 270 84 320 84"

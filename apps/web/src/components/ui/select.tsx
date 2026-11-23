@@ -30,10 +30,11 @@ export function Select({
 	className?: string;
 	"aria-label"?: string;
 }) {
+	const known = items.some((item) => item.value === String(value));
 	return (
 		<SelectRoot
 			items={items}
-			value={String(value)}
+			value={known ? String(value) : null}
 			onValueChange={(next) => {
 				if (next !== null) onValueChange(String(next));
 			}}

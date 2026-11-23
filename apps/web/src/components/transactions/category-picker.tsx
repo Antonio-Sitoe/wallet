@@ -7,7 +7,7 @@ import {
 import { SearchIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Hint } from "@/components/ui/hint";
-import { tint } from "@/utils/color";
+import { ink, tint } from "@/utils/color";
 
 export function CategoryPicker({
 	categories,
@@ -79,7 +79,7 @@ export function CategoryPicker({
 							>
 								<b
 									className="num flex size-[34px] items-center justify-center rounded-[9px] text-[13px]"
-									style={{ background: tint(color, 15), color }}
+									style={{ background: tint(color, 15), color: ink(color) }}
 								>
 									{c.name.slice(0, 2)}
 								</b>

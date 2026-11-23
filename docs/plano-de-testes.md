@@ -55,18 +55,18 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 - [x] **C1** Sem contas, a página mostra "Ainda não há contas" com os botões "Criar conta" e "Importar do Wallet".
 - [x] **C2** "Nova conta" abre o formulário: nome, tipo, saldo inicial e cor.
 - [x] **C3** Criar as 4 contas de referência → toast "Conta … criada", e cada uma aparece no seu grupo (Bancos, Poupança, Dinheiro e carteiras).
-- [ ] **C4** Nome vazio → não deixa criar.
-- [ ] **C5** Nome repetido com outra capitalização ("fcbank") → erro de nome duplicado.
-- [ ] **C6** Saldo inicial vazio → a conta é criada com 0.
-- [ ] **C7** Os totais no topo batem com as contas: total 10 500,00, Bancos 10 000,00, Poupança 0, Dinheiro e carteiras 500,00.
+- [x] **C4** Nome vazio → não deixa criar.
+- [x] **C5** Nome repetido com outra capitalização ("fcbank") → erro de nome duplicado.
+- [x] **C6** Saldo inicial vazio → a conta é criada com 0.
+- [x] **C7** Os totais no topo batem com as contas: total 10 500,00, Bancos 10 000,00, Poupança 0, Dinheiro e carteiras 500,00.
 
 ### Editar, arquivar e apagar
 
-- [ ] **C8** Seleccionar uma conta mostra o detalhe com os movimentos recentes ("Sem movimentos." quando não há).
+- [x] **C8** Seleccionar uma conta mostra o detalhe com os movimentos recentes ("Sem movimentos." quando não há).
 - [ ] **C9** Mudar o nome, o tipo e a cor → "Conta actualizada", e a mudança aparece na lista, na barra lateral e no painel.
-- [ ] **C10** Arquivar M-Pesa → desaparece da lista e do painel. "Mostrar arquivadas" mostra-a com a etiqueta "arquivada". Desarquivar → volta.
-- [ ] **C11** Apagar uma conta sem transacções → pede confirmação → "Conta apagada".
-- [ ] **C12** Apagar uma conta com transacções → recusa e sugere arquivar.
+- [x] **C10** Arquivar M-Pesa → desaparece da lista e do painel. "Mostrar arquivadas" mostra-a com a etiqueta "arquivada". Desarquivar → volta.
+- [x] **C11** Apagar uma conta sem transacções → pede confirmação → "Conta apagada".
+- [x] **C12** Apagar uma conta com transacções → recusa e sugere arquivar.
 
 ### Saldo real e acertos
 

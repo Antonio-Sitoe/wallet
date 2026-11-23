@@ -5,7 +5,7 @@ import { useCategories } from "@/actions/categories/use-categories";
 import { useTransactionPages } from "@/actions/transactions/use-transaction-pages";
 import { Empty } from "@/components/dashboard/empty";
 import { Loading } from "@/components/dashboard/loading";
-import { tint } from "@/utils/color";
+import { ink, tint } from "@/utils/color";
 import { dayKey, dayLabel, signedMoney } from "@/utils/format";
 
 export function LastRecordsCard() {
@@ -30,7 +30,7 @@ export function LastRecordsCard() {
 								className="num flex size-7 items-center justify-center rounded-md text-xs font-semibold"
 								style={{
 									background: tint(c?.color ?? "var(--color-dim)"),
-									color: c?.color ?? "var(--color-dim)",
+									color: ink(c?.color ?? "var(--color-dim)"),
 								}}
 							>
 								{t.type === "transfer" ? (
