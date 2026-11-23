@@ -1,13 +1,13 @@
 import { getRouteApi } from "@tanstack/react-router";
 import type { Category } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useCategories } from "@/actions/categories/use-categories";
 import { CategoryDetail } from "@/components/categories/category-detail";
-import { NewCategoryForm } from "@/components/categories/new-category-form";
+import { NewCategoryDialog } from "@/components/categories/new-category-dialog";
 import { KIND_LABEL } from "@/components/categories/utils";
 import { WalletMapping } from "@/components/categories/wallet-mapping";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorNote } from "@/components/ui/error-note";
 import { Page } from "@/components/ui/page";
@@ -47,17 +47,14 @@ export function CategoriesPage() {
 				/>
 				{categories.error ? <ErrorNote error={categories.error} /> : null}
 				{creating ? (
-					<NewCategoryForm
+					<NewCategoryDialog
 						categories={list}
-						onDone={(newId) => {
-							setCreating(false);
-							if (newId) navigate({ search: { id: newId } });
-						}}
+						onClose={() => setCreating(false)}
 					/>
 				) : null}
 
 				<div className="flex flex-wrap items-start gap-[18px]">
-					<Card className="min-w-0 flex-[3_1_520px] overflow-hidden">
+					<Card className="min-w-0 flex-1 overflow-hidden">
 						<div className="border-line flex items-center justify-between border-b px-3.5 py-2.5">
 							<Segmented
 								className="w-64"
@@ -141,6 +138,7 @@ export function CategoriesPage() {
 							category={selected}
 							categories={list}
 							onDeleted={() => navigate({ search: {} })}
+							onClose={() => navigate({ search: {} })}
 						/>
 					) : null}
 				</div>

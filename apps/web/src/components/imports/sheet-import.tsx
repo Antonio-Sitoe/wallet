@@ -1,8 +1,8 @@
+import { Button } from "@wallet/ui/components/button";
 import { useRef, useState } from "react";
 import { useSheetPreview } from "@/actions/imports/use-sheet-preview";
 import { useUploadSheet } from "@/actions/imports/use-upload-sheet";
 import { SheetReview } from "@/components/imports/sheet-review";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
 import { Select } from "@/components/ui/select";
@@ -42,23 +42,24 @@ export function SheetImport({
 				meta="a sheet «Gastos com salario»: cada mês vira uma lista; os itens que se repetem vão para o plano anual"
 				actions={
 					id ? (
-						<Button size="sm" onClick={onClose}>
+						<Button variant="neutral" size="sm" onClick={onClose}>
 							Fechar
 						</Button>
 					) : (
 						<>
 							<Select
+								size="sm"
 								aria-label="Ano da folha"
-								className="h-7 w-auto text-xs"
+								className="w-auto"
 								value={year}
-								onChange={(e) => setYear(Number(e.target.value))}
-							>
-								{[year - 1, year, year + 1].map((y) => (
-									<option key={y} value={y}>
-										meses de {y}
-									</option>
-								))}
-							</Select>
+								onValueChange={(value) => setYear(Number(value))}
+								items={[
+									...[year - 1, year, year + 1].map((y) => ({
+										value: String(y),
+										label: `meses de ${y}`,
+									})),
+								]}
+							/>
 							<input
 								ref={inputRef}
 								type="file"

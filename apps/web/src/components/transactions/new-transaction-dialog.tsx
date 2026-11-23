@@ -1,5 +1,11 @@
-import { Dialog as BaseDialog } from "@base-ui/react/dialog";
 import type { MonthItem } from "@wallet/shared";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogTitle,
+} from "@wallet/ui/components/dialog";
+import { Input } from "@wallet/ui/components/input";
 import { cn } from "@wallet/ui/lib/utils";
 import { XIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -11,7 +17,8 @@ import { useCreateTransaction } from "@/actions/transactions/use-create-transact
 import { useCreateTransfer } from "@/actions/transactions/use-create-transfer";
 import { AccountPick } from "@/components/transactions/account-pick";
 import { CategoryPicker } from "@/components/transactions/category-picker";
-import { TextInput } from "@/components/ui/text-input";
+import { Field } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
 import {
 	addMonths,
 	currentMonth,
@@ -185,7 +192,7 @@ export function NewTransactionDialog({
 	const [payee, setPayee] = useState("");
 	const [pickerOpen, setPickerOpen] = useState(false);
 	const [showExtras, setShowExtras] = useState(false);
-	const amountRef = useRef<HTMLDivElement>(null);
+	const amountRef = useRef<HTMLFieldSetElement>(null);
 
 	useEffect(() => {
 		if (!open) return;
@@ -377,7 +384,7 @@ export function NewTransactionDialog({
 	}
 
 	return (
-		<BaseDialog.Root
+		<Dialog
 			open={open}
 			onOpenChange={(next) => {
 				if (!next && pickerOpen) {
@@ -387,348 +394,332 @@ export function NewTransactionDialog({
 				onOpenChange(next);
 			}}
 		>
-			<BaseDialog.Portal>
-				<BaseDialog.Backdrop className="fixed inset-0 z-40 bg-[rgba(1,4,9,.66)]" />
-				<BaseDialog.Popup
-					initialFocus={amountRef}
-					onKeyDown={onKeyDown}
-					className="bg-panel text-fg fixed top-[8vh] left-1/2 z-50 flex max-h-[88vh] w-[calc(100vw-32px)] max-w-[680px] -translate-x-1/2 flex-col rounded-[14px] border border-[#30363d] shadow-[0_24px_64px_rgba(1,4,9,.7)] outline-none"
-				>
-					<BaseDialog.Title className="sr-only">
-						Nova transacção
-					</BaseDialog.Title>
+			<DialogContent
+				showCloseButton={false}
+				initialFocus={amountRef}
+				onKeyDown={onKeyDown}
+				className="bg-panel text-fg flex max-h-[88vh] w-[calc(100vw-32px)] max-w-[680px] flex-col gap-0 rounded-[14px] border border-[#30363d] p-0 text-[13px] shadow-[0_24px_64px_rgba(1,4,9,.7)] ring-0 sm:max-w-[680px]"
+			>
+				<DialogTitle className="sr-only">Nova transacção</DialogTitle>
 
-					<div className="border-line flex items-stretch border-b">
-						<BaseDialog.Close
-							aria-label="Fechar"
-							className="text-dim hover:text-fg flex w-12 shrink-0 cursor-pointer items-center justify-center rounded-tl-[14px]"
+				<div className="border-line flex items-stretch border-b">
+					<DialogClose
+						aria-label="Fechar"
+						className="text-dim hover:text-fg flex w-12 shrink-0 cursor-pointer items-center justify-center rounded-tl-[14px]"
+					>
+						<XIcon className="size-4" />
+					</DialogClose>
+					<div role="tablist" aria-label="Tipo" className="flex flex-1">
+						{(Object.keys(KINDS) as Kind[]).map((k) => (
+							<button
+								key={k}
+								type="button"
+								role="tab"
+								aria-selected={k === kind}
+								onClick={() => changeKind(k)}
+								className={cn(
+									"text-dim hover:text-fg-2 h-10 flex-1 cursor-pointer border-b-2 border-transparent text-xs font-semibold tracking-[.02em] uppercase sm:text-[13px]",
+									k === kind && "bg-[#131820]",
+								)}
+								style={
+									k === kind
+										? {
+												color: KINDS[k].accent,
+												borderBottomColor: KINDS[k].accent,
+											}
+										: undefined
+								}
+							>
+								{KINDS[k].label}
+							</button>
+						))}
+					</div>
+					<span className="num text-dim hidden items-center px-3.5 text-[11px] sm:flex">
+						esc
+					</span>
+				</div>
+
+				<div className="grid min-h-0 grid-cols-1 overflow-y-auto sm:grid-cols-[1fr_236px]">
+					<div className="border-line relative flex min-w-0 flex-col gap-4 p-5 sm:border-r">
+						<fieldset
+							ref={amountRef}
+							tabIndex={-1}
+							aria-label={`Valor: ${money(cents)} MZN`}
+							className="flex min-w-0 flex-col items-end gap-0.5 border-b px-1 pt-1 pb-2 outline-none"
+							style={{ borderBottomColor: meta.accent }}
 						>
-							<XIcon className="size-4" />
-						</BaseDialog.Close>
-						<div role="tablist" aria-label="Tipo" className="flex flex-1">
-							{(Object.keys(KINDS) as Kind[]).map((k) => (
+							<span className="num text-dim min-h-4 text-xs">
+								{hasOp ? expr.replace(/-/g, "−") : ""}
+							</span>
+							<div className="flex w-full items-baseline gap-2.5">
+								<span
+									className="num text-[34px]"
+									style={{ color: meta.accent }}
+								>
+									{meta.sign}
+								</span>
+								<span
+									aria-live="polite"
+									className={cn(
+										"num flex-1 truncate text-right text-[40px] leading-[1.1] font-medium sm:text-[52px]",
+										cents > 0 ? "text-fg" : "text-faint",
+									)}
+								>
+									{money(Math.max(cents, 0))}
+									<span
+										aria-hidden="true"
+										className="ml-1 inline-block h-[34px] w-0.5 animate-pulse align-[-4px] sm:h-[42px]"
+										style={{ background: meta.accent }}
+									/>
+								</span>
+								<span className="num text-dim text-base">MZN</span>
+							</div>
+						</fieldset>
+
+						{kind === "transfer" ? (
+							<div className="grid grid-cols-[1fr_28px_1fr] items-center gap-2">
+								<AccountPick
+									label="De"
+									value={accountId}
+									onChange={setAccountId}
+									accounts={activeAccounts}
+								/>
+								<button
+									type="button"
+									aria-label="Trocar contas"
+									onClick={() => {
+										setAccountId(toAccountId);
+										setToAccountId(accountId);
+									}}
+									className="num text-info-2 hover:text-info cursor-pointer text-center"
+								>
+									→
+								</button>
+								<AccountPick
+									label="Para"
+									value={toAccountId}
+									onChange={(id) => {
+										setToAccountId(id);
+										setMonthItemId("");
+									}}
+									accounts={activeAccounts.filter((a) => a.id !== accountId)}
+								/>
+							</div>
+						) : (
+							<div className="grid grid-cols-2 gap-2">
+								<AccountPick
+									label="Conta"
+									value={accountId}
+									onChange={setAccountId}
+									accounts={activeAccounts}
+								/>
+								<button
+									type="button"
+									onClick={() => setPickerOpen((o) => !o)}
+									aria-expanded={pickerOpen}
+									aria-haspopup="listbox"
+									className={cn(
+										"bg-canvas border-line-strong flex w-full min-w-0 cursor-pointer flex-col items-stretch gap-[3px] rounded-[10px] border px-3 py-2.5 text-left",
+										!category &&
+											"border-[#1F6FEB] shadow-[0_0_0_3px_rgba(31,111,235,.25)]",
+									)}
+								>
+									<small className="num text-dim text-[11px] tracking-[.06em] uppercase">
+										Categoria
+									</small>
+									<span
+										className={cn(
+											"flex w-full min-w-0 items-center gap-2 text-[15px] font-medium",
+											category ? "text-fg" : "text-info",
+										)}
+									>
+										{category ? (
+											<span
+												className="size-2.5 shrink-0 rounded-[3px]"
+												style={{ background: catColor.get(category.id) }}
+											/>
+										) : null}
+										<span className="truncate">
+											{category?.name ?? "Escolher"}
+										</span>
+									</span>
+								</button>
+							</div>
+						)}
+
+						{kind !== "transfer" && !category && !pickerOpen ? (
+							<div className="num text-info -mt-2 text-right text-[11px]">
+								↑ toda a transacção tem uma categoria
+							</div>
+						) : null}
+
+						{kind !== "transfer" && pickerOpen ? (
+							<CategoryPicker
+								categories={categories}
+								kind={kind}
+								colorOf={(id) => catColor.get(id) ?? "#8B949E"}
+								onPick={(id) => {
+									setCategoryId(id);
+									setMonthItemId("");
+									setPickerOpen(false);
+									amountRef.current?.focus();
+								}}
+							/>
+						) : null}
+
+						{templates.length > 0 ? (
+							<div className="flex flex-col gap-2">
+								<span className="num text-dim text-[11px] tracking-[.06em] uppercase">
+									Modelos
+								</span>
+								<div className="flex flex-wrap gap-1.5">
+									{templates.map((t) => (
+										<button
+											key={t.item.id}
+											type="button"
+											onClick={() => {
+												setExpr(centsToExpr(t.amount));
+												setMonthItemId(t.item.id);
+												if (kind === "transfer") {
+													if (t.item.accountId ?? t.item.defaultAccountId)
+														setAccountId(
+															(t.item.accountId ?? t.item.defaultAccountId)!,
+														);
+													if (t.item.toAccountId)
+														setToAccountId(t.item.toAccountId);
+												} else {
+													if (t.item.categoryId)
+														setCategoryId(t.item.categoryId);
+													if (t.item.defaultAccountId)
+														setAccountId(t.item.defaultAccountId);
+												}
+												setPickerOpen(false);
+											}}
+											className="bg-canvas border-line-strong hover:border-info-2 inline-flex h-[30px] cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs whitespace-nowrap"
+										>
+											<i
+												className="inline-block size-2 rounded-[2px]"
+												style={{ background: t.color }}
+											/>
+											{t.label}
+											<span className="num text-dim">{money(t.amount)}</span>
+										</button>
+									))}
+								</div>
+							</div>
+						) : null}
+
+						<div className="border-line flex flex-col gap-3 border-t pt-3">
+							<div className="num text-dim flex flex-wrap gap-x-3.5 gap-y-1.5 text-[11px]">
+								<span>{dateText}</span>
+								<span>{monthText}</span>
+								<span className={linkClass}>{linkText}</span>
+								<button
+									type="button"
+									onClick={() => setShowExtras((s) => !s)}
+									aria-expanded={showExtras}
+									className="text-info-2 hover:text-info ml-auto cursor-pointer"
+								>
+									{showExtras ? "− nota, data" : "+ nota, data"}
+								</button>
+							</div>
+							{showExtras ? (
+								<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+									<Field label="Data">
+										<Input
+											type="date"
+											className="num"
+											value={date}
+											onChange={(e) => setDate(e.target.value || today)}
+										/>
+									</Field>
+									<Field label="Mês do orçamento">
+										<Select
+											value={referenceMonth}
+											onValueChange={(value) => {
+												setReferenceMonth(value);
+												setMonthItemId("");
+											}}
+											items={monthOptions.map((m) => ({
+												value: m,
+												label: monthLabel(m),
+											}))}
+										/>
+									</Field>
+									<Field label="Nota">
+										<Input
+											value={note}
+											onChange={(e) => setNote(e.target.value)}
+											placeholder="opcional"
+										/>
+									</Field>
+									{kind !== "transfer" ? (
+										<Field label="Payee">
+											<Input
+												value={payee}
+												onChange={(e) => setPayee(e.target.value)}
+												placeholder="opcional"
+											/>
+										</Field>
+									) : null}
+								</div>
+							) : null}
+						</div>
+
+						{accounts.length === 0 ? (
+							<p className="text-warn text-xs">
+								Crie uma conta primeiro (Contas › Nova conta).
+							</p>
+						) : null}
+					</div>
+
+					<div className="bg-panel-2 grid grid-cols-4 content-start gap-1.5 p-4 sm:rounded-br-[14px]">
+						{KEYS.map((k) => {
+							const op = OPS.test(k === "−" ? "-" : k) || k === "⌫";
+							return (
 								<button
 									key={k}
 									type="button"
-									role="tab"
-									aria-selected={k === kind}
-									onClick={() => changeKind(k)}
+									aria-label={KEY_LABEL[k] ?? k}
+									onClick={() => setExpr((x) => press(x, k === "−" ? "-" : k))}
 									className={cn(
-										"text-dim hover:text-fg-2 h-10 flex-1 cursor-pointer border-b-2 border-transparent text-xs font-semibold tracking-[.02em] uppercase sm:text-[13px]",
-										k === kind && "bg-[#131820]",
+										"num border-line h-12 cursor-pointer rounded-lg border text-lg hover:bg-[#1c2128]",
+										op ? "bg-panel text-fg-2" : "bg-hover text-fg",
 									)}
-									style={
-										k === kind
-											? {
-													color: KINDS[k].accent,
-													borderBottomColor: KINDS[k].accent,
-												}
-											: undefined
-									}
 								>
-									{KINDS[k].label}
+									{k}
 								</button>
-							))}
-						</div>
-						<span className="num text-dim hidden items-center px-3.5 text-[11px] sm:flex">
-							esc
+							);
+						})}
+					</div>
+				</div>
+
+				<div className="border-line bg-panel-2 flex flex-wrap items-center gap-2 rounded-b-[14px] border-t px-4 py-3">
+					<span className="num text-dim mr-auto hidden text-[11px] sm:inline">
+						escreve o valor no teclado · tab muda de campo
+					</span>
+					<button
+						type="button"
+						disabled={!valid || pending}
+						onClick={() => void save(true)}
+						className="border-line-strong bg-hover text-fg inline-flex h-9 cursor-pointer items-center gap-2 rounded-[7px] border px-3.5 text-[13px] font-medium hover:bg-[#1c2128] disabled:cursor-not-allowed disabled:opacity-45"
+					>
+						Guardar e nova
+						<span className="num rounded bg-white/8 px-1 text-[11px]">⇧⌘↵</span>
+					</button>
+					<button
+						type="button"
+						disabled={!valid || pending}
+						onClick={() => void save(false)}
+						className="border-money bg-money text-money-ink hover:bg-money-2 inline-flex h-9 cursor-pointer items-center gap-2 rounded-[7px] border px-3.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
+					>
+						Guardar
+						<span className="num rounded bg-[rgba(4,19,10,.18)] px-1 text-[11px]">
+							⌘↵
 						</span>
-					</div>
-
-					<div className="grid min-h-0 grid-cols-1 overflow-y-auto sm:grid-cols-[1fr_236px]">
-						<div className="border-line relative flex min-w-0 flex-col gap-4 p-5 sm:border-r">
-							<div
-								ref={amountRef}
-								tabIndex={-1}
-								role="group"
-								aria-label={`Valor: ${money(cents)} MZN`}
-								className="flex flex-col items-end gap-0.5 border-b px-1 pt-1 pb-2 outline-none"
-								style={{ borderBottomColor: meta.accent }}
-							>
-								<span className="num text-dim min-h-4 text-xs">
-									{hasOp ? expr.replace(/-/g, "−") : ""}
-								</span>
-								<div className="flex w-full items-baseline gap-2.5">
-									<span
-										className="num text-[34px]"
-										style={{ color: meta.accent }}
-									>
-										{meta.sign}
-									</span>
-									<span
-										aria-live="polite"
-										className={cn(
-											"num flex-1 truncate text-right text-[40px] leading-[1.1] font-medium sm:text-[52px]",
-											cents > 0 ? "text-fg" : "text-faint",
-										)}
-									>
-										{money(Math.max(cents, 0))}
-										<span
-											aria-hidden="true"
-											className="ml-1 inline-block h-[34px] w-0.5 animate-pulse align-[-4px] sm:h-[42px]"
-											style={{ background: meta.accent }}
-										/>
-									</span>
-									<span className="num text-dim text-base">MZN</span>
-								</div>
-							</div>
-
-							{kind === "transfer" ? (
-								<div className="grid grid-cols-[1fr_28px_1fr] items-center gap-2">
-									<AccountPick
-										label="De"
-										value={accountId}
-										onChange={setAccountId}
-										accounts={activeAccounts}
-									/>
-									<button
-										type="button"
-										aria-label="Trocar contas"
-										onClick={() => {
-											setAccountId(toAccountId);
-											setToAccountId(accountId);
-										}}
-										className="num text-info-2 hover:text-info cursor-pointer text-center"
-									>
-										→
-									</button>
-									<AccountPick
-										label="Para"
-										value={toAccountId}
-										onChange={(id) => {
-											setToAccountId(id);
-											setMonthItemId("");
-										}}
-										accounts={activeAccounts.filter((a) => a.id !== accountId)}
-									/>
-								</div>
-							) : (
-								<div className="grid grid-cols-2 gap-2">
-									<AccountPick
-										label="Conta"
-										value={accountId}
-										onChange={setAccountId}
-										accounts={activeAccounts}
-									/>
-									<button
-										type="button"
-										onClick={() => setPickerOpen((o) => !o)}
-										aria-expanded={pickerOpen}
-										aria-haspopup="listbox"
-										className={cn(
-											"bg-canvas border-line-strong flex w-full min-w-0 cursor-pointer flex-col items-stretch gap-[3px] rounded-[10px] border px-3 py-2.5 text-left",
-											!category &&
-												"border-[#1F6FEB] shadow-[0_0_0_3px_rgba(31,111,235,.25)]",
-										)}
-									>
-										<small className="num text-dim text-[11px] tracking-[.06em] uppercase">
-											Categoria
-										</small>
-										<span
-											className={cn(
-												"flex w-full min-w-0 items-center gap-2 text-[15px] font-medium",
-												category ? "text-fg" : "text-info",
-											)}
-										>
-											{category ? (
-												<span
-													className="size-2.5 shrink-0 rounded-[3px]"
-													style={{ background: catColor.get(category.id) }}
-												/>
-											) : null}
-											<span className="truncate">
-												{category?.name ?? "Escolher"}
-											</span>
-										</span>
-									</button>
-								</div>
-							)}
-
-							{kind !== "transfer" && !category && !pickerOpen ? (
-								<div className="num text-info -mt-2 text-right text-[11px]">
-									↑ toda a transacção tem uma categoria
-								</div>
-							) : null}
-
-							{kind !== "transfer" && pickerOpen ? (
-								<CategoryPicker
-									categories={categories}
-									kind={kind}
-									colorOf={(id) => catColor.get(id) ?? "#8B949E"}
-									onPick={(id) => {
-										setCategoryId(id);
-										setMonthItemId("");
-										setPickerOpen(false);
-										amountRef.current?.focus();
-									}}
-								/>
-							) : null}
-
-							{templates.length > 0 ? (
-								<div className="flex flex-col gap-2">
-									<span className="num text-dim text-[11px] tracking-[.06em] uppercase">
-										Modelos
-									</span>
-									<div className="flex flex-wrap gap-1.5">
-										{templates.map((t) => (
-											<button
-												key={t.item.id}
-												type="button"
-												onClick={() => {
-													setExpr(centsToExpr(t.amount));
-													setMonthItemId(t.item.id);
-													if (kind === "transfer") {
-														if (t.item.accountId ?? t.item.defaultAccountId)
-															setAccountId(
-																(t.item.accountId ?? t.item.defaultAccountId)!,
-															);
-														if (t.item.toAccountId)
-															setToAccountId(t.item.toAccountId);
-													} else {
-														if (t.item.categoryId)
-															setCategoryId(t.item.categoryId);
-														if (t.item.defaultAccountId)
-															setAccountId(t.item.defaultAccountId);
-													}
-													setPickerOpen(false);
-												}}
-												className="bg-canvas border-line-strong hover:border-info-2 inline-flex h-[30px] cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs whitespace-nowrap"
-											>
-												<i
-													className="inline-block size-2 rounded-[2px]"
-													style={{ background: t.color }}
-												/>
-												{t.label}
-												<span className="num text-dim">{money(t.amount)}</span>
-											</button>
-										))}
-									</div>
-								</div>
-							) : null}
-
-							<div className="border-line flex flex-col gap-3 border-t pt-3">
-								<div className="num text-dim flex flex-wrap gap-x-3.5 gap-y-1.5 text-[11px]">
-									<span>{dateText}</span>
-									<span>{monthText}</span>
-									<span className={linkClass}>{linkText}</span>
-									<button
-										type="button"
-										onClick={() => setShowExtras((s) => !s)}
-										aria-expanded={showExtras}
-										className="text-info-2 hover:text-info ml-auto cursor-pointer"
-									>
-										{showExtras ? "− nota, data" : "+ nota, data"}
-									</button>
-								</div>
-								{showExtras ? (
-									<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-										<label className="text-fg-2 flex flex-col gap-1.5 text-xs">
-											Data
-											<TextInput
-												type="date"
-												className="num"
-												value={date}
-												onChange={(e) => setDate(e.target.value || today)}
-											/>
-										</label>
-										<label className="text-fg-2 flex flex-col gap-1.5 text-xs">
-											Mês do orçamento
-											<select
-												value={referenceMonth}
-												onChange={(e) => {
-													setReferenceMonth(e.target.value);
-													setMonthItemId("");
-												}}
-												className="border-line-strong bg-canvas text-fg focus:border-info-2 h-[34px] cursor-pointer rounded-md border px-2.5 text-[13px] outline-none"
-											>
-												{monthOptions.map((m) => (
-													<option key={m} value={m}>
-														{monthLabel(m)}
-													</option>
-												))}
-											</select>
-										</label>
-										<label className="text-fg-2 flex flex-col gap-1.5 text-xs">
-											Nota
-											<TextInput
-												value={note}
-												onChange={(e) => setNote(e.target.value)}
-												placeholder="opcional"
-											/>
-										</label>
-										{kind !== "transfer" ? (
-											<label className="text-fg-2 flex flex-col gap-1.5 text-xs">
-												Payee
-												<TextInput
-													value={payee}
-													onChange={(e) => setPayee(e.target.value)}
-													placeholder="opcional"
-												/>
-											</label>
-										) : null}
-									</div>
-								) : null}
-							</div>
-
-							{accounts.length === 0 ? (
-								<p className="text-warn text-xs">
-									Crie uma conta primeiro (Contas › Nova conta).
-								</p>
-							) : null}
-						</div>
-
-						<div className="bg-panel-2 grid grid-cols-4 content-start gap-1.5 p-4 sm:rounded-br-[14px]">
-							{KEYS.map((k) => {
-								const op = OPS.test(k === "−" ? "-" : k) || k === "⌫";
-								return (
-									<button
-										key={k}
-										type="button"
-										aria-label={KEY_LABEL[k] ?? k}
-										onClick={() =>
-											setExpr((x) => press(x, k === "−" ? "-" : k))
-										}
-										className={cn(
-											"num border-line h-12 cursor-pointer rounded-lg border text-lg hover:bg-[#1c2128]",
-											op ? "bg-panel text-fg-2" : "bg-hover text-fg",
-										)}
-									>
-										{k}
-									</button>
-								);
-							})}
-						</div>
-					</div>
-
-					<div className="border-line bg-panel-2 flex flex-wrap items-center gap-2 rounded-b-[14px] border-t px-4 py-3">
-						<span className="num text-dim mr-auto hidden text-[11px] sm:inline">
-							escreve o valor no teclado · tab muda de campo
-						</span>
-						<button
-							type="button"
-							disabled={!valid || pending}
-							onClick={() => void save(true)}
-							className="border-line-strong bg-hover text-fg inline-flex h-9 cursor-pointer items-center gap-2 rounded-[7px] border px-3.5 text-[13px] font-medium hover:bg-[#1c2128] disabled:cursor-not-allowed disabled:opacity-45"
-						>
-							Guardar e nova
-							<span className="num rounded bg-white/8 px-1 text-[11px]">
-								⇧⌘↵
-							</span>
-						</button>
-						<button
-							type="button"
-							disabled={!valid || pending}
-							onClick={() => void save(false)}
-							className="border-money bg-money text-money-ink hover:bg-money-2 inline-flex h-9 cursor-pointer items-center gap-2 rounded-[7px] border px-3.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
-						>
-							Guardar
-							<span className="num rounded bg-[rgba(4,19,10,.18)] px-1 text-[11px]">
-								⌘↵
-							</span>
-						</button>
-					</div>
-				</BaseDialog.Popup>
-			</BaseDialog.Portal>
-		</BaseDialog.Root>
+					</button>
+				</div>
+			</DialogContent>
+		</Dialog>
 	);
 }

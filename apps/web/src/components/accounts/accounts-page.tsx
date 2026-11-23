@@ -1,14 +1,14 @@
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { ACCOUNT_TYPES, type AccountType } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { AccountDetail } from "@/components/accounts/account-detail";
-import { NewAccountForm } from "@/components/accounts/new-account-form";
+import { NewAccountDialog } from "@/components/accounts/new-account-dialog";
 import { StartOverDialog } from "@/components/accounts/start-over-dialog";
 import { initials } from "@/components/accounts/utils";
 import { ValidateBalancesDialog } from "@/components/accounts/validate-balances-dialog";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorNote } from "@/components/ui/error-note";
@@ -37,7 +37,7 @@ export function AccountsPage() {
 	const [creating, setCreating] = useState(!!create);
 	const [startOver, setStartOver] = useState(false);
 	const list = accounts.data ?? [];
-	const selected = list.find((a) => a.id === id) ?? list[0];
+	const selected = list.find((a) => a.id === id);
 	const sum = (types: AccountType[]) =>
 		list
 			.filter((a) => types.includes(a.type) && !a.archived)
@@ -54,11 +54,14 @@ export function AccountsPage() {
 					{archived ? "Esconder arquivadas" : "Mostrar arquivadas"}
 				</Link>
 				<Button
+					variant="neutral"
 					onClick={() => navigate({ search: { id, archived, validate: true } })}
 				>
 					Validar saldos
 				</Button>
-				<Button onClick={() => setStartOver(true)}>Começar do zero</Button>
+				<Button variant="neutral" onClick={() => setStartOver(true)}>
+					Começar do zero
+				</Button>
 				<Button variant="primary" onClick={() => setCreating(true)}>
 					<PlusIcon className="size-3.5" strokeWidth={2.6} /> Nova conta
 				</Button>
@@ -98,12 +101,7 @@ export function AccountsPage() {
 				</StatRow>
 
 				{creating ? (
-					<NewAccountForm
-						onDone={(newId) => {
-							setCreating(false);
-							if (newId) navigate({ search: { id: newId } });
-						}}
-					/>
+					<NewAccountDialog onClose={() => setCreating(false)} />
 				) : null}
 
 				{accounts.isPending ? (
@@ -117,7 +115,7 @@ export function AccountsPage() {
 									Criar conta
 								</Button>
 								<Link to="/import">
-									<Button>Importar do Wallet</Button>
+									<Button variant="neutral">Importar do Wallet</Button>
 								</Link>
 							</>
 						}
@@ -127,7 +125,7 @@ export function AccountsPage() {
 					</EmptyState>
 				) : (
 					<div className="flex flex-wrap items-start gap-[18px]">
-						<Card className="min-w-0 flex-[2_1_380px] overflow-hidden">
+						<Card className="min-w-0 flex-1 overflow-hidden">
 							{GROUPS.map((g) => {
 								const items = list.filter((a) => g.types.includes(a.type));
 								if (items.length === 0) return null;
@@ -175,7 +173,8 @@ export function AccountsPage() {
 							<AccountDetail
 								key={selected.id}
 								account={selected}
-								onDeleted={() => navigate({ search: {} })}
+								onDeleted={() => navigate({ search: { archived } })}
+								onClose={() => navigate({ search: { archived } })}
 							/>
 						) : null}
 					</div>

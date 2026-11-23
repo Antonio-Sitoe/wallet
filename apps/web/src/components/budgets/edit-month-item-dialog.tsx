@@ -1,14 +1,14 @@
 import type { MonthItem } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
+import { Input } from "@wallet/ui/components/input";
 import { Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useDeleteMonthItem } from "@/actions/budgets/use-delete-month-item";
 import { useUpdateMonthItem } from "@/actions/budgets/use-update-month-item";
-import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
-import { TextInput } from "@/components/ui/text-input";
 import { money, moneyInput, monthLabel, parseMoney } from "@/utils/format";
 
 export function EditMonthItemDialog({
@@ -46,7 +46,9 @@ export function EditMonthItemDialog({
 							<Trash2Icon className="size-3.5" /> Remover do mês
 						</Button>
 					) : null}
-					<Button onClick={onClose}>Cancelar</Button>
+					<Button variant="neutral" onClick={onClose}>
+						Cancelar
+					</Button>
 					<Button
 						variant="primary"
 						disabled={cents === null || cents <= 0 || !name.trim()}
@@ -66,7 +68,7 @@ export function EditMonthItemDialog({
 			}
 		>
 			<Field label="Nome">
-				<TextInput value={name} onChange={(e) => setName(e.target.value)} />
+				<Input value={name} onChange={(e) => setName(e.target.value)} />
 			</Field>
 			<Field label="Planeado neste mês (MZN)">
 				<MoneyInput

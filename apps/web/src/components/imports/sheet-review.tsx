@@ -1,11 +1,11 @@
 import type { SheetPreview } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useCategories } from "@/actions/categories/use-categories";
 import { useCommitSheet } from "@/actions/imports/use-commit-sheet";
-import { Button } from "@/components/ui/button";
-import { CategoryOptions } from "@/components/ui/category-options";
+import { categoryItems } from "@/components/ui/category-items";
 import { Pill } from "@/components/ui/pill";
 import { Select } from "@/components/ui/select";
 import { GROUP_LABEL, MONTH_SHORT, money } from "@/utils/format";
@@ -68,24 +68,26 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 									</td>
 									<td className="px-3 py-1.5">
 										<Select
+											size="sm"
 											aria-label={`Categoria de ${p.name}`}
 											disabled={!draft}
-											className="h-7 max-w-[220px] text-xs"
+											className="max-w-[220px]"
 											value={
 												(p.key in overrides
 													? overrides[p.key]
 													: p.categoryId) ?? ""
 											}
-											onChange={(e) =>
+											onValueChange={(value) =>
 												setOverrides((o) => ({
 													...o,
-													[p.key]: e.target.value || null,
+													[p.key]: value || null,
 												}))
 											}
-										>
-											<option value="">Sem categoria</option>
-											<CategoryOptions categories={categories} kind="expense" />
-										</Select>
+											items={[
+												{ value: "", label: "Sem categoria" },
+												...categoryItems(categories, "expense"),
+											]}
+										/>
 									</td>
 								</tr>
 							))}
@@ -204,19 +206,21 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 					<label className="text-fg-2 mr-auto flex flex-col gap-1 text-xs">
 						Conta de onde saíram os pagamentos
 						<Select
-							className="h-8 w-56"
+							size="md"
+							className="w-56"
 							value={accountId}
-							onChange={(e) => setAccountId(e.target.value)}
-						>
-							<option value="">
-								{paying.length ? "escolher conta…" : "—"}
-							</option>
-							{accounts.map((a) => (
-								<option key={a.id} value={a.id}>
-									{a.name}
-								</option>
-							))}
-						</Select>
+							onValueChange={(value) => setAccountId(value)}
+							items={[
+								{
+									value: "",
+									label: String(paying.length ? "escolher conta…" : "—"),
+								},
+								...accounts.map((a) => ({
+									value: a.id,
+									label: a.name,
+								})),
+							]}
+						/>
 					</label>
 					<Button
 						variant="primary"

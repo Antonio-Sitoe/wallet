@@ -1,14 +1,14 @@
 import type { MonthItem } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
+import { Input } from "@wallet/ui/components/input";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { usePayMonthItem } from "@/actions/budgets/use-pay-month-item";
-import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
-import { TextInput } from "@/components/ui/text-input";
 import {
 	instantOf,
 	money,
@@ -67,7 +67,9 @@ export function PayDialog({
 			description={`planeado ${money(item.plannedAmount)} · já gasto ${money(item.spent)}`}
 			footer={
 				<>
-					<Button onClick={onClose}>Cancelar</Button>
+					<Button variant="neutral" onClick={onClose}>
+						Cancelar
+					</Button>
 					<Button
 						variant="primary"
 						disabled={
@@ -99,21 +101,20 @@ export function PayDialog({
 					<Field label={destination ? "Sai de" : "Conta"}>
 						<Select
 							value={accountId}
-							onChange={(e) => setAccountId(e.target.value)}
-						>
-							<option value="">Escolher conta</option>
-							{accounts
-								.filter((a) => a.id !== item.toAccountId)
-								.map((a) => (
-									<option key={a.id} value={a.id}>
-										{a.name}
-										{a.id === item.defaultAccountId ? " · última usada" : ""}
-									</option>
-								))}
-						</Select>
+							onValueChange={(value) => setAccountId(value)}
+							items={[
+								{ value: "", label: "Escolher conta" },
+								...accounts
+									.filter((a) => a.id !== item.toAccountId)
+									.map((a) => ({
+										value: a.id,
+										label: `${a.name} ${a.id === item.defaultAccountId ? " · última usada" : ""}`,
+									})),
+							]}
+						/>
 					</Field>
 					<Field label="Data">
-						<TextInput
+						<Input
 							type="date"
 							className="num"
 							value={date}
@@ -122,7 +123,7 @@ export function PayDialog({
 					</Field>
 				</div>
 				<Field label="Nota">
-					<TextInput
+					<Input
 						value={note}
 						onChange={(e) => setNote(e.target.value)}
 						placeholder="opcional"

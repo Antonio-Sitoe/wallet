@@ -1,12 +1,12 @@
 import type { Account } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
+import { Input } from "@wallet/ui/components/input";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useResetData } from "@/actions/accounts/use-reset-data";
 import { useZeroBalances } from "@/actions/accounts/use-zero-balances";
-import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
-import { TextInput } from "@/components/ui/text-input";
 import { money } from "@/utils/format";
 
 export function StartOverDialog({
@@ -28,7 +28,11 @@ export function StartOverDialog({
 			width={560}
 			title="Começar do zero"
 			description="escolha se guarda o histórico importado ou se apaga tudo"
-			footer={<Button onClick={onClose}>Fechar</Button>}
+			footer={
+				<Button variant="neutral" onClick={onClose}>
+					Fechar
+				</Button>
+			}
 		>
 			<div className="flex flex-col gap-4">
 				<section className="border-line flex flex-col gap-2 rounded-lg border p-3.5">
@@ -65,7 +69,7 @@ export function StartOverDialog({
 						se desfaz.
 					</p>
 					<Field label='Escreva "APAGAR" para confirmar'>
-						<TextInput
+						<Input
 							value={typed}
 							onChange={(e) => setTyped(e.target.value)}
 							placeholder="APAGAR"

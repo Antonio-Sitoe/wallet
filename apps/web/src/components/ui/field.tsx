@@ -1,5 +1,16 @@
+import {
+	FieldDescription,
+	FieldLabel,
+	Field as FieldRoot,
+} from "@wallet/ui/components/field";
 import { cn } from "@wallet/ui/lib/utils";
-import type * as React from "react";
+import {
+	cloneElement,
+	isValidElement,
+	type ReactElement,
+	type ReactNode,
+	useId,
+} from "react";
 
 export function Field({
 	label,
@@ -8,21 +19,27 @@ export function Field({
 	className,
 }: {
 	label: string;
-	children: React.ReactNode;
-	hint?: React.ReactNode;
+	children: ReactNode;
+	hint?: ReactNode;
 	className?: string;
 }) {
+	const generatedId = useId();
+	const control = isValidElement<{ id?: string }>(children)
+		? (children as ReactElement<{ id?: string }>)
+		: null;
+	const id = control?.props.id ?? generatedId;
+
 	return (
-		// biome-ignore lint/a11y/noLabelWithoutControl: the control is passed in as children
-		<label
-			className={cn(
-				"text-fg-2 flex min-w-0 flex-col gap-1.5 text-xs",
-				className,
-			)}
-		>
-			{label}
-			{children}
-			{hint ? <span className="num text-dim text-[11px]">{hint}</span> : null}
-		</label>
+		<FieldRoot className={cn("min-w-0 gap-1.5", className)}>
+			<FieldLabel htmlFor={id} className="text-fg-2 text-xs font-normal">
+				{label}
+			</FieldLabel>
+			{control ? cloneElement(control, { id }) : children}
+			{hint ? (
+				<FieldDescription className="num text-dim text-[11px]">
+					{hint}
+				</FieldDescription>
+			) : null}
+		</FieldRoot>
 	);
 }

@@ -1,6 +1,6 @@
 import type { Category } from "@wallet/shared";
 import { SearchIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function CategoryPicker({
 	categories,
@@ -14,6 +14,8 @@ export function CategoryPicker({
 	onPick: (id: string) => void;
 }) {
 	const [query, setQuery] = useState("");
+	const searchRef = useRef<HTMLInputElement>(null);
+	useEffect(() => searchRef.current?.focus(), []);
 	const visible = categories.filter(
 		(c) => !c.archived && !c.isSystem && c.kind === kind,
 	);
@@ -39,8 +41,8 @@ export function CategoryPicker({
 				<SearchIcon aria-hidden="true" className="text-dim size-[13px]" />
 				<span className="sr-only">Procurar categoria</span>
 				<input
+					ref={searchRef}
 					type="search"
-					autoFocus
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
 					onKeyDown={(e) => {

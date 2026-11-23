@@ -17,6 +17,7 @@
       "!**/.zed",
       "!**/.vscode",
       "!**/routeTree.gen.ts",
+      "!apps/*/src/**/env.ts",
       "!**/src-tauri",
       "!**/.nuxt",
       "!bts.jsonc",
@@ -40,6 +41,14 @@
       "preset": "recommended",
       "correctness": {
         "useExhaustiveDependencies": "info"
+      },
+      "a11y": {
+        "noLabelWithoutControl": {
+          "level": "error",
+          "options": {
+            "inputComponents": ["TextInput", "MoneyInput", "Select"]
+          }
+        }
       },
       "nursery": {
         "useTailwindSortedClasses": {

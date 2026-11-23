@@ -1,5 +1,5 @@
 import type { BudgetGroup, MonthItem } from "@wallet/shared";
-import { Button } from "@/components/ui/button";
+import { Button } from "@wallet/ui/components/button";
 import { Card } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { StatusPill } from "@/components/ui/status-pill";
@@ -130,11 +130,15 @@ export function GroupCard({
 						{item.partial ? (
 							<div className="flex gap-1">
 								{item.step ? (
-									<Button size="sm" onClick={() => onLaunch(item)}>
+									<Button
+										variant="neutral"
+										size="sm"
+										onClick={() => onLaunch(item)}
+									>
 										+{money(item.step)}
 									</Button>
 								) : null}
-								<Button size="sm" variant="ghost" onClick={() => onCheck(item)}>
+								<Button size="sm" variant="quiet" onClick={() => onCheck(item)}>
 									lançar…
 								</Button>
 							</div>

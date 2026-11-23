@@ -1,4 +1,13 @@
-import { Dialog as BaseDialog } from "@base-ui/react/dialog";
+import { Button } from "@wallet/ui/components/button";
+import {
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	Dialog as DialogRoot,
+	DialogTitle,
+} from "@wallet/ui/components/dialog";
 import { XIcon } from "lucide-react";
 import type * as React from "react";
 
@@ -20,41 +29,40 @@ export function Dialog({
 	width?: number;
 }) {
 	return (
-		<BaseDialog.Root open={open} onOpenChange={onOpenChange}>
-			<BaseDialog.Portal>
-				<BaseDialog.Backdrop className="fixed inset-0 z-40 bg-[rgba(1,4,9,.66)]" />
-				<BaseDialog.Popup
-					className="bg-panel text-fg fixed top-[8vh] left-1/2 z-50 flex max-h-[84vh] w-[calc(100vw-32px)] -translate-x-1/2 flex-col overflow-hidden rounded-xl border border-[#30363d] shadow-[0_24px_64px_rgba(1,4,9,.7)] outline-none"
-					style={{ maxWidth: width }}
-				>
-					<div className="border-line flex items-start justify-between gap-3 border-b px-[18px] py-3.5">
-						<div className="flex flex-col gap-1">
-							<BaseDialog.Title className="text-[15px] font-semibold">
-								{title}
-							</BaseDialog.Title>
-							{description ? (
-								<BaseDialog.Description className="num text-dim text-[11px]">
-									{description}
-								</BaseDialog.Description>
-							) : null}
-						</div>
-						<BaseDialog.Close
-							aria-label="Fechar"
-							className="text-dim hover:bg-hover hover:text-fg cursor-pointer rounded-md p-1"
-						>
-							<XIcon className="size-4" />
-						</BaseDialog.Close>
+		<DialogRoot open={open} onOpenChange={onOpenChange}>
+			<DialogContent
+				showCloseButton={false}
+				className="bg-panel text-fg flex max-h-[84vh] w-[calc(100vw-32px)] max-w-none flex-col gap-0 overflow-hidden border border-[#30363d] p-0 text-[13px] shadow-[0_24px_64px_rgba(1,4,9,.7)] ring-0 sm:max-w-none"
+				style={{ maxWidth: width }}
+			>
+				<DialogHeader className="border-line flex-row items-start justify-between gap-3 border-b px-4.5 py-3.5">
+					<div className="flex flex-col gap-1">
+						<DialogTitle className="text-fg text-[15px] font-semibold">
+							{title}
+						</DialogTitle>
+						{description ? (
+							<DialogDescription className="num text-dim text-[11px]">
+								{description}
+							</DialogDescription>
+						) : null}
 					</div>
-					<div className="flex flex-col gap-3.5 overflow-y-auto p-[18px]">
-						{children}
-					</div>
-					{footer ? (
-						<div className="border-line bg-panel-2 flex flex-wrap items-center justify-end gap-2 border-t px-[18px] py-3">
-							{footer}
-						</div>
-					) : null}
-				</BaseDialog.Popup>
-			</BaseDialog.Portal>
-		</BaseDialog.Root>
+					<DialogClose
+						render={
+							<Button variant="quiet" size="icon-sm" aria-label="Fechar" />
+						}
+					>
+						<XIcon className="size-4" />
+					</DialogClose>
+				</DialogHeader>
+				<div className="flex flex-col gap-3.5 overflow-y-auto p-4.5">
+					{children}
+				</div>
+				{footer ? (
+					<DialogFooter className="border-line bg-panel-2 m-0 flex-row flex-wrap items-center justify-end gap-2 rounded-none border-t px-4.5 py-3">
+						{footer}
+					</DialogFooter>
+				) : null}
+			</DialogContent>
+		</DialogRoot>
 	);
 }

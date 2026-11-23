@@ -1,6 +1,7 @@
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { BUDGET_GROUPS, type MonthItem } from "@wallet/shared";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { Button } from "@wallet/ui/components/button";
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
@@ -12,8 +13,7 @@ import { EditMonthItemDialog } from "@/components/budgets/edit-month-item-dialog
 import { GroupCard } from "@/components/budgets/group-card";
 import { NoListState } from "@/components/budgets/no-list-state";
 import { PayDialog } from "@/components/budgets/pay-dialog";
-import { UnplannedForm } from "@/components/budgets/unplanned-form";
-import { Button } from "@/components/ui/button";
+import { UnplannedItemDialog } from "@/components/budgets/unplanned-item-dialog";
 import { ErrorNote } from "@/components/ui/error-note";
 import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
@@ -21,6 +21,7 @@ import { PageTitle } from "@/components/ui/page-title";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
+import { useConfirm } from "@/contexts/confirm-context";
 import {
 	addMonths,
 	currentMonth,
@@ -32,6 +33,7 @@ import {
 const route = getRouteApi("/_private/budget");
 
 export function BudgetPage() {
+	const confirmAction = useConfirm();
 	const { month: monthParam } = route.useSearch();
 	const month = monthParam ?? currentMonth();
 	const navigate = route.useNavigate();
@@ -40,6 +42,7 @@ export function BudgetPage() {
 	const categories = useCategories().data ?? [];
 	const [paying, setPaying] = useState<MonthItem | null>(null);
 	const [editing, setEditing] = useState<MonthItem | null>(null);
+	const [addingUnplanned, setAddingUnplanned] = useState(false);
 	const unpay = useUnpayMonthItem();
 	const pay = usePayMonthItem();
 	const go = (delta: number) =>
@@ -55,6 +58,7 @@ export function BudgetPage() {
 			<PageHeader crumb={["orçamento", month]}>
 				<div className="flex gap-1">
 					<Button
+						variant="neutral"
 						aria-label="Mês anterior"
 						className="w-[30px] px-0"
 						onClick={() => go(-1)}
@@ -62,6 +66,7 @@ export function BudgetPage() {
 						<ChevronLeftIcon className="size-4" />
 					</Button>
 					<Button
+						variant="neutral"
 						aria-label="Mês seguinte"
 						className="w-[30px] px-0"
 						onClick={() => go(1)}
@@ -84,6 +89,12 @@ export function BudgetPage() {
 						);
 					})}
 				</div>
+				{data?.hasList ? (
+					<Button variant="primary" onClick={() => setAddingUnplanned(true)}>
+						<PlusIcon className="size-3.5" strokeWidth={2.6} /> Item não
+						planeado
+					</Button>
+				) : null}
 			</PageHeader>
 			<Page>
 				<PageTitle
@@ -151,43 +162,40 @@ export function BudgetPage() {
 						</StatRow>
 
 						{data.hasList ? (
-							<>
-								{BUDGET_GROUPS.map((group) => {
-									const items = data.items.filter((i) => i.group === group);
-									if (items.length === 0) return null;
-									return (
-										<GroupCard
-											key={group}
-											group={group}
-											items={items}
-											accountName={accountName}
-											categoryName={categoryName}
-											onCheck={(item) => setPaying(item)}
-											onUncheck={async (item) => {
-												if (
-													!confirm(
-														`Desmarcar ${item.name}? ${item.payments.length} pagamento(s) da lista são apagados.`,
-													)
-												)
-													return;
-												await unpay.mutateAsync(item.id);
-												toast.success(
-													`${item.name} desmarcado · transacção apagada`,
-												);
-											}}
-											onLaunch={async (item) => {
-												if (!item.defaultAccountId) return setPaying(item);
-												const res = await pay.mutateAsync({ id: item.id });
-												toast.success(
-													`${item.name} −${money(item.step ?? 0)} · ${accountName(res.payments[0]?.accountId ?? null)}`,
-												);
-											}}
-											onEdit={setEditing}
-										/>
-									);
-								})}
-								<UnplannedForm month={month} />
-							</>
+							BUDGET_GROUPS.map((group) => {
+								const items = data.items.filter((i) => i.group === group);
+								if (items.length === 0) return null;
+								return (
+									<GroupCard
+										key={group}
+										group={group}
+										items={items}
+										accountName={accountName}
+										categoryName={categoryName}
+										onCheck={(item) => setPaying(item)}
+										onUncheck={async (item) => {
+											if (
+												!(await confirmAction({
+													title: `Desmarcar ${item.name}? ${item.payments.length} pagamento(s) da lista são apagados.`,
+												}))
+											)
+												return;
+											await unpay.mutateAsync(item.id);
+											toast.success(
+												`${item.name} desmarcado · transacção apagada`,
+											);
+										}}
+										onLaunch={async (item) => {
+											if (!item.defaultAccountId) return setPaying(item);
+											const res = await pay.mutateAsync({ id: item.id });
+											toast.success(
+												`${item.name} −${money(item.step ?? 0)} · ${accountName(res.payments[0]?.accountId ?? null)}`,
+											);
+										}}
+										onEdit={setEditing}
+									/>
+								);
+							})
 						) : (
 							<NoListState month={month} />
 						)}
@@ -196,6 +204,12 @@ export function BudgetPage() {
 			</Page>
 			{paying ? (
 				<PayDialog item={paying} onClose={() => setPaying(null)} />
+			) : null}
+			{addingUnplanned ? (
+				<UnplannedItemDialog
+					month={month}
+					onClose={() => setAddingUnplanned(false)}
+				/>
 			) : null}
 			{editing ? (
 				<EditMonthItemDialog item={editing} onClose={() => setEditing(null)} />

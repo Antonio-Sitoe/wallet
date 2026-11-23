@@ -3,7 +3,7 @@ import { useSetWalletMapping } from "@/actions/categories/use-set-wallet-mapping
 import { useWalletMap } from "@/actions/categories/use-wallet-map";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
-import { CategoryOptions } from "@/components/ui/category-options";
+import { categoryItems } from "@/components/ui/category-items";
 import { Select } from "@/components/ui/select";
 
 export function WalletMapping({ categories }: { categories: Category[] }) {
@@ -34,26 +34,24 @@ export function WalletMapping({ categories }: { categories: Category[] }) {
 						</span>
 						<span className="text-faint">→</span>
 						<Select
+							size="sm"
 							aria-label={`Categoria para ${r.walletName}`}
-							className={`h-7 max-w-[240px] text-xs ${r.categoryId ? "" : "border-warn-line text-warn"}`}
+							className={`max-w-[240px] ${r.categoryId ? "" : "border-warn-line text-warn"}`}
 							value={r.categoryId ?? ""}
-							onChange={(e) =>
+							onValueChange={(value) =>
 								set.mutate({
 									walletName: r.walletName,
-									categoryId: e.target.value || null,
+									categoryId: value || null,
 								})
 							}
-						>
-							<option value="">escolher…</option>
-							<CategoryOptions categories={categories} />
-							{categories
-								.filter((c) => c.isSystem)
-								.map((c) => (
-									<option key={c.id} value={c.id}>
-										{c.name}
-									</option>
-								))}
-						</Select>
+							items={[
+								{ value: "", label: "escolher…" },
+								...categoryItems(categories),
+								...categories
+									.filter((c) => c.isSystem)
+									.map((c) => ({ value: c.id, label: c.name })),
+							]}
+						/>
 					</div>
 				))}
 			</div>

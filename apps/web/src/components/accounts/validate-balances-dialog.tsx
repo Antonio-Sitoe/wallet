@@ -1,8 +1,8 @@
 import type { Account } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useReconcileAccount } from "@/actions/accounts/use-reconcile-account";
-import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { MoneyInput } from "@/components/ui/money-input";
 import { money, moneyInput, parseMoney, signedMoney } from "@/utils/format";
@@ -47,7 +47,9 @@ export function ValidateBalancesDialog({
 							? `${changes.length} contas a acertar`
 							: "nada a acertar"}
 					</span>
-					<Button onClick={onClose}>Fechar</Button>
+					<Button variant="neutral" onClick={onClose}>
+						Fechar
+					</Button>
 					<Button
 						variant="primary"
 						disabled={changes.length === 0 || invalid || busy}

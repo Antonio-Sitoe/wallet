@@ -1,8 +1,8 @@
+import { Button } from "@wallet/ui/components/button";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useCreatePlan } from "@/actions/plan/use-create-plan";
 import { Check } from "@/components/plan/check";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
 import { Field } from "@/components/ui/field";

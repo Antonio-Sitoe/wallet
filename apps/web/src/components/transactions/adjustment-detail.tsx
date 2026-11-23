@@ -1,8 +1,9 @@
 import type { Transaction } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
 import { toast } from "sonner";
 import { useDeleteTransaction } from "@/actions/transactions/use-delete-transaction";
-import { DetailCard } from "@/components/transactions/detail-card";
-import { Button } from "@/components/ui/button";
+import { DetailDialog } from "@/components/transactions/detail-dialog";
+import { useConfirm } from "@/contexts/confirm-context";
 import { dayKey, dayLabel, signedMoney } from "@/utils/format";
 
 export function AdjustmentDetail({
@@ -14,9 +15,10 @@ export function AdjustmentDetail({
 	account: string;
 	onClose: () => void;
 }) {
+	const confirmAction = useConfirm();
 	const remove = useDeleteTransaction();
 	return (
-		<DetailCard title="Acerto de saldo" onClose={onClose}>
+		<DetailDialog title="Acerto de saldo" onClose={onClose}>
 			<p className="text-fg-2 text-xs">
 				Ajusta o saldo de <b>{account}</b> em{" "}
 				<span className="num">{signedMoney(tx.amount)} MZN</span> a{" "}
@@ -27,7 +29,11 @@ export function AdjustmentDetail({
 				<Button
 					variant="danger"
 					onClick={async () => {
-						if (!confirm("Apagar este acerto? O saldo da conta volta atrás."))
+						if (
+							!(await confirmAction({
+								title: "Apagar este acerto? O saldo da conta volta atrás.",
+							}))
+						)
 							return;
 						await remove.mutateAsync(tx.id);
 						toast.success("Acerto apagado");
@@ -37,6 +43,6 @@ export function AdjustmentDetail({
 					Apagar acerto
 				</Button>
 			</div>
-		</DetailCard>
+		</DetailDialog>
 	);
 }

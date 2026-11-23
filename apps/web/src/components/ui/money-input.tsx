@@ -1,19 +1,18 @@
+import { Input } from "@wallet/ui/components/input";
 import { cn } from "@wallet/ui/lib/utils";
 import type * as React from "react";
-import { inputBase } from "@/components/ui/utils";
 
 export function MoneyInput({
 	className,
 	large,
 	...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { large?: boolean }) {
+}: React.ComponentProps<typeof Input> & { large?: boolean }) {
 	return (
-		<input
+		<Input
 			inputMode="decimal"
 			className={cn(
-				inputBase,
 				"num",
-				large && "h-[46px] text-[22px]",
+				large && "h-11.5 text-[22px] md:text-[22px]",
 				className,
 			)}
 			{...props}

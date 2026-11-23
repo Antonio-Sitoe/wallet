@@ -1,4 +1,5 @@
 import { getRouteApi } from "@tanstack/react-router";
+import { Button } from "@wallet/ui/components/button";
 import { UploadIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -8,7 +9,6 @@ import { useImports } from "@/actions/imports/use-imports";
 import { useUploadWallet } from "@/actions/imports/use-upload-wallet";
 import { ImportReview } from "@/components/imports/import-review";
 import { SheetImport } from "@/components/imports/sheet-import";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
 import { ErrorNote } from "@/components/ui/error-note";
@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Pill } from "@/components/ui/pill";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useConfirm } from "@/contexts/confirm-context";
 import { dayKey, dayLabel } from "@/utils/format";
 
 const route = getRouteApi("/_private/import");
@@ -28,6 +29,7 @@ export const STATUS = {
 } as const;
 
 export function ImportPage() {
+	const confirmAction = useConfirm();
 	const { id, sheet } = route.useSearch();
 	const navigate = route.useNavigate();
 	const upload = useUploadWallet();
@@ -54,7 +56,7 @@ export function ImportPage() {
 		<>
 			<PageHeader crumb={id ? ["importar", "rever"] : ["importar"]}>
 				{id ? (
-					<Button onClick={() => navigate({ search: {} })}>
+					<Button variant="neutral" onClick={() => navigate({ search: {} })}>
 						Nova importação
 					</Button>
 				) : null}
@@ -150,6 +152,7 @@ export function ImportPage() {
 								</span>
 								{b.status === "draft" ? (
 									<Button
+										variant="neutral"
 										size="sm"
 										onClick={() =>
 											navigate({
@@ -166,13 +169,14 @@ export function ImportPage() {
 								{b.status !== "reverted" ? (
 									<Button
 										size="sm"
-										variant={b.status === "committed" ? "danger" : "ghost"}
+										variant={b.status === "committed" ? "danger" : "quiet"}
 										onClick={async () => {
 											if (
 												b.status === "committed" &&
-												!confirm(
-													"Desfazer esta importação? As transacções que ela criou são apagadas.",
-												)
+												!(await confirmAction({
+													title:
+														"Desfazer esta importação? As transacções que ela criou são apagadas.",
+												}))
 											)
 												return;
 											const res = await remove.mutateAsync(b.id);

@@ -1,17 +1,18 @@
 import type { Account } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
+import { Input } from "@wallet/ui/components/input";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useDeleteTransfer } from "@/actions/transactions/use-delete-transfer";
 import { useTransfer } from "@/actions/transactions/use-transfer";
 import { useUpdateTransfer } from "@/actions/transactions/use-update-transfer";
-import { DetailCard } from "@/components/transactions/detail-card";
+import { DetailDialog } from "@/components/transactions/detail-dialog";
 import { monthChoices } from "@/components/transactions/utils";
-import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TextInput } from "@/components/ui/text-input";
+import { useConfirm } from "@/contexts/confirm-context";
 import {
 	dateInputOf,
 	instantOf,
@@ -31,6 +32,7 @@ export function TransferEditor({
 	accounts: Account[];
 	onClose: () => void;
 }) {
+	const confirmAction = useConfirm();
 	const transfer = useTransfer(transferId);
 	const update = useUpdateTransfer();
 	const remove = useDeleteTransfer();
@@ -58,15 +60,15 @@ export function TransferEditor({
 
 	if (!transfer.data || !form)
 		return (
-			<DetailCard title="Transferência" onClose={onClose}>
+			<DetailDialog title="Transferência" onClose={onClose}>
 				<Skeleton className="h-40" />
-			</DetailCard>
+			</DetailDialog>
 		);
 	const t = transfer.data;
 	const cents = parseMoney(form.amount);
 
 	return (
-		<DetailCard title="Transferência" onClose={onClose}>
+		<DetailDialog title="Transferência" onClose={onClose}>
 			<span className="num text-[26px] font-medium">
 				{money(t.amount)}
 				<span className="text-dim text-[13px]"> MZN</span>
@@ -95,26 +97,26 @@ export function TransferEditor({
 					<Field label="De">
 						<Select
 							value={form.from}
-							onChange={(e) => setForm({ ...form, from: e.target.value })}
-						>
-							{accounts.map((a) => (
-								<option key={a.id} value={a.id}>
-									{a.name}
-								</option>
-							))}
-						</Select>
+							onValueChange={(value) => setForm({ ...form, from: value })}
+							items={[
+								...accounts.map((a) => ({
+									value: a.id,
+									label: a.name,
+								})),
+							]}
+						/>
 					</Field>
 					<Field label="Para">
 						<Select
 							value={form.to}
-							onChange={(e) => setForm({ ...form, to: e.target.value })}
-						>
-							{accounts.map((a) => (
-								<option key={a.id} value={a.id}>
-									{a.name}
-								</option>
-							))}
-						</Select>
+							onValueChange={(value) => setForm({ ...form, to: value })}
+							items={[
+								...accounts.map((a) => ({
+									value: a.id,
+									label: a.name,
+								})),
+							]}
+						/>
 					</Field>
 					<Field label="Valor (MZN)">
 						<MoneyInput
@@ -123,7 +125,7 @@ export function TransferEditor({
 						/>
 					</Field>
 					<Field label="Data">
-						<TextInput
+						<Input
 							type="date"
 							className="num"
 							value={form.date}
@@ -134,20 +136,20 @@ export function TransferEditor({
 					<Field label="Mês do orçamento" className="col-span-2">
 						<Select
 							value={form.referenceMonth}
-							onChange={(e) =>
-								setForm({ ...form, referenceMonth: e.target.value })
+							onValueChange={(value) =>
+								setForm({ ...form, referenceMonth: value })
 							}
-						>
-							{monthChoices(t.referenceMonth).map((m) => (
-								<option key={m} value={m}>
-									{monthLabel(m)}
-								</option>
-							))}
-						</Select>
+							items={[
+								...monthChoices(t.referenceMonth).map((m) => ({
+									value: m,
+									label: String(monthLabel(m)),
+								})),
+							]}
+						/>
 					</Field>
 				</div>
 				<Field label="Nota">
-					<TextInput
+					<Input
 						value={form.note}
 						onChange={(e) => setForm({ ...form, note: e.target.value })}
 						placeholder="sem nota"
@@ -157,7 +159,12 @@ export function TransferEditor({
 					<Button
 						variant="danger"
 						onClick={async () => {
-							if (!confirm("Apagar a transferência (as duas pernas)?")) return;
+							if (
+								!(await confirmAction({
+									title: "Apagar a transferência (as duas pernas)?",
+								}))
+							)
+								return;
 							await remove.mutateAsync(t.id);
 							toast.success("Transferência apagada");
 							onClose();
@@ -180,6 +187,6 @@ export function TransferEditor({
 					</Button>
 				</div>
 			</form>
-		</DetailCard>
+		</DetailDialog>
 	);
 }

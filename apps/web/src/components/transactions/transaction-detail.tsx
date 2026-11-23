@@ -1,9 +1,8 @@
 import type { Account, Category, Transaction } from "@wallet/shared";
 import { AdjustmentDetail } from "@/components/transactions/adjustment-detail";
+import { DetailDialog } from "@/components/transactions/detail-dialog";
 import { TransactionEditor } from "@/components/transactions/transaction-editor";
 import { TransferEditor } from "@/components/transactions/transfer-editor";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
 export function TransactionDetail({
 	id,
@@ -20,12 +19,11 @@ export function TransactionDetail({
 }) {
 	if (!tx) {
 		return (
-			<Card className="text-dim flex-[2_1_340px] p-4">
-				A transacção {id.slice(0, 8)} não está na lista filtrada.{" "}
-				<Button size="sm" onClick={onClose}>
-					Fechar
-				</Button>
-			</Card>
+			<DetailDialog title="Detalhe" onClose={onClose}>
+				<p className="text-dim">
+					A transacção {id.slice(0, 8)} não está na lista filtrada.
+				</p>
+			</DetailDialog>
 		);
 	}
 	if (tx.type === "adjustment")

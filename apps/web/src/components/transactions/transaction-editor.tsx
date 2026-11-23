@@ -1,17 +1,18 @@
 import type { Account, Category, Transaction } from "@wallet/shared";
-import { useEffect, useState } from "react";
+import { Button } from "@wallet/ui/components/button";
+import { Input } from "@wallet/ui/components/input";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useDeleteTransaction } from "@/actions/transactions/use-delete-transaction";
 import { useUpdateTransaction } from "@/actions/transactions/use-update-transaction";
-import { DetailCard } from "@/components/transactions/detail-card";
+import { DetailDialog } from "@/components/transactions/detail-dialog";
 import { monthChoices } from "@/components/transactions/utils";
-import { Button } from "@/components/ui/button";
-import { CategoryOptions } from "@/components/ui/category-options";
+import { categoryItems } from "@/components/ui/category-items";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Pill } from "@/components/ui/pill";
 import { Select } from "@/components/ui/select";
-import { TextInput } from "@/components/ui/text-input";
+import { useConfirm } from "@/contexts/confirm-context";
 import {
 	dateInputOf,
 	instantOf,
@@ -32,6 +33,7 @@ export function TransactionEditor({
 	categories: Category[];
 	onClose: () => void;
 }) {
+	const confirmAction = useConfirm();
 	const update = useUpdateTransaction();
 	const remove = useDeleteTransaction();
 	const [type, setType] = useState<"expense" | "income">(
@@ -46,14 +48,8 @@ export function TransactionEditor({
 	const [payee, setPayee] = useState(tx.payee ?? "");
 	const cents = parseMoney(amount);
 
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-		window.addEventListener("keydown", onKey);
-		return () => window.removeEventListener("keydown", onKey);
-	}, [onClose]);
-
 	return (
-		<DetailCard title="Detalhe" onClose={onClose}>
+		<DetailDialog title="Detalhe" onClose={onClose}>
 			<div className="flex items-baseline justify-between">
 				<span className="num text-[26px] font-medium">
 					{signedMoney(tx.amount)}
@@ -87,11 +83,12 @@ export function TransactionEditor({
 					<Field label="Tipo">
 						<Select
 							value={type}
-							onChange={(e) => setType(e.target.value as "expense" | "income")}
-						>
-							<option value="expense">Saída</option>
-							<option value="income">Entrada</option>
-						</Select>
+							onValueChange={(value) => setType(value as "expense" | "income")}
+							items={[
+								{ value: "expense", label: "Saída" },
+								{ value: "income", label: "Entrada" },
+							]}
+						/>
 					</Field>
 					<Field label="Valor (MZN)">
 						<MoneyInput
@@ -102,26 +99,27 @@ export function TransactionEditor({
 					<Field label="Conta">
 						<Select
 							value={accountId}
-							onChange={(e) => setAccountId(e.target.value)}
-						>
-							{accounts.map((a) => (
-								<option key={a.id} value={a.id}>
-									{a.name}
-								</option>
-							))}
-						</Select>
+							onValueChange={(value) => setAccountId(value)}
+							items={[
+								...accounts.map((a) => ({
+									value: a.id,
+									label: a.name,
+								})),
+							]}
+						/>
 					</Field>
 					<Field label="Categoria">
 						<Select
 							value={categoryId}
-							onChange={(e) => setCategoryId(e.target.value)}
-						>
-							<option value="">Sem categoria</option>
-							<CategoryOptions categories={categories} />
-						</Select>
+							onValueChange={(value) => setCategoryId(value)}
+							items={[
+								{ value: "", label: "Sem categoria" },
+								...categoryItems(categories),
+							]}
+						/>
 					</Field>
 					<Field label="Data">
-						<TextInput
+						<Input
 							type="date"
 							className="num"
 							value={date}
@@ -131,25 +129,25 @@ export function TransactionEditor({
 					<Field label="Mês do orçamento">
 						<Select
 							value={referenceMonth}
-							onChange={(e) => setReferenceMonth(e.target.value)}
-						>
-							{monthChoices(tx.referenceMonth).map((m) => (
-								<option key={m} value={m}>
-									{monthLabel(m)}
-								</option>
-							))}
-						</Select>
+							onValueChange={(value) => setReferenceMonth(value)}
+							items={[
+								...monthChoices(tx.referenceMonth).map((m) => ({
+									value: m,
+									label: String(monthLabel(m)),
+								})),
+							]}
+						/>
 					</Field>
 				</div>
 				<Field label="Payee">
-					<TextInput
+					<Input
 						value={payee}
 						onChange={(e) => setPayee(e.target.value)}
 						placeholder="sem payee"
 					/>
 				</Field>
 				<Field label="Nota">
-					<TextInput
+					<Input
 						value={note}
 						onChange={(e) => setNote(e.target.value)}
 						placeholder="sem nota"
@@ -171,7 +169,8 @@ export function TransactionEditor({
 					<Button
 						variant="danger"
 						onClick={async () => {
-							if (!confirm("Apagar esta transacção?")) return;
+							if (!(await confirmAction({ title: "Apagar esta transacção?" })))
+								return;
 							await remove.mutateAsync(tx.id);
 							toast.success("Transacção apagada");
 							onClose();
@@ -189,6 +188,6 @@ export function TransactionEditor({
 					</Button>
 				</div>
 			</form>
-		</DetailCard>
+		</DetailDialog>
 	);
 }

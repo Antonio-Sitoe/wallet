@@ -1,13 +1,13 @@
 import type { ImportPreview, ReviewResolution } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useCategories } from "@/actions/categories/use-categories";
 import { useCommitImport } from "@/actions/imports/use-commit-import";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
-import { CategoryOptions } from "@/components/ui/category-options";
+import { categoryItems } from "@/components/ui/category-items";
 import { Pill } from "@/components/ui/pill";
 import { Select } from "@/components/ui/select";
 import { Stat } from "@/components/ui/stat";
@@ -128,20 +128,22 @@ export function ImportReview({
 									{c.rows}
 								</span>
 								<Select
+									size="sm"
 									aria-label={`Categoria para ${c.walletName}`}
 									disabled={!draft}
-									className={`h-7 max-w-[240px] text-xs ${value ? "" : "border-warn-line text-warn"}`}
+									className={`max-w-[240px] ${value ? "" : "border-warn-line text-warn"}`}
 									value={value}
-									onChange={(e) =>
+									onValueChange={(value) =>
 										setCategoryMap((m) => ({
 											...m,
-											[c.walletName]: e.target.value,
+											[c.walletName]: value,
 										}))
 									}
-								>
-									<option value="">escolher…</option>
-									<CategoryOptions categories={categories} />
-								</Select>
+									items={[
+										{ value: "", label: "escolher…" },
+										...categoryItems(categories),
+									]}
+								/>
 							</div>
 						);
 					})}
@@ -174,12 +176,12 @@ export function ImportReview({
 										</td>
 										<td className="px-3.5 py-2">
 											<Select
+												size="sm"
 												aria-label="Resolver"
 												disabled={!draft}
-												className="h-7 text-xs"
 												value={value}
-												onChange={(e) => {
-													const v = e.target.value;
+												onValueChange={(value) => {
+													const v = value;
 													setResolutions((m) => ({
 														...m,
 														[r.key]: v.startsWith("to:")
@@ -187,20 +189,20 @@ export function ImportReview({
 															: (v as "ignore" | "keep"),
 													}));
 												}}
-											>
-												<option value="ignore">ignorar</option>
-												<option value="keep">
-													tratar como{" "}
-													{r.type === "expense" ? "despesa" : "entrada"}
-												</option>
-												{accounts
-													.filter((a) => a.name !== r.account)
-													.map((a) => (
-														<option key={a.id} value={`to:${a.id}`}>
-															criar o outro lado em {a.name}
-														</option>
-													))}
-											</Select>
+												items={[
+													{ value: "ignore", label: "ignorar" },
+													{
+														value: "keep",
+														label: `tratar como ${r.type === "expense" ? "despesa" : "entrada"}`,
+													},
+													...accounts
+														.filter((a) => a.name !== r.account)
+														.map((a) => ({
+															value: `to:${a.id}`,
+															label: `criar o outro lado em ${a.name}`,
+														})),
+												]}
+											/>
 										</td>
 									</tr>
 								);
@@ -216,7 +218,9 @@ export function ImportReview({
 						{t.transactions} transacções a criar · saldos iniciais a 0
 						(acerte-os depois em Contas)
 					</span>
-					<Button onClick={onDone}>Cancelar</Button>
+					<Button variant="neutral" onClick={onDone}>
+						Cancelar
+					</Button>
 					<Button
 						variant="primary"
 						disabled={unmapped.length > 0 || commit.isPending}

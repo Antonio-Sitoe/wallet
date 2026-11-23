@@ -5,6 +5,8 @@ import {
 	type Frequency,
 	type PlanItemYear,
 } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
+import { Input } from "@wallet/ui/components/input";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
@@ -13,13 +15,12 @@ import { useAddPlanItem } from "@/actions/plan/use-add-plan-item";
 import { useDeletePlanItem } from "@/actions/plan/use-delete-plan-item";
 import { useUpdatePlanItem } from "@/actions/plan/use-update-plan-item";
 import { Check } from "@/components/plan/check";
-import { Button } from "@/components/ui/button";
-import { CategoryOptions } from "@/components/ui/category-options";
+import { categoryItems } from "@/components/ui/category-items";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
-import { TextInput } from "@/components/ui/text-input";
+import { useConfirm } from "@/contexts/confirm-context";
 import {
 	currentMonth,
 	GROUP_LABEL,
@@ -43,6 +44,7 @@ export function PlanItemDialog({
 	item: PlanItemYear | null;
 	onClose: () => void;
 }) {
+	const confirmAction = useConfirm();
 	const accounts = useAccounts().data ?? [];
 	const categories = useCategories().data ?? [];
 	const add = useAddPlanItem();
@@ -130,9 +132,9 @@ export function PlanItemDialog({
 							className="mr-auto"
 							onClick={async () => {
 								if (
-									!confirm(
-										`Tirar ${item.name} do plano a partir de ${applyFrom}? Meses pagos ficam.`,
-									)
+									!(await confirmAction({
+										title: `Tirar ${item.name} do plano a partir de ${applyFrom}? Meses pagos ficam.`,
+									}))
 								)
 									return;
 								await remove.mutateAsync({ id: item.id, applyFrom });
@@ -143,7 +145,9 @@ export function PlanItemDialog({
 							Apagar
 						</Button>
 					) : null}
-					<Button onClick={onClose}>Cancelar</Button>
+					<Button variant="neutral" onClick={onClose}>
+						Cancelar
+					</Button>
 					<Button
 						variant="primary"
 						disabled={!valid || add.isPending || update.isPending}
@@ -156,7 +160,7 @@ export function PlanItemDialog({
 		>
 			<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
 				<Field label="Nome">
-					<TextInput
+					<Input
 						autoFocus
 						value={name}
 						onChange={(e) => setName(e.target.value)}
@@ -172,14 +176,14 @@ export function PlanItemDialog({
 				<Field label="Grupo">
 					<Select
 						value={group}
-						onChange={(e) => setGroup(e.target.value as BudgetGroup)}
-					>
-						{BUDGET_GROUPS.map((g) => (
-							<option key={g} value={g}>
-								{GROUP_LABEL[g]}
-							</option>
-						))}
-					</Select>
+						onValueChange={(value) => setGroup(value as BudgetGroup)}
+						items={[
+							...BUDGET_GROUPS.map((g) => ({
+								value: g,
+								label: String(GROUP_LABEL[g]),
+							})),
+						]}
+					/>
 				</Field>
 				<Field
 					label="Categoria"
@@ -187,39 +191,40 @@ export function PlanItemDialog({
 				>
 					<Select
 						value={categoryId}
-						onChange={(e) => setCategoryId(e.target.value)}
-					>
-						<option value="">Sem categoria</option>
-						<CategoryOptions categories={categories} kind="expense" />
-					</Select>
+						onValueChange={(value) => setCategoryId(value)}
+						items={[
+							{ value: "", label: "Sem categoria" },
+							...categoryItems(categories, "expense"),
+						]}
+					/>
 				</Field>
 				<Field label="Frequência">
 					<Select
 						value={frequency}
-						onChange={(e) => {
-							setFrequency(e.target.value as Frequency);
+						onValueChange={(value) => {
+							setFrequency(value as Frequency);
 							setMonths([]);
 						}}
-					>
-						{(Object.keys(FREQ_LABEL) as Frequency[]).map((f) => (
-							<option key={f} value={f}>
-								{FREQ_LABEL[f]}
-							</option>
-						))}
-					</Select>
+						items={[
+							...(Object.keys(FREQ_LABEL) as Frequency[]).map((f) => ({
+								value: f,
+								label: String(FREQ_LABEL[f]),
+							})),
+						]}
+					/>
 				</Field>
 				<Field label="Conta por defeito">
 					<Select
 						value={accountId}
-						onChange={(e) => setAccountId(e.target.value)}
-					>
-						<option value="">Escolher ao marcar</option>
-						{accounts.map((a) => (
-							<option key={a.id} value={a.id}>
-								{a.name}
-							</option>
-						))}
-					</Select>
+						onValueChange={(value) => setAccountId(value)}
+						items={[
+							{ value: "", label: "Escolher ao marcar" },
+							...accounts.map((a) => ({
+								value: a.id,
+								label: a.name,
+							})),
+						]}
+					/>
 				</Field>
 			</div>
 			{frequency !== "monthly" ? (
@@ -248,17 +253,14 @@ export function PlanItemDialog({
 				>
 					<Select
 						value={toAccountId}
-						onChange={(e) => setToAccountId(e.target.value)}
-					>
-						<option value="">Nenhuma (é uma despesa)</option>
-						{accounts
-							.filter((a) => a.id !== accountId)
-							.map((a) => (
-								<option key={a.id} value={a.id}>
-									{a.name}
-								</option>
-							))}
-					</Select>
+						onValueChange={(value) => setToAccountId(value)}
+						items={[
+							{ value: "", label: "Nenhuma (é uma despesa)" },
+							...accounts
+								.filter((a) => a.id !== accountId)
+								.map((a) => ({ value: a.id, label: a.name })),
+						]}
+					/>
 				</Field>
 				<div className="flex flex-col gap-2">
 					<Check checked={partial} onChange={setPartial}>
@@ -279,18 +281,17 @@ export function PlanItemDialog({
 				<Field label="Aplicar a partir de">
 					<Select
 						value={applyFrom}
-						onChange={(e) => setApplyFrom(e.target.value)}
-					>
-						{MONTH_SHORT.map((label, i) => {
-							const m = `${year}-${String(i + 1).padStart(2, "0")}`;
-							return (
-								<option key={m} value={m}>
-									{label} {year}
-									{m === now ? " (este mês)" : ""}
-								</option>
-							);
-						})}
-					</Select>
+						onValueChange={(value) => setApplyFrom(value)}
+						items={[
+							...MONTH_SHORT.map((label, i) => {
+								const m = `${year}-${String(i + 1).padStart(2, "0")}`;
+								return {
+									value: m,
+									label: `${label} ${year} ${m === now ? " (este mês)" : ""}`,
+								};
+							}),
+						]}
+					/>
 				</Field>
 			) : null}
 			{!item ? null : (

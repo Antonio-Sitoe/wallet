@@ -1,5 +1,6 @@
 import { getRouteApi } from "@tanstack/react-router";
 import { BUDGET_GROUPS, type PlanItemYear } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,7 +13,6 @@ import { CreatePlan } from "@/components/plan/create-plan";
 import { Legend } from "@/components/plan/legend";
 import { PlanItemDialog } from "@/components/plan/plan-item-dialog";
 import { Th } from "@/components/plan/th";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MoneyInput } from "@/components/ui/money-input";
@@ -65,25 +65,32 @@ export function PlanPage() {
 		<>
 			<PageHeader crumb={["orçamento", `plano-${year}`]}>
 				<Select
-					className="h-8 w-auto"
+					size="md"
+					className="w-auto"
 					aria-label="Ano"
 					value={year}
-					onChange={(e) =>
-						navigate({ search: { year: Number(e.target.value) } })
+					onValueChange={(value) =>
+						navigate({ search: { year: Number(value) } })
 					}
-				>
-					{[...new Set([...plans.map((p) => p.year), year - 1, year, year + 1])]
-						.sort()
-						.map((y) => (
-							<option key={y} value={y}>
-								{y}
-								{plans.some((p) => p.year === y) ? "" : " · sem plano"}
-							</option>
-						))}
-				</Select>
+					items={[
+						...[
+							...new Set([
+								...plans.map((p) => p.year),
+								year - 1,
+								year,
+								year + 1,
+							]),
+						]
+							.sort()
+							.map((y) => ({
+								value: String(y),
+								label: `${y} ${plans.some((p) => p.year === y) ? "" : " · sem plano"}`,
+							})),
+					]}
+				/>
 				{data ? (
 					<>
-						<Button onClick={() => setEditing("new")}>
+						<Button variant="neutral" onClick={() => setEditing("new")}>
 							<PlusIcon className="size-3.5" strokeWidth={2.6} /> Item
 						</Button>
 						<Button

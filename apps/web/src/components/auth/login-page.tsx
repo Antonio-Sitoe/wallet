@@ -1,11 +1,11 @@
 import { useNavigate } from "@tanstack/react-router";
+import { Button } from "@wallet/ui/components/button";
+import { Input } from "@wallet/ui/components/input";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Segmented } from "@/components/ui/segmented";
-import { TextInput } from "@/components/ui/text-input";
 import { authClient } from "@/lib/auth-client";
 
 export function LoginPage() {
@@ -81,7 +81,7 @@ export function LoginPage() {
 					/>
 					{mode === "up" ? (
 						<Field label="Nome">
-							<TextInput
+							<Input
 								value={name}
 								onChange={(e) => setName(e.target.value)}
 								autoComplete="name"
@@ -89,7 +89,7 @@ export function LoginPage() {
 						</Field>
 					) : null}
 					<Field label="Email">
-						<TextInput
+						<Input
 							type="email"
 							required
 							value={email}
@@ -98,7 +98,7 @@ export function LoginPage() {
 						/>
 					</Field>
 					<Field label="Palavra-passe">
-						<TextInput
+						<Input
 							type="password"
 							required
 							minLength={8}

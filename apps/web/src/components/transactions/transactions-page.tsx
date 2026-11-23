@@ -1,6 +1,8 @@
 import { getRouteApi } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { Transaction } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
+import { Input } from "@wallet/ui/components/input";
 import { BusIcon, PlusIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -12,16 +14,14 @@ import { useTransactionPages } from "@/actions/transactions/use-transaction-page
 import { TransactionDetail } from "@/components/transactions/transaction-detail";
 import { TxRow } from "@/components/transactions/tx-row";
 import { PERIODS, type Period } from "@/components/transactions/utils";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CategoryOptions } from "@/components/ui/category-options";
+import { categoryItems } from "@/components/ui/category-items";
 import { ErrorNote } from "@/components/ui/error-note";
 import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TextInput } from "@/components/ui/text-input";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
 import {
 	addMonths,
@@ -157,7 +157,11 @@ export function TransactionsPage() {
 	return (
 		<>
 			<PageHeader crumb={["transacções"]}>
-				<Button onClick={quickRide} disabled={create.isPending}>
+				<Button
+					variant="neutral"
+					onClick={quickRide}
+					disabled={create.isPending}
+				>
 					<BusIcon className="size-3.5" /> Transporte 100
 				</Button>
 				<Button variant="primary" onClick={() => openNew()}>
@@ -176,69 +180,76 @@ export function TransactionsPage() {
 
 				<div className="flex flex-wrap gap-2">
 					<Select
-						className="h-8 w-auto"
+						size="md"
+						className="w-auto"
 						aria-label="Período"
 						value={period}
-						onChange={(e) => set({ period: e.target.value as Period })}
-					>
-						{Object.entries(PERIODS).map(([k, label]) => (
-							<option key={k} value={k}>
-								período: {label}
-							</option>
-						))}
-					</Select>
+						onValueChange={(value) => set({ period: value as Period })}
+						items={[
+							...Object.entries(PERIODS).map(([k, label]) => ({
+								value: k,
+								label: `período: ${label}`,
+							})),
+						]}
+					/>
 					<Select
-						className="h-8 w-auto"
+						size="md"
+						className="w-auto"
 						aria-label="Conta"
 						value={search.account ?? ""}
-						onChange={(e) => set({ account: e.target.value || undefined })}
-					>
-						<option value="">conta: todas</option>
-						{accounts.map((a) => (
-							<option key={a.id} value={a.id}>
-								{a.name}
-							</option>
-						))}
-					</Select>
+						onValueChange={(value) => set({ account: value || undefined })}
+						items={[
+							{ value: "", label: "conta: todas" },
+							...accounts.map((a) => ({
+								value: a.id,
+								label: a.name,
+							})),
+						]}
+					/>
 					<Select
-						className="h-8 w-auto max-w-[240px]"
+						size="md"
+						className="w-auto max-w-[240px]"
 						aria-label="Categoria"
 						value={search.category ?? ""}
-						onChange={(e) => set({ category: e.target.value || undefined })}
-					>
-						<option value="">categoria: todas</option>
-						<CategoryOptions categories={categories} />
-					</Select>
+						onValueChange={(value) => set({ category: value || undefined })}
+						items={[
+							{ value: "", label: "categoria: todas" },
+							...categoryItems(categories),
+						]}
+					/>
 					<Select
-						className="h-8 w-auto"
+						size="md"
+						className="w-auto"
 						aria-label="Tipo"
 						value={search.type ?? ""}
-						onChange={(e) =>
-							set({ type: (e.target.value || undefined) as typeof search.type })
+						onValueChange={(value) =>
+							set({ type: (value || undefined) as typeof search.type })
 						}
-					>
-						<option value="">tipo: todos</option>
-						<option value="expense">saídas</option>
-						<option value="income">entradas</option>
-						<option value="transfer">transferências</option>
-						<option value="adjustment">acertos</option>
-					</Select>
+						items={[
+							{ value: "", label: "tipo: todos" },
+							{ value: "expense", label: "saídas" },
+							{ value: "income", label: "entradas" },
+							{ value: "transfer", label: "transferências" },
+							{ value: "adjustment", label: "acertos" },
+						]}
+					/>
 					<Select
-						className="h-8 w-auto"
+						size="md"
+						className="w-auto"
 						aria-label="Mês do orçamento"
 						value={search.month ?? ""}
-						onChange={(e) => set({ month: e.target.value || undefined })}
-					>
-						<option value="">mês: todos</option>
-						{Array.from({ length: 18 }, (_, i) =>
-							addMonths(currentMonth(), 1 - i),
-						).map((m) => (
-							<option key={m} value={m}>
-								{monthLabel(m)}
-							</option>
-						))}
-					</Select>
-					<TextInput
+						onValueChange={(value) => set({ month: value || undefined })}
+						items={[
+							{ value: "", label: "mês: todos" },
+							...Array.from({ length: 18 }, (_, i) =>
+								addMonths(currentMonth(), 1 - i),
+							).map((m) => ({
+								value: m,
+								label: String(monthLabel(m)),
+							})),
+						]}
+					/>
+					<Input
 						className="h-8 max-w-[220px]"
 						placeholder="procurar nota ou payee…"
 						value={q}
@@ -251,7 +262,7 @@ export function TransactionsPage() {
 					search.month ||
 					search.q ? (
 						<Button
-							variant="ghost"
+							variant="quiet"
 							size="sm"
 							onClick={() => {
 								setQ("");
