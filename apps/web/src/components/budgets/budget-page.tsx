@@ -1,0 +1,207 @@
+import { getRouteApi, Link } from "@tanstack/react-router";
+import { BUDGET_GROUPS, type MonthItem } from "@wallet/shared";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { EditMonthItemDialog } from "@/components/budgets/edit-month-item-dialog";
+import { GroupCard } from "@/components/budgets/group-card";
+import { NoListState } from "@/components/budgets/no-list-state";
+import { PayDialog } from "@/components/budgets/pay-dialog";
+import { UnplannedForm } from "@/components/budgets/unplanned-form";
+import { Button } from "@/components/ui/button";
+import { ErrorNote } from "@/components/ui/error-note";
+import { Page } from "@/components/ui/page";
+import { PageHeader } from "@/components/ui/page-header";
+import { PageTitle } from "@/components/ui/page-title";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Stat } from "@/components/ui/stat";
+import { StatRow } from "@/components/ui/stat-row";
+import {
+	useAccounts,
+	useCategories,
+	useMonthBudget,
+	usePayMonthItem,
+	useUnpayMonthItem,
+} from "@/lib/queries";
+import {
+	addMonths,
+	currentMonth,
+	money,
+	monthLabel,
+	shortMonth,
+} from "@/utils/format";
+
+const route = getRouteApi("/_private/budget");
+
+export function BudgetPage() {
+	const { month: monthParam } = route.useSearch();
+	const month = monthParam ?? currentMonth();
+	const navigate = route.useNavigate();
+	const budget = useMonthBudget(month);
+	const accounts = useAccounts().data ?? [];
+	const categories = useCategories().data ?? [];
+	const [paying, setPaying] = useState<MonthItem | null>(null);
+	const [editing, setEditing] = useState<MonthItem | null>(null);
+	const unpay = useUnpayMonthItem();
+	const pay = usePayMonthItem();
+	const go = (delta: number) =>
+		navigate({ search: { month: addMonths(month, delta) } });
+	const data = budget.data;
+	const accountName = (id: string | null) =>
+		accounts.find((a) => a.id === id)?.name ?? "sem conta";
+	const categoryName = (id: string | null) =>
+		categories.find((c) => c.id === id)?.name ?? "sem categoria";
+
+	return (
+		<>
+			<PageHeader crumb={["orçamento", month]}>
+				<div className="flex gap-1">
+					<Button
+						aria-label="Mês anterior"
+						className="w-[30px] px-0"
+						onClick={() => go(-1)}
+					>
+						<ChevronLeftIcon className="size-4" />
+					</Button>
+					<Button
+						aria-label="Mês seguinte"
+						className="w-[30px] px-0"
+						onClick={() => go(1)}
+					>
+						<ChevronRightIcon className="size-4" />
+					</Button>
+				</div>
+				<div className="num flex gap-1 text-[11px]">
+					{[-2, -1, 0, 1, 2].map((d) => {
+						const m = addMonths(month, d);
+						return (
+							<Link
+								key={m}
+								to="/budget"
+								search={{ month: m }}
+								className={`rounded-[5px] border px-2 py-1 no-underline ${d === 0 ? "border-line-strong text-fg bg-[#21262D]" : "text-dim hover:text-fg border-transparent"}`}
+							>
+								{shortMonth(m)}
+							</Link>
+						);
+					})}
+				</div>
+			</PageHeader>
+			<Page>
+				<PageTitle
+					title={monthLabel(month)}
+					meta={
+						data
+							? data.hasList
+								? `${data.items.length} itens · check = transacção`
+								: "sem lista"
+							: " "
+					}
+				/>
+				{budget.error ? <ErrorNote error={budget.error} /> : null}
+				{!data ? (
+					<Skeleton className="h-96" />
+				) : (
+					<>
+						<StatRow>
+							<Stat
+								label="Salário previsto"
+								value={money(data.expectedIncome)}
+								note={
+									data.income
+										? `recebido ${money(data.income)}`
+										: "nada recebido ainda"
+								}
+							/>
+							<Stat
+								label="Planeado"
+								value={data.hasList ? money(data.totals.planned) : "—"}
+								tone={data.hasList ? undefined : "dim"}
+								note={
+									data.totals.unplanned
+										? `${money(data.totals.unplanned)} não planeado`
+										: undefined
+								}
+							/>
+							<Stat
+								label="Gasto"
+								value={data.hasList ? money(data.totals.spent) : "—"}
+								tone={data.hasList ? undefined : "dim"}
+								note={
+									data.totals.unassignedSpent
+										? `+ ${money(data.totals.unassignedSpent)} fora da lista`
+										: undefined
+								}
+							/>
+							<Stat
+								label="Falta gastar"
+								value={data.hasList ? money(data.totals.remaining) : "—"}
+								tone={data.hasList ? undefined : "dim"}
+							/>
+							<Stat
+								label="Sobra do salário"
+								value={data.hasList ? money(data.totals.leftover) : "—"}
+								tone={
+									!data.hasList
+										? "dim"
+										: data.totals.leftover < 0
+											? "warn"
+											: "ok"
+								}
+								note="previsto − planeado"
+							/>
+						</StatRow>
+
+						{data.hasList ? (
+							<>
+								{BUDGET_GROUPS.map((group) => {
+									const items = data.items.filter((i) => i.group === group);
+									if (items.length === 0) return null;
+									return (
+										<GroupCard
+											key={group}
+											group={group}
+											items={items}
+											accountName={accountName}
+											categoryName={categoryName}
+											onCheck={(item) => setPaying(item)}
+											onUncheck={async (item) => {
+												if (
+													!confirm(
+														`Desmarcar ${item.name}? ${item.payments.length} pagamento(s) da lista são apagados.`,
+													)
+												)
+													return;
+												await unpay.mutateAsync(item.id);
+												toast.success(
+													`${item.name} desmarcado · transacção apagada`,
+												);
+											}}
+											onLaunch={async (item) => {
+												if (!item.defaultAccountId) return setPaying(item);
+												const res = await pay.mutateAsync({ id: item.id });
+												toast.success(
+													`${item.name} −${money(item.step ?? 0)} · ${accountName(res.payments[0]?.accountId ?? null)}`,
+												);
+											}}
+											onEdit={setEditing}
+										/>
+									);
+								})}
+								<UnplannedForm month={month} />
+							</>
+						) : (
+							<NoListState month={month} />
+						)}
+					</>
+				)}
+			</Page>
+			{paying ? (
+				<PayDialog item={paying} onClose={() => setPaying(null)} />
+			) : null}
+			{editing ? (
+				<EditMonthItemDialog item={editing} onClose={() => setEditing(null)} />
+			) : null}
+		</>
+	);
+}

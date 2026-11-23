@@ -1,4 +1,3 @@
-/** Data hooks: one place that knows the API paths and which caches a change touches. */
 import {
 	type QueryClient,
 	useInfiniteQuery,
@@ -46,10 +45,8 @@ import type {
 	WalletMapping,
 } from "@wallet/shared";
 import { toast } from "sonner";
+import { api, errorMessage } from "@/lib/api";
 
-import { api, errorMessage } from "./api";
-
-/** Dates travel as ISO strings; the shared input types use Date after parsing. */
 type Wire<T> = {
 	[K in keyof T]: T[K] extends Date
 		? string
@@ -58,7 +55,6 @@ type Wire<T> = {
 			: T[K];
 };
 
-/** Anything that moves money can change balances, lists, budgets and category counts. */
 function refreshMoney(qc: QueryClient) {
 	for (const key of [
 		"accounts",
@@ -70,12 +66,12 @@ function refreshMoney(qc: QueryClient) {
 		"categories",
 		"month-item",
 		"analytics",
+		"imports",
 	]) {
 		qc.invalidateQueries({ queryKey: [key] });
 	}
 }
 
-/** useMutation with the error toast every screen wants. */
 function useApiMutation<TVars, TResult>(
 	fn: (vars: TVars) => Promise<TResult>,
 	onDone: (qc: QueryClient) => void,
@@ -87,8 +83,6 @@ function useApiMutation<TVars, TResult>(
 		onError: (error) => toast.error(errorMessage(error)),
 	});
 }
-
-// ---- Accounts
 
 export const useAccounts = (includeArchived = false) =>
 	useQuery({
@@ -122,13 +116,28 @@ export const useReconcileAccount = () =>
 		refreshMoney,
 	);
 
+export const useZeroBalances = () =>
+	useApiMutation(
+		(body: { at?: string }) =>
+			api<Account[]>("/accounts/zero-balances", { method: "POST", body }),
+		refreshMoney,
+	);
+
+export const useResetData = () =>
+	useApiMutation(
+		(_: void) =>
+			api<{ removed: { transactions: number } }>("/accounts/reset", {
+				method: "POST",
+				body: { confirm: "APAGAR" },
+			}),
+		refreshMoney,
+	);
+
 export const useDeleteAccount = () =>
 	useApiMutation(
 		(id: string) => api<void>(`/accounts/${id}`, { method: "DELETE" }),
 		refreshMoney,
 	);
-
-// ---- Categories
 
 export const useCategories = () =>
 	useQuery({
@@ -175,14 +184,12 @@ export const useSetWalletMapping = () =>
 		},
 	);
 
-// ---- Transactions
-
 export type TransactionFilters = {
 	from?: string;
 	to?: string;
 	accountId?: string[];
 	categoryId?: string[];
-	type?: "expense" | "income" | "transfer";
+	type?: "expense" | "income" | "transfer" | "adjustment";
 	referenceMonth?: string;
 	q?: string;
 };
@@ -196,13 +203,6 @@ export const useTransactionPages = (filters: TransactionFilters, limit = 100) =>
 				query: { ...filters, limit, cursor: pageParam },
 			}),
 		getNextPageParam: (last) => last.nextCursor ?? undefined,
-	});
-
-export const useTransaction = (id: string | null) =>
-	useQuery({
-		queryKey: ["transaction", id],
-		queryFn: () => api<Transaction>(`/transactions/${id}`),
-		enabled: !!id,
 	});
 
 export const useTransfer = (id: string | null) =>
@@ -256,8 +256,6 @@ export const useDeleteTransfer = () =>
 		(id: string) => api<void>(`/transfers/${id}`, { method: "DELETE" }),
 		refreshMoney,
 	);
-
-// ---- Imports
 
 export const useImports = () =>
 	useQuery({
@@ -315,8 +313,6 @@ export const useDeleteImport = () =>
 			qc.invalidateQueries({ queryKey: ["imports"] });
 		},
 	);
-
-// ---- Budget
 
 export const usePlans = () =>
 	useQuery({
@@ -452,17 +448,6 @@ export const useUnpayMonthItem = () =>
 		refreshMoney,
 	);
 
-export const useRemovePayment = () =>
-	useApiMutation(
-		({ id, transactionId }: { id: string; transactionId: string }) =>
-			api<MonthItem>(`/budgets/month-items/${id}/payments/${transactionId}`, {
-				method: "DELETE",
-			}),
-		refreshMoney,
-	);
-
-// ---- Analytics & dashboard (Fase 3)
-
 export type Period = { from: string; to: string };
 
 export const useOverview = (p: Period) =>
@@ -547,7 +532,6 @@ export const useReorderCards = () => {
 				method: "PUT",
 				body: { ids },
 			}),
-		// Move the cards right away; the server answer confirms it.
 		onMutate: (ids) => {
 			const current = qc.getQueryData<DashboardCard[]>(["dashboard-cards"]);
 			if (current)
@@ -569,8 +553,6 @@ export const useResetCards = () =>
 		() => api<DashboardCard[]>("/dashboard/cards/reset", { method: "POST" }),
 		refreshCards,
 	);
-
-// ---- Spreadsheet import
 
 export const useUploadSheet = () =>
 	useApiMutation(

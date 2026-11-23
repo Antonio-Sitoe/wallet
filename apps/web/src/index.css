@@ -1,6 +1,5 @@
 @import "@wallet/ui/globals.css";
 
-/* Wallet design tokens (dark, macOS-first): see the design canvas "Dark-*" boards. */
 @theme {
 	--font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 	--font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -61,12 +60,234 @@
 		-webkit-font-smoothing: antialiased;
 		font-size: 13px;
 	}
-	/* Money and dates line up in columns. */
 	.num {
 		font-family: var(--font-mono);
 		font-variant-numeric: tabular-nums;
 	}
 	input[type="date"]::-webkit-calendar-picker-indicator {
 		filter: invert(0.7);
+	}
+}
+
+.wl-loader {
+	animation: wl-fade-in 0.35s ease-out 0.12s both;
+}
+.wl-wallet {
+	transform-box: fill-box;
+	transform-origin: 50% 100%;
+	animation: wl-squash 0.8s cubic-bezier(0.3, 0.7, 0.4, 1) 0.16s infinite;
+}
+.wl-coin-drop {
+	opacity: 0;
+	animation: wl-drop 2.4s cubic-bezier(0.55, 0, 0.9, 0.45) infinite;
+}
+.wl-coin-spin {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: wl-spin 2.4s linear infinite;
+}
+.wl-shadow {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: wl-shadow 0.8s ease-out 0.16s infinite;
+}
+.wl-sparkles > * {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: wl-sparkle 0.8s ease-out 0.16s infinite;
+}
+.wl-sparkles > :nth-child(2) {
+	animation-delay: 0.22s;
+}
+.wl-sparkles > :nth-child(3) {
+	animation-delay: 0.26s;
+}
+.wl-sparkles > :nth-child(4) {
+	animation-delay: 0.2s;
+}
+.wl-clasp {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: wl-pulse 0.8s ease-out 0.16s infinite;
+}
+.wl-glow {
+	animation: wl-glow 1.6s ease-in-out infinite;
+}
+.wl-msg {
+	animation: wl-msg 1.8s ease-in-out both;
+}
+.wl-dot {
+	animation: wl-dot 0.9s ease-in-out infinite;
+}
+
+@keyframes wl-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+@keyframes wl-drop {
+	0% {
+		opacity: 0;
+		transform: translateY(-78px);
+	}
+	8% {
+		opacity: 1;
+	}
+	40% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	44%,
+	100% {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+}
+@keyframes wl-spin {
+	0% {
+		transform: scaleX(1);
+	}
+	10% {
+		transform: scaleX(0.15);
+	}
+	20% {
+		transform: scaleX(1);
+	}
+	30% {
+		transform: scaleX(0.15);
+	}
+	40%,
+	100% {
+		transform: scaleX(1);
+	}
+}
+@keyframes wl-squash {
+	0% {
+		transform: scale(1, 1);
+	}
+	12% {
+		transform: scale(1.07, 0.9);
+	}
+	35% {
+		transform: scale(0.97, 1.05);
+	}
+	60%,
+	100% {
+		transform: scale(1, 1);
+	}
+}
+@keyframes wl-shadow {
+	0% {
+		transform: scaleX(1);
+		opacity: 0.45;
+	}
+	12% {
+		transform: scaleX(1.12);
+		opacity: 0.6;
+	}
+	60%,
+	100% {
+		transform: scaleX(1);
+		opacity: 0.45;
+	}
+}
+@keyframes wl-sparkle {
+	0%,
+	8% {
+		opacity: 0;
+		transform: scale(0.2) rotate(0deg);
+	}
+	25% {
+		opacity: 1;
+		transform: scale(1.15) rotate(25deg);
+	}
+	60%,
+	100% {
+		opacity: 0;
+		transform: scale(0.6) rotate(60deg);
+	}
+}
+@keyframes wl-pulse {
+	0% {
+		transform: scale(1);
+	}
+	15% {
+		transform: scale(1.35);
+	}
+	50%,
+	100% {
+		transform: scale(1);
+	}
+}
+@keyframes wl-glow {
+	0%,
+	100% {
+		opacity: 0.5;
+		transform: scale(0.92);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.08);
+	}
+}
+@keyframes wl-msg {
+	0% {
+		opacity: 0;
+		transform: translateY(6px);
+		filter: blur(2px);
+	}
+	15%,
+	85% {
+		opacity: 1;
+		transform: translateY(0);
+		filter: blur(0);
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(-6px);
+		filter: blur(2px);
+	}
+}
+@keyframes wl-dot {
+	0%,
+	100% {
+		transform: translateY(0);
+		opacity: 0.4;
+	}
+	40% {
+		transform: translateY(-5px);
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wl-loader * {
+		animation: none;
+	}
+	.wl-coin-drop:first-of-type {
+		opacity: 1;
+	}
+}
+
+.wl-search {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: wl-search 3.2s ease-in-out infinite;
+}
+@keyframes wl-search {
+	0%,
+	100% {
+		transform: translate(0, 0) rotate(0deg);
+	}
+	50% {
+		transform: translate(-14px, 8px) rotate(-8deg);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.wl-search {
+		animation: none;
 	}
 }

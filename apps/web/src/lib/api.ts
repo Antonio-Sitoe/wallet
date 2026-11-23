@@ -1,9 +1,8 @@
-import { ENV } from "../env";
-import { isDesktop, readDesktopToken } from "./auth-client";
+import { ENV } from "@/env";
+import { isDesktop, readDesktopToken } from "@/lib/auth-client";
 
 const BASE = ENV.VITE_SERVER_URL.replace(/\/$/, "");
 
-/** An error answer from the API: `{ error: { code, message, details } }`. */
 export class ApiError extends Error {
 	constructor(
 		readonly status: number,
@@ -43,7 +42,6 @@ export async function api<T>(
 ): Promise<T> {
 	const headers: Record<string, string> = {};
 	if (options.body !== undefined) headers["Content-Type"] = "application/json";
-	// The desktop webview cannot send cross-site cookies; it uses the bearer token instead.
 	if (isDesktop) headers.Authorization = `Bearer ${readDesktopToken()}`;
 
 	const res = await fetch(`${BASE}/api${path}${toSearch(options.query)}`, {
@@ -66,7 +64,6 @@ export async function api<T>(
 	return data as T;
 }
 
-/** A readable message for toasts, including the first validation issue. */
 export function errorMessage(error: unknown): string {
 	if (error instanceof ApiError) {
 		const first = Array.isArray(error.details) ? error.details[0] : undefined;
