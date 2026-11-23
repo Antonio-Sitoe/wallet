@@ -1,9 +1,10 @@
 import type { Category } from "@wallet/shared";
+import { useSetWalletMapping } from "@/actions/categories/use-set-wallet-mapping";
+import { useWalletMap } from "@/actions/categories/use-wallet-map";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
 import { CategoryOptions } from "@/components/ui/category-options";
 import { Select } from "@/components/ui/select";
-import { useSetWalletMapping, useWalletMap } from "@/lib/queries";
 
 export function WalletMapping({ categories }: { categories: Category[] }) {
 	const map = useWalletMap();

@@ -4,6 +4,11 @@ import type { Transaction } from "@wallet/shared";
 import { BusIcon, PlusIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import type { TransactionFilters } from "@/@types/transaction-filters";
+import { useAccounts } from "@/actions/accounts/use-accounts";
+import { useCategories } from "@/actions/categories/use-categories";
+import { useCreateTransaction } from "@/actions/transactions/use-create-transaction";
+import { useTransactionPages } from "@/actions/transactions/use-transaction-pages";
 import { TransactionDetail } from "@/components/transactions/transaction-detail";
 import { TxRow } from "@/components/transactions/tx-row";
 import { PERIODS, type Period } from "@/components/transactions/utils";
@@ -18,13 +23,6 @@ import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TextInput } from "@/components/ui/text-input";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
-import {
-	type TransactionFilters,
-	useAccounts,
-	useCategories,
-	useCreateTransaction,
-	useTransactionPages,
-} from "@/lib/queries";
 import {
 	addMonths,
 	currentMonth,

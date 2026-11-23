@@ -1,4 +1,4 @@
-import type { Period } from "@/lib/queries";
+import type { Period } from "@/@types/period";
 import { dayLabel } from "@/utils/format";
 
 export const PeriodNote = ({ p }: { p: Period }) => (

@@ -1,8 +1,8 @@
 import type { Transaction } from "@wallet/shared";
 import { toast } from "sonner";
+import { useDeleteTransaction } from "@/actions/transactions/use-delete-transaction";
 import { DetailCard } from "@/components/transactions/detail-card";
 import { Button } from "@/components/ui/button";
-import { useDeleteTransaction } from "@/lib/queries";
 import { dayKey, dayLabel, signedMoney } from "@/utils/format";
 
 export function AdjustmentDetail({

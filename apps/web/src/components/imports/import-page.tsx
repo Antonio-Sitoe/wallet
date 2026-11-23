@@ -2,6 +2,10 @@ import { getRouteApi } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { useDeleteImport } from "@/actions/imports/use-delete-import";
+import { useImportPreview } from "@/actions/imports/use-import-preview";
+import { useImports } from "@/actions/imports/use-imports";
+import { useUploadWallet } from "@/actions/imports/use-upload-wallet";
 import { ImportReview } from "@/components/imports/import-review";
 import { SheetImport } from "@/components/imports/sheet-import";
 import { Button } from "@/components/ui/button";
@@ -13,12 +17,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Pill } from "@/components/ui/pill";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	useDeleteImport,
-	useImportPreview,
-	useImports,
-	useUploadWallet,
-} from "@/lib/queries";
 import { dayKey, dayLabel } from "@/utils/format";
 
 const route = getRouteApi("/_private/import");

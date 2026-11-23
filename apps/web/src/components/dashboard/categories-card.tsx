@@ -1,9 +1,10 @@
+import type { Period } from "@/@types/period";
+import { useCategorySpending } from "@/actions/analytics/use-category-spending";
 import { BarList } from "@/components/charts/bar-list";
 import { Delta } from "@/components/charts/delta";
 import { Empty } from "@/components/dashboard/empty";
 import { Loading } from "@/components/dashboard/loading";
 import { PeriodNote } from "@/components/dashboard/period-note";
-import { type Period, useCategorySpending } from "@/lib/queries";
 import { money } from "@/utils/format";
 
 export function CategoriesCard({ period }: { period: Period }) {

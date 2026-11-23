@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { parseYearMonth } from "@wallet/shared";
 import { toast } from "sonner";
+import { useCreatePlan } from "@/actions/plan/use-create-plan";
+import { useGeneratePlan } from "@/actions/plan/use-generate-plan";
+import { usePlans } from "@/actions/plan/use-plans";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useCreatePlan, useGeneratePlan, usePlans } from "@/lib/queries";
 import { monthLabel } from "@/utils/format";
 
 export function NoListState({ month }: { month: string }) {

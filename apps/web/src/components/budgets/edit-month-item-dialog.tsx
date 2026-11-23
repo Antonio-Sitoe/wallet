@@ -2,12 +2,13 @@ import type { MonthItem } from "@wallet/shared";
 import { Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useDeleteMonthItem } from "@/actions/budgets/use-delete-month-item";
+import { useUpdateMonthItem } from "@/actions/budgets/use-update-month-item";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { TextInput } from "@/components/ui/text-input";
-import { useDeleteMonthItem, useUpdateMonthItem } from "@/lib/queries";
 import { money, moneyInput, monthLabel, parseMoney } from "@/utils/format";
 
 export function EditMonthItemDialog({

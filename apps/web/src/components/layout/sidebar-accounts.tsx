@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useAccounts } from "@/lib/queries";
+import { useAccounts } from "@/actions/accounts/use-accounts";
 
 export function SidebarAccounts() {
 	const accounts = useAccounts().data ?? [];

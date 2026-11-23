@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
+import { useAccounts } from "@/actions/accounts/use-accounts";
+import { useCategories } from "@/actions/categories/use-categories";
+import { useTransactionPages } from "@/actions/transactions/use-transaction-pages";
 import { Empty } from "@/components/dashboard/empty";
 import { Loading } from "@/components/dashboard/loading";
-import { useAccounts, useCategories, useTransactionPages } from "@/lib/queries";
 import { dayKey, dayLabel, signedMoney } from "@/utils/format";
 
 export function LastRecordsCard() {

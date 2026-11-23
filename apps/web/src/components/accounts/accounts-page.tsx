@@ -2,6 +2,7 @@ import { getRouteApi, Link } from "@tanstack/react-router";
 import { ACCOUNT_TYPES, type AccountType } from "@wallet/shared";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { useAccounts } from "@/actions/accounts/use-accounts";
 import { AccountDetail } from "@/components/accounts/account-detail";
 import { NewAccountForm } from "@/components/accounts/new-account-form";
 import { StartOverDialog } from "@/components/accounts/start-over-dialog";
@@ -19,7 +20,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { Swatch } from "@/components/ui/swatch";
-import { useAccounts } from "@/lib/queries";
 import { ACCOUNT_TYPE_LABEL, money } from "@/utils/format";
 
 const route = getRouteApi("/_private/accounts");

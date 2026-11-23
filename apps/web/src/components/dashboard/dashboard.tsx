@@ -7,6 +7,12 @@ import {
 	TriangleAlertIcon,
 } from "lucide-react";
 import { useState } from "react";
+import type { Period } from "@/@types/period";
+import { useAccounts } from "@/actions/accounts/use-accounts";
+import { useMonthBudget } from "@/actions/budgets/use-month-budget";
+import { useDashboardCards } from "@/actions/dashboard/use-dashboard-cards";
+import { useReorderCards } from "@/actions/dashboard/use-reorder-cards";
+import { useResetCards } from "@/actions/dashboard/use-reset-cards";
 import { AddCardDialog } from "@/components/dashboard/add-card-dialog";
 import { DashboardCardFrame } from "@/components/dashboard/dashboard-card-frame";
 import { Greeting } from "@/components/dashboard/greeting";
@@ -17,14 +23,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
-import {
-	type Period,
-	useAccounts,
-	useDashboardCards,
-	useMonthBudget,
-	useReorderCards,
-	useResetCards,
-} from "@/lib/queries";
 import {
 	addMonths,
 	currentMonth,

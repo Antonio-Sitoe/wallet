@@ -1,10 +1,10 @@
 import type { Account } from "@wallet/shared";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useReconcileAccount } from "@/actions/accounts/use-reconcile-account";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { MoneyInput } from "@/components/ui/money-input";
-import { useReconcileAccount } from "@/lib/queries";
 import { money, moneyInput, parseMoney, signedMoney } from "@/utils/format";
 
 export function ValidateBalancesDialog({

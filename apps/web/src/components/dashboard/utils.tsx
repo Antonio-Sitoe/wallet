@@ -1,5 +1,5 @@
 import type { DashboardCardType } from "@wallet/shared";
-import type { Period } from "@/lib/queries";
+import type { Period } from "@/@types/period";
 
 export const CARD_CATALOG: Record<
 	DashboardCardType,

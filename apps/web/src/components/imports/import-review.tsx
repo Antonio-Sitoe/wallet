@@ -1,6 +1,9 @@
 import type { ImportPreview, ReviewResolution } from "@wallet/shared";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAccounts } from "@/actions/accounts/use-accounts";
+import { useCategories } from "@/actions/categories/use-categories";
+import { useCommitImport } from "@/actions/imports/use-commit-import";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
@@ -9,7 +12,6 @@ import { Pill } from "@/components/ui/pill";
 import { Select } from "@/components/ui/select";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
-import { useAccounts, useCategories, useCommitImport } from "@/lib/queries";
 import { dayKey, dayLabel, money } from "@/utils/format";
 
 export function ImportReview({

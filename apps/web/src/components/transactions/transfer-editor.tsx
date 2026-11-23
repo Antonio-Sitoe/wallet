@@ -1,6 +1,9 @@
 import type { Account } from "@wallet/shared";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useDeleteTransfer } from "@/actions/transactions/use-delete-transfer";
+import { useTransfer } from "@/actions/transactions/use-transfer";
+import { useUpdateTransfer } from "@/actions/transactions/use-update-transfer";
 import { DetailCard } from "@/components/transactions/detail-card";
 import { monthChoices } from "@/components/transactions/utils";
 import { Button } from "@/components/ui/button";
@@ -9,11 +12,6 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TextInput } from "@/components/ui/text-input";
-import {
-	useDeleteTransfer,
-	useTransfer,
-	useUpdateTransfer,
-} from "@/lib/queries";
 import {
 	dateInputOf,
 	instantOf,

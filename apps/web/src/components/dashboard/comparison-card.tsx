@@ -1,8 +1,9 @@
+import type { Period } from "@/@types/period";
+import { useComparison } from "@/actions/analytics/use-comparison";
 import { SERIES } from "@/components/charts/bar-list";
 import { Legend } from "@/components/charts/legend";
 import { LineChart } from "@/components/charts/line-chart";
 import { Loading } from "@/components/dashboard/loading";
-import { type Period, useComparison } from "@/lib/queries";
 import { dayLabel, MONTH_SHORT } from "@/utils/format";
 
 export function ComparisonCard({ period }: { period: Period }) {

@@ -1,8 +1,9 @@
+import type { Period } from "@/@types/period";
+import { useCashflow } from "@/actions/analytics/use-cashflow";
 import { SERIES } from "@/components/charts/bar-list";
 import { GroupedBars } from "@/components/charts/grouped-bars";
 import { Legend } from "@/components/charts/legend";
 import { Loading } from "@/components/dashboard/loading";
-import { type Period, useCashflow } from "@/lib/queries";
 import { dayLabel, MONTH_SHORT, money, monthLabel } from "@/utils/format";
 
 export function CashFlowTrendCard({ period }: { period: Period }) {

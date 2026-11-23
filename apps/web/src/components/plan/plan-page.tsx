@@ -3,6 +3,11 @@ import { BUDGET_GROUPS, type PlanItemYear } from "@wallet/shared";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useCategories } from "@/actions/categories/use-categories";
+import { useGeneratePlan } from "@/actions/plan/use-generate-plan";
+import { usePlan } from "@/actions/plan/use-plan";
+import { usePlans } from "@/actions/plan/use-plans";
+import { useUpdatePlan } from "@/actions/plan/use-update-plan";
 import { CreatePlan } from "@/components/plan/create-plan";
 import { Legend } from "@/components/plan/legend";
 import { PlanItemDialog } from "@/components/plan/plan-item-dialog";
@@ -20,13 +25,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { ApiError } from "@/lib/api";
-import {
-	useCategories,
-	useGeneratePlan,
-	usePlan,
-	usePlans,
-	useUpdatePlan,
-} from "@/lib/queries";
 import {
 	currentMonth,
 	GROUP_LABEL,

@@ -7,6 +7,11 @@ import {
 } from "@wallet/shared";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAccounts } from "@/actions/accounts/use-accounts";
+import { useCategories } from "@/actions/categories/use-categories";
+import { useAddPlanItem } from "@/actions/plan/use-add-plan-item";
+import { useDeletePlanItem } from "@/actions/plan/use-delete-plan-item";
+import { useUpdatePlanItem } from "@/actions/plan/use-update-plan-item";
 import { Check } from "@/components/plan/check";
 import { Button } from "@/components/ui/button";
 import { CategoryOptions } from "@/components/ui/category-options";
@@ -15,13 +20,6 @@ import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
 import { TextInput } from "@/components/ui/text-input";
-import {
-	useAccounts,
-	useAddPlanItem,
-	useCategories,
-	useDeletePlanItem,
-	useUpdatePlanItem,
-} from "@/lib/queries";
 import {
 	currentMonth,
 	GROUP_LABEL,

@@ -3,6 +3,11 @@ import { BUDGET_GROUPS, type MonthItem } from "@wallet/shared";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAccounts } from "@/actions/accounts/use-accounts";
+import { useMonthBudget } from "@/actions/budgets/use-month-budget";
+import { usePayMonthItem } from "@/actions/budgets/use-pay-month-item";
+import { useUnpayMonthItem } from "@/actions/budgets/use-unpay-month-item";
+import { useCategories } from "@/actions/categories/use-categories";
 import { EditMonthItemDialog } from "@/components/budgets/edit-month-item-dialog";
 import { GroupCard } from "@/components/budgets/group-card";
 import { NoListState } from "@/components/budgets/no-list-state";
@@ -16,13 +21,6 @@ import { PageTitle } from "@/components/ui/page-title";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
-import {
-	useAccounts,
-	useCategories,
-	useMonthBudget,
-	usePayMonthItem,
-	useUnpayMonthItem,
-} from "@/lib/queries";
 import {
 	addMonths,
 	currentMonth,

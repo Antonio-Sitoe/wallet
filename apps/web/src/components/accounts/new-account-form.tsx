@@ -1,6 +1,7 @@
 import { ACCOUNT_TYPES, type AccountType } from "@wallet/shared";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useCreateAccount } from "@/actions/accounts/use-create-account";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
@@ -8,7 +9,6 @@ import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
 import { TextInput } from "@/components/ui/text-input";
-import { useCreateAccount } from "@/lib/queries";
 import { ACCOUNT_TYPE_LABEL, parseMoney } from "@/utils/format";
 
 export const COLORS = [

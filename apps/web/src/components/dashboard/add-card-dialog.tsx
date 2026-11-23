@@ -6,12 +6,13 @@ import {
 } from "@wallet/shared";
 import { PlusIcon } from "lucide-react";
 import { toast } from "sonner";
+import type { Period } from "@/@types/period";
+import { useAddCard } from "@/actions/dashboard/use-add-card";
 import { CardBody } from "@/components/dashboard/card-body";
 import { CARD_CATALOG } from "@/components/dashboard/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
-import { type Period, useAddCard } from "@/lib/queries";
 
 export function AddCardDialog({
 	open,

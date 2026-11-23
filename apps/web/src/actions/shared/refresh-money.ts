@@ -1,0 +1,18 @@
+import type { QueryClient } from "@tanstack/react-query";
+
+export function refreshMoney(qc: QueryClient) {
+	for (const key of [
+		"accounts",
+		"transactions",
+		"transaction",
+		"transfer",
+		"budget-month",
+		"plan",
+		"categories",
+		"month-item",
+		"analytics",
+		"imports",
+	]) {
+		qc.invalidateQueries({ queryKey: [key] });
+	}
+}

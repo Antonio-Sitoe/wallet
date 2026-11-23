@@ -1,13 +1,14 @@
 import type { Category } from "@wallet/shared";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useDeleteCategory } from "@/actions/categories/use-delete-category";
+import { useUpdateCategory } from "@/actions/categories/use-update-category";
 import { KIND_LABEL } from "@/components/categories/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Pill } from "@/components/ui/pill";
 import { TextInput } from "@/components/ui/text-input";
-import { useDeleteCategory, useUpdateCategory } from "@/lib/queries";
 
 export const PALETTE = [
 	"#56D364",

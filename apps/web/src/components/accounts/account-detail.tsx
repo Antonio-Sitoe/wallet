@@ -2,6 +2,11 @@ import { Link } from "@tanstack/react-router";
 import { ACCOUNT_TYPES, type Account, type AccountType } from "@wallet/shared";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useDeleteAccount } from "@/actions/accounts/use-delete-account";
+import { useReconcileAccount } from "@/actions/accounts/use-reconcile-account";
+import { useUpdateAccount } from "@/actions/accounts/use-update-account";
+import { useCategories } from "@/actions/categories/use-categories";
+import { useTransactionPages } from "@/actions/transactions/use-transaction-pages";
 import { initials } from "@/components/accounts/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,13 +16,6 @@ import { Select } from "@/components/ui/select";
 import { Swatch } from "@/components/ui/swatch";
 import { TextInput } from "@/components/ui/text-input";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
-import {
-	useCategories,
-	useDeleteAccount,
-	useReconcileAccount,
-	useTransactionPages,
-	useUpdateAccount,
-} from "@/lib/queries";
 import {
 	ACCOUNT_TYPE_LABEL,
 	dayKey,

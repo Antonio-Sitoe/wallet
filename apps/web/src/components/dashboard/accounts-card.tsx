@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
+import { useAccounts } from "@/actions/accounts/use-accounts";
 import { Empty } from "@/components/dashboard/empty";
 import { Loading } from "@/components/dashboard/loading";
-import { useAccounts } from "@/lib/queries";
 import { ACCOUNT_TYPE_LABEL, money } from "@/utils/format";
 
 export function AccountsCard() {

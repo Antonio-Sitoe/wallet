@@ -9,11 +9,13 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import type { Period } from "@/@types/period";
+import { useRemoveCard } from "@/actions/dashboard/use-remove-card";
+import { useUpdateCard } from "@/actions/dashboard/use-update-card";
 import { CardBody } from "@/components/dashboard/card-body";
 import { IconButton } from "@/components/dashboard/icon-button";
 import { CARD_CATALOG, cardTitle } from "@/components/dashboard/utils";
 import { Card } from "@/components/ui/card";
-import { type Period, useRemoveCard, useUpdateCard } from "@/lib/queries";
 
 export function DashboardCardFrame({
 	card,

@@ -1,13 +1,13 @@
 import type { Category } from "@wallet/shared";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useCreateCategory } from "@/actions/categories/use-create-category";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
 import { TextInput } from "@/components/ui/text-input";
-import { useCreateCategory } from "@/lib/queries";
 
 export function NewCategoryForm({
 	categories,

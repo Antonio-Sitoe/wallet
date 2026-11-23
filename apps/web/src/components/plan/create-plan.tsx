@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useCreatePlan } from "@/actions/plan/use-create-plan";
 import { Check } from "@/components/plan/check";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
-import { useCreatePlan } from "@/lib/queries";
 import { parseMoney } from "@/utils/format";
 
 export function CreatePlan({

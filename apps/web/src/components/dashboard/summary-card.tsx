@@ -1,12 +1,10 @@
+import type { Period } from "@/@types/period";
+import { useAccounts } from "@/actions/accounts/use-accounts";
+import { useOverview } from "@/actions/analytics/use-overview";
+import { useMonthBudget } from "@/actions/budgets/use-month-budget";
 import { Delta } from "@/components/charts/delta";
 import { Loading } from "@/components/dashboard/loading";
 import { monthOfPeriod } from "@/components/dashboard/utils";
-import {
-	type Period,
-	useAccounts,
-	useMonthBudget,
-	useOverview,
-} from "@/lib/queries";
 import { MONTH_SHORT, money } from "@/utils/format";
 
 export function SummaryCard({ period }: { period: Period }) {

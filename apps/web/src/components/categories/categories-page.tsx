@@ -2,6 +2,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import type { Category } from "@wallet/shared";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { useCategories } from "@/actions/categories/use-categories";
 import { CategoryDetail } from "@/components/categories/category-detail";
 import { NewCategoryForm } from "@/components/categories/new-category-form";
 import { KIND_LABEL } from "@/components/categories/utils";
@@ -14,7 +15,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Segmented } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCategories } from "@/lib/queries";
 
 const route = getRouteApi("/_private/categories");
 

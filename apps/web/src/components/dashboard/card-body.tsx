@@ -1,4 +1,5 @@
 import type { DashboardCardType } from "@wallet/shared";
+import type { Period } from "@/@types/period";
 import { AccountsCard } from "@/components/dashboard/accounts-card";
 import { BalanceTrendCard } from "@/components/dashboard/balance-trend-card";
 import { CashFlowCard } from "@/components/dashboard/cash-flow-card";
@@ -8,7 +9,6 @@ import { ComparisonCard } from "@/components/dashboard/comparison-card";
 import { LastRecordsCard } from "@/components/dashboard/last-records-card";
 import { SummaryCard } from "@/components/dashboard/summary-card";
 import { UpcomingCard } from "@/components/dashboard/upcoming-card";
-import type { Period } from "@/lib/queries";
 
 export function CardBody({
 	type,

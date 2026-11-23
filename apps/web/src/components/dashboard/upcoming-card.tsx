@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
+import type { Period } from "@/@types/period";
+import { useMonthBudget } from "@/actions/budgets/use-month-budget";
 import { Empty } from "@/components/dashboard/empty";
 import { Loading } from "@/components/dashboard/loading";
 import { monthOfPeriod } from "@/components/dashboard/utils";
 import { StatusPill } from "@/components/ui/status-pill";
-import { type Period, useMonthBudget } from "@/lib/queries";
 import { money, monthLabel } from "@/utils/format";
 
 export function UpcomingCard({ period }: { period: Period }) {

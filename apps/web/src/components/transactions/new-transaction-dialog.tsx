@@ -4,16 +4,14 @@ import { cn } from "@wallet/ui/lib/utils";
 import { XIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useAccounts } from "@/actions/accounts/use-accounts";
+import { useMonthBudget } from "@/actions/budgets/use-month-budget";
+import { useCategories } from "@/actions/categories/use-categories";
+import { useCreateTransaction } from "@/actions/transactions/use-create-transaction";
+import { useCreateTransfer } from "@/actions/transactions/use-create-transfer";
 import { AccountPick } from "@/components/transactions/account-pick";
 import { CategoryPicker } from "@/components/transactions/category-picker";
 import { TextInput } from "@/components/ui/text-input";
-import {
-	useAccounts,
-	useCategories,
-	useCreateTransaction,
-	useCreateTransfer,
-	useMonthBudget,
-} from "@/lib/queries";
 import {
 	addMonths,
 	currentMonth,
@@ -263,7 +261,6 @@ export function NewTransactionDialog({
 						? KINDS.transfer.accent
 						: (catColor.get(i.categoryId ?? "") ?? "#8B949E"),
 			}));
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [items, kind, catColor, accounts]);
 
 	const pending = createTx.isPending || createTransfer.isPending;

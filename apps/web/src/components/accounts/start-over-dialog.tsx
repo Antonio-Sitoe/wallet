@@ -1,11 +1,12 @@
 import type { Account } from "@wallet/shared";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useResetData } from "@/actions/accounts/use-reset-data";
+import { useZeroBalances } from "@/actions/accounts/use-zero-balances";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { TextInput } from "@/components/ui/text-input";
-import { useResetData, useZeroBalances } from "@/lib/queries";
 import { money } from "@/utils/format";
 
 export function StartOverDialog({

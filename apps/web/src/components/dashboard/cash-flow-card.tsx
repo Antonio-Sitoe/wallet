@@ -1,8 +1,9 @@
+import type { Period } from "@/@types/period";
+import { useOverview } from "@/actions/analytics/use-overview";
 import { SERIES } from "@/components/charts/bar-list";
 import { Delta } from "@/components/charts/delta";
 import { Loading } from "@/components/dashboard/loading";
 import { PeriodNote } from "@/components/dashboard/period-note";
-import { type Period, useOverview } from "@/lib/queries";
 import { money, signedMoney } from "@/utils/format";
 
 export function CashFlowCard({ period }: { period: Period }) {

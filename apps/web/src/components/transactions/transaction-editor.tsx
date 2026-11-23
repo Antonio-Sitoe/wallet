@@ -1,6 +1,8 @@
 import type { Account, Category, Transaction } from "@wallet/shared";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useDeleteTransaction } from "@/actions/transactions/use-delete-transaction";
+import { useUpdateTransaction } from "@/actions/transactions/use-update-transaction";
 import { DetailCard } from "@/components/transactions/detail-card";
 import { monthChoices } from "@/components/transactions/utils";
 import { Button } from "@/components/ui/button";
@@ -10,7 +12,6 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { Pill } from "@/components/ui/pill";
 import { Select } from "@/components/ui/select";
 import { TextInput } from "@/components/ui/text-input";
-import { useDeleteTransaction, useUpdateTransaction } from "@/lib/queries";
 import {
 	dateInputOf,
 	instantOf,
