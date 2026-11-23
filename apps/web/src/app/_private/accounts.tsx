@@ -7,6 +7,7 @@ export const Route = createFileRoute("/_private/accounts")({
 		id: z.string().optional(),
 		archived: z.boolean().optional(),
 		validate: z.boolean().optional(),
+		create: z.boolean().optional(),
 	}),
 	component: AccountsPage,
 });

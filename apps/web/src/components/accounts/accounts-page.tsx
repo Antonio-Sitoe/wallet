@@ -31,10 +31,10 @@ export const GROUPS: { title: string; types: AccountType[] }[] = [
 ];
 
 export function AccountsPage() {
-	const { id, archived, validate } = route.useSearch();
+	const { id, archived, validate, create } = route.useSearch();
 	const navigate = route.useNavigate();
 	const accounts = useAccounts(!!archived);
-	const [creating, setCreating] = useState(false);
+	const [creating, setCreating] = useState(!!create);
 	const [startOver, setStartOver] = useState(false);
 	const list = accounts.data ?? [];
 	const selected = list.find((a) => a.id === id) ?? list[0];

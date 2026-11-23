@@ -1,3 +1,5 @@
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { CardSize, DashboardCard } from "@wallet/shared";
 import {
 	ArrowDownIcon,
@@ -7,7 +9,6 @@ import {
 	Minimize2Icon,
 	Trash2Icon,
 } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 import type { Period } from "@/@types/period";
 import { useRemoveCard } from "@/actions/dashboard/use-remove-card";
@@ -22,57 +23,49 @@ export function DashboardCardFrame({
 	period,
 	index,
 	count,
-	dragging,
-	onDragStart,
-	onDragEnd,
-	onDropHere,
 	onMove,
 }: {
 	card: DashboardCard;
 	period: Period;
 	index: number;
 	count: number;
-	dragging: boolean;
-	onDragStart: () => void;
-	onDragEnd: () => void;
-	onDropHere: () => void;
 	onMove: (to: number) => void;
 }) {
 	const update = useUpdateCard();
 	const remove = useRemoveCard();
-	const [over, setOver] = useState(false);
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		setActivatorNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({ id: card.id });
 	const hasRange =
 		card.type === "cash-flow-trend" || card.type === "spending-by-category";
 	const nextSize: CardSize = card.size === "full" ? "half" : "full";
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: drop target for mouse drag; the ↑/↓ buttons do the same by keyboard
 		<Card
-			className={`flex min-w-0 flex-col overflow-hidden transition-opacity ${card.size === "full" ? "lg:col-span-2" : ""} ${dragging ? "opacity-40" : ""} ${over ? "ring-info-2/50 ring-2" : ""}`}
-			onDragOver={(e) => {
-				e.preventDefault();
-				setOver(true);
+			ref={setNodeRef}
+			style={{
+				transform: CSS.Translate.toString(transform),
+				transition,
 			}}
-			onDragLeave={() => setOver(false)}
-			onDrop={(e) => {
-				e.preventDefault();
-				setOver(false);
-				onDropHere();
-			}}
+			className={`flex min-w-0 flex-col overflow-hidden ${card.size === "full" ? "lg:col-span-2" : ""} ${isDragging ? "ring-info-2/50 relative z-10 opacity-80 shadow-2xl ring-2" : ""}`}
 		>
 			<div className="border-line flex items-center gap-2 border-b px-4 py-3">
-				{/* biome-ignore lint/a11y/noStaticElementInteractions: mouse drag handle; ↑/↓ buttons are the keyboard path */}
-				<span
-					draggable
-					onDragStart={(e) => {
-						e.dataTransfer.effectAllowed = "move";
-						onDragStart();
-					}}
-					onDragEnd={onDragEnd}
+				<button
+					type="button"
+					ref={setActivatorNodeRef}
+					{...attributes}
+					{...listeners}
+					aria-label="Arrastar para mudar a ordem"
 					title="Arrastar para mudar a ordem"
-					className="text-faint hover:text-fg-2 cursor-grab"
+					className={`text-faint hover:text-fg-2 touch-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
 				>
 					<GripVerticalIcon className="size-4" aria-hidden="true" />
-				</span>
+				</button>
 				<h2 className="min-w-0 flex-1 truncate text-sm font-semibold">
 					{cardTitle(card.type, period, card.config)}
 				</h2>

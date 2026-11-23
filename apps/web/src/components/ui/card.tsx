@@ -4,7 +4,10 @@ import type * as React from "react";
 export function Card({
 	className,
 	...props
-}: React.HTMLAttributes<HTMLElement> & { as?: "section" | "div" | "aside" }) {
+}: React.HTMLAttributes<HTMLElement> & {
+	as?: "section" | "div" | "aside";
+	ref?: React.Ref<HTMLElement>;
+}) {
 	return (
 		<section
 			className={cn("border-line bg-panel rounded-[10px] border", className)}
