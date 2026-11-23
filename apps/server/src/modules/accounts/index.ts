@@ -1,15 +1,20 @@
 import type { Database } from "@wallet/db";
 
-import { accountsRoutes } from "./routes";
-import { type AccountActivityPort, createAccountsService } from "./service";
+import { AccountsController } from "./accounts.controller";
+import { AccountsRepository } from "./accounts.repository";
+import { accountsRoutes } from "./accounts.routes";
+import { AccountsService } from "./accounts.service";
+import type { AccountActivityPort } from "./accounts.types";
 
-export type { AccountActivityPort, AccountsService } from "./service";
+export { AccountsService } from "./accounts.service";
+export type { AccountActivityPort } from "./accounts.types";
 
-/** Accounts: CRUD, computed balances, reconcile. Owns the `accounts` table. */
 export function createAccountsModule(
 	db: Database,
 	deps: { activity: AccountActivityPort },
 ) {
-	const service = createAccountsService(db, deps.activity);
-	return { service, routes: accountsRoutes(service) };
+	const repository = new AccountsRepository(db);
+	const service = new AccountsService(repository, deps.activity);
+	const controller = new AccountsController(service);
+	return { service, routes: accountsRoutes(controller) };
 }

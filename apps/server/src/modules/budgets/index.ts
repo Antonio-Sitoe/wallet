@@ -1,12 +1,17 @@
 import type { Database } from "@wallet/db";
 
-import { budgetsRoutes } from "./routes";
-import { type BudgetsDeps, createBudgetsService } from "./service";
+import { BudgetsController } from "./budgets.controller";
+import { BudgetsRepository } from "./budgets.repository";
+import { budgetsRoutes } from "./budgets.routes";
+import { BudgetsService } from "./budgets.service";
+import type { BudgetsDeps } from "./budgets.types";
 
-export type { BudgetsDeps, BudgetsService } from "./service";
+export { BudgetsService } from "./budgets.service";
+export type { BudgetsDeps } from "./budgets.types";
 
-/** Yearly plan + monthly lists: check = transaction. Owns `budget_plans`, `plan_items`, `month_items`. */
 export function createBudgetsModule(db: Database, deps: BudgetsDeps) {
-	const service = createBudgetsService(db, deps);
-	return { service, routes: budgetsRoutes(service) };
+	const repository = new BudgetsRepository(db);
+	const service = new BudgetsService(repository, deps);
+	const controller = new BudgetsController(service);
+	return { service, routes: budgetsRoutes(controller) };
 }

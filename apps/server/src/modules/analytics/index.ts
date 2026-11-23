@@ -1,10 +1,13 @@
-import { analyticsRoutes } from "./routes";
-import { type AnalyticsDeps, createAnalyticsService } from "./service";
+import { AnalyticsController } from "./analytics.controller";
+import { analyticsRoutes } from "./analytics.routes";
+import { AnalyticsService } from "./analytics.service";
+import type { AnalyticsDeps } from "./analytics.types";
 
-export type { AnalyticsDeps, AnalyticsService } from "./service";
+export { AnalyticsService } from "./analytics.service";
+export type { AnalyticsDeps } from "./analytics.types";
 
-/** Read-only figures for the dashboard: totals, trends, categories, period comparison. Owns no tables. */
 export function createAnalyticsModule(deps: AnalyticsDeps) {
-	const service = createAnalyticsService(deps);
-	return { service, routes: analyticsRoutes(service) };
+	const service = new AnalyticsService(deps);
+	const controller = new AnalyticsController(service);
+	return { service, routes: analyticsRoutes(controller) };
 }

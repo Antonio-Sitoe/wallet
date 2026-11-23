@@ -1,17 +1,21 @@
 import type { Database } from "@wallet/db";
 
-import { transactionsRoutes } from "./routes";
-import { createTransactionsService, type TransactionsDeps } from "./service";
+import { TransactionsController } from "./transactions.controller";
+import { TransactionsRepository } from "./transactions.repository";
+import { transactionsRoutes } from "./transactions.routes";
+import { TransactionsService } from "./transactions.service";
+import type { TransactionsDeps } from "./transactions.types";
 
+export { TransactionsService } from "./transactions.service";
 export type {
 	ImportedTransaction,
 	ImportedTransfer,
 	TransactionsDeps,
-	TransactionsService,
-} from "./service";
+} from "./transactions.types";
 
-/** Transactions and transfers: CRUD, filtered keyset listing, import writes. Owns `transactions` and `transfers`. */
 export function createTransactionsModule(db: Database, deps: TransactionsDeps) {
-	const service = createTransactionsService(db, deps);
-	return { service, routes: transactionsRoutes(service) };
+	const repository = new TransactionsRepository(db);
+	const service = new TransactionsService(repository, deps);
+	const controller = new TransactionsController(service);
+	return { service, routes: transactionsRoutes(controller) };
 }

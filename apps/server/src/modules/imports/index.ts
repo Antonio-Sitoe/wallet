@@ -1,22 +1,24 @@
 import type { Database } from "@wallet/db";
 
-import { importsRoutes } from "./routes";
-import { createImportsService, type ImportsDeps } from "./service";
-import {
-	createSheetImportService,
-	type SheetImportDeps,
-} from "./sheet-service";
+import { ImportsController } from "./imports.controller";
+import { ImportsRepository } from "./imports.repository";
+import { importsRoutes } from "./imports.routes";
+import { ImportsService } from "./imports.service";
+import { SheetImportService } from "./imports.sheet.service";
+import type { ImportsDeps, SheetImportDeps } from "./imports.types";
 
-export type { ImportsDeps, ImportsService } from "./service";
-export type { SheetImportDeps } from "./sheet-service";
+export { ImportsService } from "./imports.service";
+export { SheetImportService } from "./imports.sheet.service";
+export type { ImportsDeps, SheetImportDeps } from "./imports.types";
 
-/** Wallet CSV import: draft preview → commit → undo. Owns `import_batches`. */
 export function createImportsModule(
 	db: Database,
 	deps: ImportsDeps,
 	sheetDeps: SheetImportDeps,
 ) {
-	const sheet = createSheetImportService(db, sheetDeps);
-	const service = createImportsService(db, deps, sheet);
-	return { service, sheet, routes: importsRoutes(service, sheet) };
+	const repository = new ImportsRepository(db);
+	const sheet = new SheetImportService(repository, sheetDeps);
+	const service = new ImportsService(repository, deps, sheet);
+	const controller = new ImportsController(service, sheet);
+	return { service, sheet, routes: importsRoutes(controller) };
 }

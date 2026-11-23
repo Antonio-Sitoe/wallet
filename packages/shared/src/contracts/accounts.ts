@@ -30,9 +30,21 @@ export const updateAccountInput = z
 	.partial();
 export type UpdateAccountInput = z.infer<typeof updateAccountInput>;
 
-/** "The account holds X today": the server moves the initial balance so the computed balance equals X. */
-export const reconcileAccountInput = z.object({ balance: cents });
+/** "The account holds X": the server adds an "Acerto" transaction for the difference (none when it already matches). */
+export const reconcileAccountInput = z.object({
+	balance: cents,
+	/** When the account held that balance; defaults to now. */
+	at: z.coerce.date().optional(),
+});
 export type ReconcileAccountInput = z.infer<typeof reconcileAccountInput>;
+
+/** Every active account to 0 at `at`, keeping the history (one "Acerto" per account that is not at 0). */
+export const zeroBalancesInput = z.object({ at: z.coerce.date().optional() });
+export type ZeroBalancesInput = z.infer<typeof zeroBalancesInput>;
+
+/** Deletes every transaction, transfer and import and sets initial balances to 0. Accounts, categories and the plan stay. */
+export const resetDataInput = z.object({ confirm: z.literal("APAGAR") });
+export type ResetDataInput = z.infer<typeof resetDataInput>;
 
 export const listAccountsQuery = z.object({
 	includeArchived: z.stringbool().default(false),

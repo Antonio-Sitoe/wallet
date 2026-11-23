@@ -1,16 +1,21 @@
 import type { Database } from "@wallet/db";
 
-import { categoriesRoutes } from "./routes";
-import { type CategoryActivityPort, createCategoriesService } from "./service";
+import { CategoriesController } from "./categories.controller";
+import { CategoriesRepository } from "./categories.repository";
+import { categoriesRoutes } from "./categories.routes";
+import { CategoriesService } from "./categories.service";
+import type { CategoryActivityPort } from "./categories.types";
 
-export { SYSTEM_SLUGS } from "./defaults";
-export type { CategoriesService, CategoryActivityPort } from "./service";
+export { SYSTEM_SLUGS } from "./categories.defaults";
+export { CategoriesService } from "./categories.service";
+export type { CategoryActivityPort } from "./categories.types";
 
-/** Categories: two-level tree, default seed, Wallet name mapping. Owns `categories` and `wallet_category_map`. */
 export function createCategoriesModule(
 	db: Database,
 	deps: { activity: CategoryActivityPort },
 ) {
-	const service = createCategoriesService(db, deps.activity);
-	return { service, routes: categoriesRoutes(service) };
+	const repository = new CategoriesRepository(db);
+	const service = new CategoriesService(repository, deps.activity);
+	const controller = new CategoriesController(service);
+	return { service, routes: categoriesRoutes(controller) };
 }

@@ -1,10 +1,8 @@
 import fastifyCors from "@fastify/cors";
 import type { Auth } from "@wallet/auth";
 import type { Database } from "@wallet/db";
-import Fastify, { type FastifyError, type FastifyServerOptions } from "fastify";
+import Fastify, { type FastifyServerOptions } from "fastify";
 
-import { createAuthGuard, toHeaders } from "./lib/auth-guard";
-import { AppError } from "./lib/errors";
 import { createAccountsModule } from "./modules/accounts";
 import { createAnalyticsModule } from "./modules/analytics";
 import { createBudgetsModule } from "./modules/budgets";
@@ -12,6 +10,8 @@ import { createCategoriesModule, SYSTEM_SLUGS } from "./modules/categories";
 import { createDashboardModule } from "./modules/dashboard";
 import { createImportsModule } from "./modules/imports";
 import { createTransactionsModule } from "./modules/transactions";
+import { errorHandler } from "./shared/errors/error-handler";
+import { createAuthGuard, toHeaders } from "./shared/middleware/auth-guard";
 
 export type AppOptions = {
 	db: Database;
@@ -20,28 +20,32 @@ export type AppOptions = {
 	logger?: FastifyServerOptions["logger"];
 };
 
-/**
- * Composition root of the modular monolith. Modules never import each other: each declares the small
- * interface it needs from the others (a "port") and this function wires the real services into them.
- */
 export function buildModules(db: Database) {
-	// Accounts and categories ask transactions for counts and sums, and transactions asks them to validate ids.
-	// The ports below are closures, so the cycle is only resolved at call time.
 	let transactions: ReturnType<typeof createTransactionsModule> | undefined;
 	let budgets: ReturnType<typeof createBudgetsModule> | undefined;
+	let imports: ReturnType<typeof createImportsModule> | undefined;
 	const tx = () => transactions!.service;
 	const budget = () => budgets!.service;
 
 	const accounts = createAccountsModule(db, {
 		activity: {
 			statsByAccount: (userId, ids) => tx().statsByAccount(userId, ids),
+			createAdjustment: (userId, input) => tx().createAdjustment(userId, input),
+			wipe: async (userId) => {
+				const removed = await tx().wipe(userId);
+				await imports!.service.wipe(userId);
+				return removed;
+			},
 		},
 	});
 	const categories = createCategoriesModule(db, {
 		activity: { countByCategory: (userId) => tx().countByCategory(userId) },
 	});
 	transactions = createTransactionsModule(db, {
-		accounts: { assertOwned: accounts.service.assertOwned },
+		accounts: {
+			assertOwned: (userId, ids, exec) =>
+				accounts.service.assertOwned(userId, ids, exec),
+		},
 		categories: {
 			assertOwned: categories.service.assertOwned,
 			withDescendants: categories.service.withDescendants,
@@ -67,7 +71,7 @@ export function buildModules(db: Database) {
 		},
 		transactions: transactions.service,
 	});
-	const imports = createImportsModule(
+	imports = createImportsModule(
 		db,
 		{
 			accounts: accounts.service,
@@ -134,27 +138,7 @@ export function buildApp({ db, auth, corsOrigins, logger = true }: AppOptions) {
 		maxAge: 86400,
 	});
 
-	app.setErrorHandler((error: FastifyError | AppError, request, reply) => {
-		if (error instanceof AppError) {
-			return reply.status(error.statusCode).send({
-				error: {
-					code: error.code,
-					message: error.message,
-					details: error.details,
-				},
-			});
-		}
-		// Fastify's own client errors: malformed JSON, body too large, unsupported media type…
-		if (error.statusCode && error.statusCode < 500) {
-			return reply.status(error.statusCode).send({
-				error: { code: error.code ?? "BAD_REQUEST", message: error.message },
-			});
-		}
-		request.log.error({ err: error }, "Unhandled error");
-		return reply
-			.status(500)
-			.send({ error: { code: "INTERNAL_ERROR", message: "Erro interno" } });
-	});
+	app.setErrorHandler(errorHandler);
 
 	app.route({
 		method: ["GET", "POST"],

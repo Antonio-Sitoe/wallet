@@ -22,6 +22,8 @@ export const transactionType = pgEnum("transaction_type", [
 	"expense",
 	"income",
 	"transfer",
+	/** "Acerto": moves a balance to what the account really holds. Never income or expense. */
+	"adjustment",
 ]);
 
 /** One transfer = one row here + two transactions (out and in) pointing at it. */
@@ -125,7 +127,7 @@ export const transactions = pgTable(
 		),
 		check(
 			"transactions_sign_matches_type",
-			sql`(${t.type} = 'expense' and ${t.amount} < 0) or (${t.type} = 'income' and ${t.amount} > 0) or ${t.type} = 'transfer'`,
+			sql`(${t.type} = 'expense' and ${t.amount} < 0) or (${t.type} = 'income' and ${t.amount} > 0) or ${t.type} in ('transfer', 'adjustment')`,
 		),
 		check(
 			"transactions_transfer_link",

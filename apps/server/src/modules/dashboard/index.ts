@@ -1,12 +1,15 @@
 import type { Database } from "@wallet/db";
 
-import { dashboardRoutes } from "./routes";
-import { createDashboardService } from "./service";
+import { DashboardController } from "./dashboard.controller";
+import { DashboardRepository } from "./dashboard.repository";
+import { dashboardRoutes } from "./dashboard.routes";
+import { DashboardService } from "./dashboard.service";
 
-export type { DashboardService } from "./service";
+export { DashboardService } from "./dashboard.service";
 
-/** The user's dashboard layout: which cards, in what order and size. Owns `dashboard_cards`. */
 export function createDashboardModule(db: Database) {
-	const service = createDashboardService(db);
-	return { service, routes: dashboardRoutes(service) };
+	const repository = new DashboardRepository(db);
+	const service = new DashboardService(repository);
+	const controller = new DashboardController(service);
+	return { service, routes: dashboardRoutes(controller) };
 }

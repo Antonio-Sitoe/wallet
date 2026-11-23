@@ -1,0 +1,16 @@
+export {
+	type CreateTransactionInput,
+	type CreateTransferInput,
+	createTransactionInput,
+	createTransferInput,
+	idParams,
+	type ListTransactionsQuery,
+	listTransactionsQuery,
+	type Transaction,
+	type TransactionPage,
+	type Transfer,
+	type UpdateTransactionInput,
+	type UpdateTransferInput,
+	updateTransactionInput,
+	updateTransferInput,
+} from "@wallet/shared";

@@ -2,7 +2,12 @@ import { z } from "zod";
 
 import { id, manyIds, positiveCents, yearMonth } from "./common";
 
-export const TRANSACTION_TYPES = ["expense", "income", "transfer"] as const;
+export const TRANSACTION_TYPES = [
+	"expense",
+	"income",
+	"transfer",
+	"adjustment",
+] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 
 const text = (max: number) => z.string().trim().max(max);
