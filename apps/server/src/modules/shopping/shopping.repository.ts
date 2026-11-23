@@ -2,7 +2,7 @@ import type { Database } from "@wallet/db";
 import { monthItems } from "@wallet/db/schema/budgets";
 import { shoppingItems, shoppingLists } from "@wallet/db/schema/shopping";
 import { transactions } from "@wallet/db/schema/transactions";
-import { and, asc, eq, inArray, max } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, max } from "drizzle-orm";
 
 import type {
 	NewShoppingItemRow,
@@ -107,6 +107,26 @@ export class ShoppingRepository {
 						}
 					: null,
 		}));
+	}
+
+	async priceHistory(userId: string) {
+		return this.db
+			.select({
+				name: shoppingItems.name,
+				quantity: shoppingItems.quantity,
+				unitPrice: shoppingItems.unitPrice,
+				amount: transactions.amount,
+				occurredAt: transactions.occurredAt,
+				createdAt: shoppingItems.createdAt,
+			})
+			.from(shoppingItems)
+			.leftJoin(transactions, eq(transactions.id, shoppingItems.transactionId))
+			.where(eq(shoppingItems.userId, userId))
+			.orderBy(desc(shoppingItems.createdAt));
+	}
+
+	async insertItems(rows: NewShoppingItemRow[]) {
+		if (rows.length) await this.db.insert(shoppingItems).values(rows);
 	}
 
 	async findItem(

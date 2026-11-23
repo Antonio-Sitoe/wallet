@@ -188,12 +188,45 @@ describe.runIf(dbUp)("shopping lists", () => {
 		).toBe(5_000);
 	});
 
+	it("remembers the last price paid per unit", async () => {
+		await me("POST", `/shopping-lists/${list}/items/${rice}/buy`, {
+			amount: 72_000,
+		});
+		const prices = (await me("GET", "/shopping-lists/prices")).body;
+		expect(prices).toContainEqual(
+			expect.objectContaining({ name: "Arroz", unitPrice: 36_000, paid: true }),
+		);
+		expect(prices).toContainEqual(
+			expect.objectContaining({ name: "Pão", unitPrice: 5_000, paid: true }),
+		);
+		expect(prices.some((p: { name: string }) => p.name === "Leite")).toBe(
+			false,
+		);
+	});
+
+	it("duplicating a list copies the items to buy with the last price", async () => {
+		const r = await me("POST", `/shopping-lists/${list}/duplicate`, {
+			name: "Rancho de Janeiro",
+		});
+		expect(r.status).toBe(201);
+		expect(r.body).toMatchObject({
+			name: "Rancho de Janeiro",
+			accountId: bank,
+			totals: { items: 2, bought: 0, estimated: 72_000 },
+		});
+		expect(
+			r.body.items.map((i: { name: string; unitPrice: number | null }) => [
+				i.name,
+				i.unitPrice,
+			]),
+		).toEqual([
+			["Arroz", 36_000],
+			["Leite", null],
+		]);
+	});
+
 	it("deleting a list keeps the purchases as transactions", async () => {
-		const bought = (
-			await me("POST", `/shopping-lists/${list}/items/${rice}/buy`, {
-				amount: 70_000,
-			})
-		).body;
+		const bought = (await me("GET", `/shopping-lists/${list}`)).body;
 		const txId = bought.items.find(
 			(i: { id: string }) => i.id === rice,
 		).transactionId;

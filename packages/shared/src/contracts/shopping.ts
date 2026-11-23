@@ -90,3 +90,17 @@ export type ShoppingListSummary = {
 };
 
 export type ShoppingList = ShoppingListSummary & { items: ShoppingItem[] };
+
+export const duplicateShoppingListInput = z.object({
+	name: name.optional(),
+});
+export type DuplicateShoppingListInput = z.infer<
+	typeof duplicateShoppingListInput
+>;
+
+export type ShoppingPrice = {
+	name: string;
+	unitPrice: number;
+	paid: boolean;
+	at: string;
+};

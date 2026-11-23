@@ -5,6 +5,7 @@ import {
 	addShoppingItemInput,
 	buyShoppingItemInput,
 	createShoppingListInput,
+	duplicateShoppingListInput,
 	idParams,
 	listShoppingListsQuery,
 	shoppingItemParams,
@@ -39,6 +40,18 @@ export class ShoppingController {
 			id,
 			parse(updateShoppingListInput, req.body),
 		);
+	};
+
+	prices = async (req: FastifyRequest) => this.service.prices(req.userId);
+
+	duplicate = async (req: FastifyRequest, reply: FastifyReply) => {
+		const { id } = parse(idParams, req.params);
+		const list = await this.service.duplicate(
+			req.userId,
+			id,
+			parse(duplicateShoppingListInput, req.body ?? {}),
+		);
+		return reply.status(201).send(list);
 	};
 
 	remove = async (req: FastifyRequest, reply: FastifyReply) => {

@@ -8,9 +8,11 @@ export function shoppingRoutes(
 	return async (app) => {
 		app.get("/shopping-lists", controller.list);
 		app.post("/shopping-lists", controller.create);
+		app.get("/shopping-lists/prices", controller.prices);
 		app.get("/shopping-lists/:id", controller.get);
 		app.patch("/shopping-lists/:id", controller.update);
 		app.delete("/shopping-lists/:id", controller.remove);
+		app.post("/shopping-lists/:id/duplicate", controller.duplicate);
 		app.post("/shopping-lists/:id/items", controller.addItem);
 		app.patch("/shopping-lists/:id/items/:itemId", controller.updateItem);
 		app.delete("/shopping-lists/:id/items/:itemId", controller.removeItem);

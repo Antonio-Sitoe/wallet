@@ -6,6 +6,7 @@ import { cn } from "@wallet/ui/lib/utils";
 import {
 	ArchiveIcon,
 	ArchiveRestoreIcon,
+	CopyIcon,
 	PencilIcon,
 	PlusIcon,
 	Trash2Icon,
@@ -14,6 +15,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useDeleteShoppingList } from "@/actions/shopping/use-delete-shopping-list";
+import { useDuplicateShoppingList } from "@/actions/shopping/use-duplicate-shopping-list";
 import { useRemoveShoppingItem } from "@/actions/shopping/use-remove-shopping-item";
 import { useShoppingList } from "@/actions/shopping/use-shopping-list";
 import { useShoppingLists } from "@/actions/shopping/use-shopping-lists";
@@ -36,7 +38,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { useConfirm } from "@/contexts/confirm-context";
-import { money, monthLabel } from "@/utils/format";
+import { addMonths, currentMonth, money, monthLabel } from "@/utils/format";
 
 const route = getRouteApi("/_private/shopping");
 
@@ -54,6 +56,7 @@ export function ShoppingPage() {
 	const accounts = useAccounts(true).data ?? [];
 	const updateList = useUpdateShoppingList();
 	const deleteList = useDeleteShoppingList();
+	const duplicateList = useDuplicateShoppingList();
 	const removeItem = useRemoveShoppingItem();
 	const unbuy = useUnbuyShoppingItem();
 	const [editing, setEditing] = useState<Editing | null>(null);
@@ -95,6 +98,20 @@ export function ShoppingPage() {
 			if (!ok) return;
 		}
 		await removeItem.mutateAsync({ listId: list.id, itemId: item.id });
+	}
+
+	async function duplicate() {
+		if (!list || duplicateList.isPending) return;
+		const copy = await duplicateList.mutateAsync({
+			id: list.id,
+			name: `${list.name} · ${monthLabel(addMonths(currentMonth(), 1))}`,
+		});
+		toast.success(`${copy.name} criada com ${itemsLabel(copy.totals.items)}`, {
+			description: list.archived
+				? undefined
+				: "Arquiva a lista antiga quando já não precisares dela.",
+		});
+		select(copy.id);
 	}
 
 	async function removeList() {
@@ -227,6 +244,14 @@ export function ShoppingPage() {
 												onClick={() => setEditing({ kind: "edit", list })}
 											>
 												<PencilIcon className="size-3.5" /> Editar
+											</Button>
+											<Button
+												size="sm"
+												variant="neutral"
+												disabled={duplicateList.isPending}
+												onClick={duplicate}
+											>
+												<CopyIcon className="size-3.5" /> Duplicar
 											</Button>
 											<Button
 												size="sm"

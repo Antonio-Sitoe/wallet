@@ -1,16 +1,20 @@
+import { yearMonthOf } from "@wallet/shared";
 import {
 	conflict,
 	notFound,
 	unprocessable,
 } from "../../shared/errors/app-error";
+
 import type { ShoppingRepository } from "./shopping.repository";
 import type {
 	AddShoppingItemInput,
 	BuyShoppingItemInput,
 	CreateShoppingListInput,
+	DuplicateShoppingListInput,
 	ShoppingItem,
 	ShoppingList,
 	ShoppingListSummary,
+	ShoppingPrice,
 	UpdateShoppingItemInput,
 	UpdateShoppingListInput,
 } from "./shopping.schema";
@@ -19,6 +23,8 @@ import type {
 	ShoppingItemWithPurchase,
 	ShoppingListWithMonthItem,
 } from "./shopping.types";
+
+const priceKey = (name: string) => name.trim().toLocaleLowerCase("pt");
 
 export const lineEstimate = (quantity: number, unitPrice: number | null) =>
 	unitPrice === null ? 0 : Math.round(quantity * unitPrice);
@@ -130,6 +136,71 @@ export class ShoppingService {
 		await this.assertLinks(userId, input);
 		await this.repository.updateList(userId, id, input);
 		return this.get(userId, id);
+	}
+
+	async prices(userId: string): Promise<ShoppingPrice[]> {
+		const rows = await this.repository.priceHistory(userId);
+		const paid = new Map<string, ShoppingPrice>();
+		const estimated = new Map<string, ShoppingPrice>();
+		for (const row of rows) {
+			const key = priceKey(row.name);
+			if (row.amount !== null && row.occurredAt !== null) {
+				const previous = paid.get(key);
+				if (!previous || previous.at < row.occurredAt.toISOString())
+					paid.set(key, {
+						name: row.name,
+						unitPrice: Math.max(
+							1,
+							Math.round(Math.abs(row.amount) / row.quantity),
+						),
+						paid: true,
+						at: row.occurredAt.toISOString(),
+					});
+			} else if (row.unitPrice !== null && !estimated.has(key)) {
+				estimated.set(key, {
+					name: row.name,
+					unitPrice: row.unitPrice,
+					paid: false,
+					at: row.createdAt.toISOString(),
+				});
+			}
+		}
+		for (const [key, price] of estimated)
+			if (!paid.has(key)) paid.set(key, price);
+		return [...paid.values()].sort((a, b) =>
+			a.name.localeCompare(b.name, "pt"),
+		);
+	}
+
+	async duplicate(
+		userId: string,
+		id: string,
+		input: DuplicateShoppingListInput,
+	): Promise<ShoppingList> {
+		const source = await this.get(userId, id);
+		const currentMonth = yearMonthOf(new Date());
+		const row = await this.repository.insertList({
+			userId,
+			name: input.name ?? source.name,
+			accountId: source.accountId,
+			categoryId: source.categoryId,
+			monthItemId:
+				source.monthItem?.month === currentMonth ? source.monthItemId : null,
+		});
+		await this.repository.insertItems(
+			source.items.map((item, position) => ({
+				userId,
+				listId: row.id,
+				name: item.name,
+				quantity: item.quantity,
+				unitPrice:
+					item.actual !== null
+						? Math.max(1, Math.round(item.actual / item.quantity))
+						: item.unitPrice,
+				position,
+			})),
+		);
+		return this.get(userId, row.id);
 	}
 
 	async remove(userId: string, id: string) {
