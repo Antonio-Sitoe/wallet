@@ -49,9 +49,9 @@ export function Loader() {
 								width="100"
 								height="22"
 								rx="9"
-								fill="#1f4d2b"
+								fill="var(--color-money-line)"
 							/>
-							<rect x="38" y="58" width="84" height="6" rx="3" fill="#0b0e12" />
+							<rect x="38" y="58" width="84" height="6" rx="3" fill="var(--color-panel-2)" />
 
 							{COINS.map((delay) => (
 								<g
@@ -97,8 +97,8 @@ export function Loader() {
 								width="116"
 								height="74"
 								rx="15"
-								fill="#0e1f14"
-								stroke="#3fb950"
+								fill="var(--color-money-bg)"
+								stroke="var(--color-money)"
 								strokeWidth="2.5"
 							/>
 							<rect
@@ -108,7 +108,7 @@ export function Loader() {
 								height="58"
 								rx="10"
 								fill="none"
-								stroke="#1f4d2b"
+								stroke="var(--color-money-line)"
 								strokeWidth="1.5"
 								strokeDasharray="4 4"
 							/>
@@ -118,8 +118,8 @@ export function Loader() {
 								width="40"
 								height="26"
 								rx="9"
-								fill="#0b0e12"
-								stroke="#3fb950"
+								fill="var(--color-panel-2)"
+								stroke="var(--color-money)"
 								strokeWidth="2.5"
 							/>
 							<circle
@@ -127,11 +127,11 @@ export function Loader() {
 								cx="112"
 								cy="101"
 								r="4.5"
-								fill="#56d364"
+								fill="var(--color-money-2)"
 							/>
 						</g>
 
-						<g className="wl-sparkles" fill="#56d364">
+						<g className="wl-sparkles" fill="var(--color-money-2)">
 							<path d="M40 40l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" />
 							<path d="M120 34l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5z" />
 							<circle cx="132" cy="56" r="2" />
