@@ -16,7 +16,7 @@ export function AccountPick({
 }) {
 	const id = useId();
 	return (
-		<div className="bg-canvas border-line-strong focus-within:border-info-2 flex w-full min-w-0 flex-col items-start gap-0.75 rounded-[10px] border px-3 py-2.5">
+		<div className="bg-canvas border-line-strong focus-within:border-info-2 flex w-full min-w-0 flex-col items-start gap-[3px] rounded-[10px] border px-3 py-2.5">
 			<label
 				htmlFor={id}
 				className="num text-dim text-[11px] tracking-[.06em] uppercase"

@@ -23,7 +23,7 @@ export function Segmented<T extends string>({
 				if (picked) onChange(picked as T);
 			}}
 			className={cn(
-				"border-line bg-canvas flex w-auto gap-0.5 rounded-lg border p-0.75",
+				"border-line bg-canvas flex w-auto gap-0.5 rounded-lg border p-[3px]",
 				className,
 			)}
 		>

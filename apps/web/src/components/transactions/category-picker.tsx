@@ -45,7 +45,7 @@ export function CategoryPicker({
 		>
 			<InputGroup className="border-line-strong bg-canvas h-8 rounded-[7px]">
 				<InputGroupAddon>
-					<SearchIcon aria-hidden="true" className="text-dim size-3.25" />
+					<SearchIcon aria-hidden="true" className="text-dim size-[13px]" />
 				</InputGroupAddon>
 				<InputGroupInput
 					ref={searchRef}

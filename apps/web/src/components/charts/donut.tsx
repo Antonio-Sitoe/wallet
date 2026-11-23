@@ -1,4 +1,6 @@
+import { type ChartConfig, ChartContainer } from "@wallet/ui/components/chart";
 import { useState } from "react";
+import { Cell, Pie, PieChart } from "recharts";
 import { money } from "@/utils/format";
 
 export type DonutSlice = {
@@ -50,11 +52,8 @@ export function distinctColors(preferred: (string | null | undefined)[]) {
 	});
 }
 
-const SIZE = 200;
-const RADIUS = 78;
-const RING = 26;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-const GAP = 2;
+const INNER_RADIUS = 65;
+const OUTER_RADIUS = 91;
 
 export function Donut({
 	slices,
@@ -72,16 +71,10 @@ export function Donut({
 	const total = slices.reduce((s, x) => s + x.value, 0);
 	const [activeKey, setActiveKey] = useState<string | null>(null);
 	const active = slices.find((s) => s.key === activeKey) ?? null;
-	const single = slices.filter((s) => s.value > 0).length === 1;
-
-	let offset = 0;
-	const arcs = slices.map((slice) => {
-		const length = total ? (slice.value / total) * CIRCUMFERENCE : 0;
-		const visible = single ? length : Math.max(0, length - GAP);
-		const arc = { slice, visible, offset };
-		offset += length;
-		return arc;
-	});
+	const visible = slices.filter((s) => s.value > 0);
+	const config: ChartConfig = Object.fromEntries(
+		slices.map((s) => [s.key, { label: s.label, color: s.color }]),
+	);
 
 	const share = (value: number) =>
 		total ? `${Math.round((value / total) * 100)}%` : "0%";
@@ -89,38 +82,42 @@ export function Donut({
 	return (
 		<div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
 			<div className="relative size-[200px] shrink-0">
-				<svg
-					viewBox={`0 0 ${SIZE} ${SIZE}`}
-					className="size-full -rotate-90"
+				<ChartContainer
+					config={config}
 					role="img"
 					aria-label={`${label}: ${slices.map((s) => `${s.label} ${share(s.value)}`).join(", ")}`}
+					className="aspect-square size-full"
 					onPointerLeave={() => setActiveKey(null)}
 				>
-					<circle
-						cx={SIZE / 2}
-						cy={SIZE / 2}
-						r={RADIUS}
-						fill="none"
-						stroke="#161b22"
-						strokeWidth={RING}
-					/>
-					{arcs.map(({ slice, visible, offset: start }) => (
-						<circle
-							key={slice.key}
-							cx={SIZE / 2}
-							cy={SIZE / 2}
-							r={RADIUS}
-							fill="none"
-							stroke={slice.color}
-							strokeWidth={slice.key === activeKey ? RING + 8 : RING}
-							strokeDasharray={`${visible} ${CIRCUMFERENCE - visible}`}
-							strokeDashoffset={-start}
-							opacity={activeKey && slice.key !== activeKey ? 0.35 : 1}
-							className="cursor-pointer transition-[stroke-width,opacity] duration-150"
-							onPointerEnter={() => setActiveKey(slice.key)}
-						/>
-					))}
-				</svg>
+					<PieChart>
+						<Pie
+							data={visible.length ? visible : [{ key: "empty", value: 1 }]}
+							dataKey="value"
+							nameKey="key"
+							innerRadius={INNER_RADIUS}
+							outerRadius={OUTER_RADIUS}
+							paddingAngle={visible.length > 1 ? 1 : 0}
+							stroke="none"
+							isAnimationActive={false}
+							onMouseEnter={(_, index) =>
+								setActiveKey(visible[index]?.key ?? null)
+							}
+						>
+							{visible.length ? (
+								visible.map((slice) => (
+									<Cell
+										key={slice.key}
+										fill={slice.color}
+										className="cursor-pointer transition-opacity duration-150"
+										opacity={activeKey && slice.key !== activeKey ? 0.35 : 1}
+									/>
+								))
+							) : (
+								<Cell fill="var(--color-hover)" />
+							)}
+						</Pie>
+					</PieChart>
+				</ChartContainer>
 				<div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-0.5 px-12 text-center">
 					<span className="text-fg-2 w-full truncate text-xs">
 						{active ? active.label : (centerCaption ?? "Total")}

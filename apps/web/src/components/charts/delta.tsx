@@ -1,3 +1,5 @@
+import { Pill } from "@/components/ui/pill";
+
 const MAX_SHOWN_PCT = 999;
 
 export function Delta({
@@ -16,19 +18,14 @@ export function Delta({
 	const pct = Math.round(((now - before) / Math.abs(before)) * 100);
 	const good = pct === 0 ? null : pct > 0 === goodWhenUp;
 	return (
-		<span
-			className={`num inline-flex w-fit items-center gap-1 self-start rounded-full border px-2 py-0.5 text-[11px] whitespace-nowrap ${
-				good === null
-					? "border-line-strong text-dim"
-					: good
-						? "border-money-line bg-money-bg text-money-2"
-						: "border-warn-line bg-warn-bg text-warn"
-			}`}
+		<Pill
+			tone={good === null ? "neutral" : good ? "ok" : "warn"}
+			className="gap-1 self-start"
 		>
 			<span aria-hidden="true">{pct > 0 ? "↑" : pct < 0 ? "↓" : "="}</span>
 			{Math.abs(pct) > MAX_SHOWN_PCT ? "> " : ""}
 			{pct > 0 ? "+" : pct < 0 ? "−" : ""}
 			{Math.min(Math.abs(pct), MAX_SHOWN_PCT)}% vs anterior
-		</span>
+		</Pill>
 	);
 }

@@ -1,8 +1,8 @@
 import type { Period } from "@/@types/period";
 import { useOverview } from "@/actions/analytics/use-overview";
-import { SERIES } from "@/components/charts/bar-list";
 import { Delta } from "@/components/charts/delta";
 import { Donut } from "@/components/charts/donut";
+import { SERIES } from "@/components/charts/series";
 import { Empty } from "@/components/dashboard/empty";
 import { Loading } from "@/components/dashboard/loading";
 import { PeriodNote } from "@/components/dashboard/period-note";

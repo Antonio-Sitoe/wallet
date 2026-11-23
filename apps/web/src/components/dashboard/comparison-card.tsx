@@ -1,8 +1,7 @@
 import type { Period } from "@/@types/period";
 import { useComparison } from "@/actions/analytics/use-comparison";
-import { SERIES } from "@/components/charts/bar-list";
-import { Legend } from "@/components/charts/legend";
 import { LineChart } from "@/components/charts/line-chart";
+import { SERIES } from "@/components/charts/series";
 import { Loading } from "@/components/dashboard/loading";
 import { dayLabel, MONTH_SHORT } from "@/utils/format";
 
@@ -17,6 +16,7 @@ export function ComparisonCard({ period }: { period: Period }) {
 				Entradas − saídas, acumulado desde o início de cada período
 			</span>
 			<LineChart
+				legend
 				label="Fluxo acumulado: este período, o anterior e há um ano"
 				xLabels={points.map((p) => short(p.date))}
 				titles={points.map((p) => `dia ${p.day} · ${dayLabel(p.date)}`)}
@@ -36,13 +36,6 @@ export function ComparisonCard({ period }: { period: Period }) {
 						color: SERIES.yearAgo,
 						values: points.map((p) => p.yearAgo),
 					},
-				]}
-			/>
-			<Legend
-				items={[
-					{ label: "este período", color: SERIES.current, line: true },
-					{ label: "período anterior", color: SERIES.previous, line: true },
-					{ label: "há um ano", color: SERIES.yearAgo, line: true },
 				]}
 			/>
 		</div>

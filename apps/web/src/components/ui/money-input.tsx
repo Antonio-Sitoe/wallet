@@ -12,7 +12,7 @@ export function MoneyInput({
 			inputMode="decimal"
 			className={cn(
 				"num",
-				large && "h-11.5 text-[22px] md:text-[22px]",
+				large && "h-[46px] text-[22px] md:text-[22px]",
 				className,
 			)}
 			{...props}

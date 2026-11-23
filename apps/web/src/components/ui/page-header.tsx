@@ -17,7 +17,7 @@ export function PageHeader({
 }) {
 	const parts = ["wallet", ...crumb];
 	return (
-		<header className="border-line bg-panel-2 flex min-h-13 flex-wrap items-center justify-between gap-3 border-b px-6 py-2">
+		<header className="border-line bg-panel-2 flex min-h-[52px] flex-wrap items-center justify-between gap-3 border-b px-6 py-2">
 			<Breadcrumb>
 				<BreadcrumbList className="num text-dim gap-1.5 text-xs">
 					{parts.map((part, i) => (

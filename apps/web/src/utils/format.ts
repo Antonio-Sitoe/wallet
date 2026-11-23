@@ -100,3 +100,14 @@ export const STATUS_LABEL = {
 	paid: "pago",
 	over: "acima",
 } as const;
+
+export function compact(cents: number) {
+	const mzn = cents / 100;
+	const abs = Math.abs(mzn);
+	if (abs >= 1_000_000)
+		return `${(mzn / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}M`;
+	if (abs >= 10_000) return `${Math.round(mzn / 1_000)}k`;
+	if (abs >= 1_000)
+		return `${(mzn / 1_000).toFixed(1).replace(".0", "").replace(".", ",")}k`;
+	return String(Math.round(mzn));
+}

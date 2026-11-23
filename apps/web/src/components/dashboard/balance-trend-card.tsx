@@ -1,8 +1,8 @@
 import type { Period } from "@/@types/period";
 import { useBalanceTrend } from "@/actions/analytics/use-balance-trend";
-import { SERIES } from "@/components/charts/bar-list";
 import { Delta } from "@/components/charts/delta";
 import { LineChart } from "@/components/charts/line-chart";
+import { SERIES } from "@/components/charts/series";
 import { Loading } from "@/components/dashboard/loading";
 import { PeriodNote } from "@/components/dashboard/period-note";
 import { dayLabel, MONTH_SHORT, money } from "@/utils/format";

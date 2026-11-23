@@ -1,8 +1,7 @@
 import type { Period } from "@/@types/period";
 import { useCashflow } from "@/actions/analytics/use-cashflow";
-import { SERIES } from "@/components/charts/bar-list";
 import { GroupedBars } from "@/components/charts/grouped-bars";
-import { Legend } from "@/components/charts/legend";
+import { SERIES } from "@/components/charts/series";
 import { Loading } from "@/components/dashboard/loading";
 import { dayLabel, MONTH_SHORT, money, monthLabel } from "@/utils/format";
 
@@ -21,14 +20,9 @@ export function CashFlowTrendCard({ period }: { period: Period }) {
 				<span className="num text-fg-2 text-xs">
 					entradas {money(income)} · saídas {money(expense)}
 				</span>
-				<Legend
-					items={[
-						{ label: "entradas", color: SERIES.income },
-						{ label: "saídas", color: SERIES.expense },
-					]}
-				/>
 			</div>
 			<GroupedBars
+				legend
 				label="Entradas e saídas por período"
 				series={[
 					{ label: "Entradas", color: SERIES.income },
