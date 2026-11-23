@@ -11,6 +11,7 @@ import {
 	ListChecksIcon,
 	LogOutIcon,
 	PlusIcon,
+	SettingsIcon,
 	ShoppingCartIcon,
 	TagIcon,
 	TargetIcon,
@@ -24,15 +25,17 @@ import {
 } from "react";
 import {
 	ThemeCycleButton,
-	ThemeSwitch,
 	useThemeShortcut,
 } from "@/components/layout/theme-switch";
+import { UserMenu } from "@/components/layout/user-menu";
+import { HideMoneyButton } from "@/components/settings/hide-money-button";
 import {
 	type NewTransactionDefaults,
 	NewTransactionDialog,
 } from "@/components/transactions/new-transaction-dialog";
 import { BrandMark } from "@/components/ui/brand-mark";
 import { NewTransactionContext } from "@/contexts/new-transaction-context";
+import { useOpenSettings } from "@/contexts/settings-context";
 import { ApiError } from "@/lib/api";
 import { authClient, clearDesktopToken } from "@/lib/auth-client";
 
@@ -61,6 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 	useThemeShortcut();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const { data: session } = authClient.useSession();
+	const openSettings = useOpenSettings();
 	const [dialog, setDialog] = useState<{
 		open: boolean;
 		defaults?: NewTransactionDefaults;
@@ -124,7 +128,20 @@ export function AppShell({ children }: { children: ReactNode }) {
 								{session?.user.name ?? "—"}
 							</span>
 						</div>
-						<ThemeCycleButton className="text-fg-2 hover:bg-hover ml-auto cursor-pointer rounded-md p-2 md:hidden" />
+						<HideMoneyButton
+							iconOnly
+							className="text-fg-2 hover:bg-hover ml-auto cursor-pointer rounded-md p-2 md:hidden"
+						/>
+						<ThemeCycleButton className="text-fg-2 hover:bg-hover cursor-pointer rounded-md p-2 md:hidden" />
+						<Button
+							variant="quiet"
+							size="icon-sm"
+							aria-label="Definições"
+							className="text-fg-2 hover:bg-hover cursor-pointer rounded-md p-2 md:hidden"
+							onClick={() => openSettings()}
+						>
+							<SettingsIcon className="size-4" strokeWidth={1.8} />
+						</Button>
 						<Button
 							variant="quiet"
 							size="icon-sm"
@@ -182,19 +199,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 						})}
 					</div>
 
-					<div className="border-line mt-auto hidden flex-col gap-1 border-t pt-3 md:flex">
-						<ThemeSwitch />
-						<span className="num text-dim truncate px-2 pt-1 text-[11px]">
-							{session?.user.email}
-						</span>
-						<Button
-							variant="quiet"
-							className="text-fg-2 hover:bg-hover hover:text-fg h-input flex cursor-pointer items-center gap-2.5 rounded-md px-2"
-							onClick={signOut}
-						>
-							<LogOutIcon className="size-4" strokeWidth={1.8} />
-							Sair
-						</Button>
+					<div className="border-line mt-auto hidden border-t pt-3 md:block">
+						<UserMenu mod={MOD} onSignOut={signOut} />
 					</div>
 				</nav>
 

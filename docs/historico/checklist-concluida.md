@@ -180,6 +180,24 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 
 - [x] Ecrã Lista de compras (`/shopping`, «Compras» no menu, ⌘0): listas em separadores, indicadores (estimado, real, diferença, por comprar), adicionar rápido numa linha («Arroz 2x 350», «2 Arroz 350», «Leite 85»), marcar comprado com preço real e conta, comprados em secção própria com diferença face ao estimado, editar item, nova / editar lista com conta, item do orçamento do mês e categoria, arquivar e apagar
 
+## Fase 7 — Definições e preferências — 2026-11-23
+
+**Backend**
+
+- [x] Modelos de registo: tabela `transaction_templates` (nome, tipo, valor opcional, contas, categoria, payee, nota, posição); `GET/POST /settings/templates`, `PATCH/DELETE /settings/templates/:id`, `PUT /settings/templates/order`
+- [x] Perfil: `GET/PATCH /settings/profile` (nome; foto como data URL PNG/JPEG/WebP, recortada a 256 px no browser); email só de leitura; `DELETE /settings/profile` apaga o utilizador e, em cascata, todos os dados, só com o email escrito como confirmação
+- [x] Preferências por utilizador: tabela `user_preferences` (tema, ocultar dinheiro, densidade, formato dos números, confirmação ao marcar, salário previsto, conta do salário, notificações); `GET/PATCH /settings/preferences`
+- [x] PIN guardado com hash (scrypt com sal); 5 tentativas erradas bloqueiam 5 min, e o tempo dobra a cada novo bloqueio (máx. 1 h); `PUT/DELETE /settings/pin`, `POST /settings/pin/verify`
+- [x] Exportar transacções: `GET /settings/export?format=csv|xlsx` (CSV com `;` e BOM; Excel gerado no servidor)
+
+**Frontend**
+
+- [x] Modo claro / escuro / seguir o sistema nas Definições, guardado na conta (segue o utilizador entre dispositivos); ⇧⌘L e o selector da barra lateral também guardam
+- [x] Ocultar dinheiro: •••• em todos os valores formatados, interruptor nas Definições e atalho ⇧⌘H
+- [x] Ecrã Definições em modal (⌘, ou «Definições» na barra lateral), com barra lateral de secções e pesquisa: Orçamento (salário previsto, que muda o plano do ano; conta do salário, escolhida por defeito nas entradas; sobra; confirmação ao marcar Sempre / Só se o valor mudar / Nunca), Geral (moeda, formato dos números 116 582 / 116.582 / 116,582, ocultar dinheiro), Aparência (tema, densidade compacta / confortável), Dados (estado do servidor, histórico de imports, exportar CSV / Excel)
+- [x] Definições › Perfil (foto, nome, email, apagar conta), Modelos (criar, editar, apagar, ordenar; aparecem como botões no ecrã Transacções e no formulário de nova transacção, em vez do «Transporte 100» fixo), Notificações (escolhas guardadas) e Sobre (versão, privacidade)
+- [x] Definições › Segurança: PIN ao abrir o app (ecrã de bloqueio com teclado numérico e contagem do bloqueio), mudar / remover PIN, bloquear agora
+
 ## Fase 9 — Estatísticas, exportar e lançamento — 2026-11-23
 
 **Backend**
@@ -193,3 +211,8 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 - [x] Ecrã Estatísticas (barra lateral, depois de Compras): período mês / 30 dias / ano, totais com comparação (entradas, saídas, sobra, taxa de poupança), evolução por mês ou semana, ranking por Categorias / Pessoas / Etiquetas / Contas em saídas ou entradas; cada linha abre as transacções filtradas
 - [x] Campo Etiquetas (com sugestões das já usadas) no modal Nova transacção e no detalhe da transacção; «Payee» passa a chamar-se «Pessoa»; etiquetas aparecem na linha da transacção (#Obra) e como filtro no ecrã Transacções
 - [x] Ícone do app desktop (gráfico em W) e BrandMark na barra lateral, login e PIN
+- [x] Menu do utilizador no fundo da barra lateral (dropdown menu do shadcn): perfil, Definições (⌘,), Ocultar valores (⇧⌘H), submenu Tema e Sair; o modo claro / escuro / sistema fica nas Definições, no menu e em ⇧⌘L
+
+**Retirado do plano em 2026-11-23**
+
+- Definições › Segurança: impressão digital / Touch ID ao abrir o app — decidido não fazer; o bloqueio fica só com PIN

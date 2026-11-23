@@ -1,18 +1,32 @@
 import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { usePreferencesContext } from "@/contexts/preferences-context";
 
-const THEMES = [
+export const THEMES = [
 	{ value: "system", label: "Seguir o sistema", icon: MonitorIcon },
 	{ value: "light", label: "Claro", icon: SunIcon },
 	{ value: "dark", label: "Escuro", icon: MoonIcon },
 ] as const;
-type ThemeName = (typeof THEMES)[number]["value"];
+export type ThemeName = (typeof THEMES)[number]["value"];
 
 const nextTheme = (current: string | undefined): ThemeName => {
 	const index = THEMES.findIndex((t) => t.value === current);
 	return THEMES[(index + 1) % THEMES.length]?.value ?? "system";
 };
+
+export function useThemeSetter() {
+	const { theme, setTheme } = useTheme();
+	const { preferences, update } = usePreferencesContext();
+	const set = useCallback(
+		(next: ThemeName) => {
+			setTheme(next);
+			if (preferences) update({ theme: next });
+		},
+		[setTheme, preferences, update],
+	);
+	return { theme, setTheme: set };
+}
 
 function useMounted() {
 	const [mounted, setMounted] = useState(false);
@@ -21,7 +35,7 @@ function useMounted() {
 }
 
 export function useThemeShortcut() {
-	const { theme, setTheme } = useTheme();
+	const { theme, setTheme } = useThemeSetter();
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => {
 			if (!(e.metaKey || e.ctrlKey) || !e.shiftKey || e.altKey) return;
@@ -35,7 +49,7 @@ export function useThemeShortcut() {
 }
 
 export function ThemeSwitch() {
-	const { theme, setTheme } = useTheme();
+	const { theme, setTheme } = useThemeSetter();
 	const mounted = useMounted();
 	const current = mounted ? (theme ?? "system") : "system";
 	return (
@@ -59,7 +73,7 @@ export function ThemeSwitch() {
 }
 
 export function ThemeCycleButton({ className }: { className?: string }) {
-	const { theme, setTheme } = useTheme();
+	const { theme, setTheme } = useThemeSetter();
 	const mounted = useMounted();
 	const current = THEMES.find((t) => t.value === (mounted ? theme : "system"));
 	const Icon = current?.icon ?? MonitorIcon;

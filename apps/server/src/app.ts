@@ -11,6 +11,7 @@ import { createDashboardModule } from "./modules/dashboard";
 import { createDebtsModule } from "./modules/debts";
 import { createGoalsModule } from "./modules/goals";
 import { createImportsModule } from "./modules/imports";
+import { createSettingsModule } from "./modules/settings";
 import { createShoppingModule } from "./modules/shopping";
 import { createTransactionsModule } from "./modules/transactions";
 import { errorHandler } from "./shared/errors/error-handler";
@@ -144,6 +145,14 @@ export function buildModules(db: Database) {
 		transactions: transactions.service,
 		budgets: budgets.service,
 	});
+	const settings = createSettingsModule(db, {
+		accounts: {
+			assertOwned: (userId, ids) => accounts.service.assertOwned(userId, ids),
+		},
+		categories: {
+			assertOwned: (userId, ids) => categories.service.assertOwned(userId, ids),
+		},
+	});
 	const shopping = createShoppingModule(db, {
 		accounts: {
 			assertOwned: (userId, ids) => accounts.service.assertOwned(userId, ids),
@@ -168,6 +177,7 @@ export function buildModules(db: Database) {
 		dashboard,
 		goals,
 		debts,
+		settings,
 	};
 }
 

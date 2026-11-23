@@ -7,7 +7,8 @@ import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
-import { parseMoney } from "@/utils/format";
+import { usePreferencesContext } from "@/contexts/preferences-context";
+import { moneyInput, parseMoney } from "@/utils/format";
 
 export function CreatePlan({
 	year,
@@ -17,7 +18,10 @@ export function CreatePlan({
 	hasPrevious: boolean;
 }) {
 	const create = useCreatePlan();
-	const [income, setIncome] = useState("");
+	const savedIncome = usePreferencesContext().preferences?.expectedIncome;
+	const [income, setIncome] = useState(
+		savedIncome ? moneyInput(savedIncome) : "",
+	);
 	const [copy, setCopy] = useState(hasPrevious);
 	const [copySeasonal, setCopySeasonal] = useState(true);
 	const [copyOneOff, setCopyOneOff] = useState(false);

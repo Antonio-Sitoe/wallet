@@ -6,5 +6,6 @@ export * from "./dashboard";
 export * from "./debts";
 export * from "./goals";
 export * from "./imports";
-export * from "./transactions";
+export * from "./settings";
 export * from "./shopping";
+export * from "./transactions";

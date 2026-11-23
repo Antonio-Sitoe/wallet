@@ -6,6 +6,7 @@ export * from "./contracts/common";
 export * from "./contracts/debts";
 export * from "./contracts/goals";
 export * from "./contracts/imports";
+export * from "./contracts/settings";
 export * from "./contracts/shopping";
 export * from "./contracts/transactions";
 export * from "./money";

@@ -1,7 +1,7 @@
 import {
 	addMonths,
-	formatMZN,
 	MONTH_NAMES_PT,
+	type NumberFormat,
 	parseYearMonth,
 	toCents,
 	yearMonthOf,
@@ -9,10 +9,53 @@ import {
 
 export { addMonths, yearMonthOf };
 
-export const money = (cents: number) => formatMZN(cents);
+export const HIDDEN_MONEY = "••••";
 
-export const signedMoney = (cents: number) =>
-	cents > 0 ? `+${formatMZN(cents)}` : formatMZN(cents);
+const display = {
+	hideMoney: false,
+	numberFormat: "space" as NumberFormat,
+};
+
+export function setDisplayOptions(next: {
+	hideMoney: boolean;
+	numberFormat: NumberFormat;
+}) {
+	display.hideMoney = next.hideMoney;
+	display.numberFormat = next.numberFormat;
+}
+
+export const isMoneyHidden = () => display.hideMoney;
+
+const SEPARATORS: Record<NumberFormat, { group: string; decimal: string }> = {
+	space: { group: " ", decimal: "," },
+	dot: { group: ".", decimal: "," },
+	comma: { group: ",", decimal: "." },
+};
+
+export function formatAmount(
+	cents: number,
+	format: NumberFormat = display.numberFormat,
+) {
+	const { group, decimal } = SEPARATORS[format];
+	const abs = Math.abs(cents);
+	const whole = Math.floor(abs / 100)
+		.toString()
+		.replace(/\B(?=(\d{3})+(?!\d))/g, group);
+	const fraction = abs % 100;
+	const body =
+		fraction === 0
+			? whole
+			: `${whole}${decimal}${fraction.toString().padStart(2, "0")}`;
+	return `${cents < 0 ? "−" : ""}${body}`;
+}
+
+export const money = (cents: number) =>
+	display.hideMoney ? HIDDEN_MONEY : formatAmount(cents);
+
+export const signedMoney = (cents: number) => {
+	if (display.hideMoney) return HIDDEN_MONEY;
+	return cents > 0 ? `+${formatAmount(cents)}` : formatAmount(cents);
+};
 
 export function parseMoney(text: string): number | null {
 	if (text.trim() === "") return null;
@@ -102,6 +145,7 @@ export const STATUS_LABEL = {
 } as const;
 
 export function compact(cents: number) {
+	if (display.hideMoney) return "••";
 	const mzn = cents / 100;
 	const abs = Math.abs(mzn);
 	if (abs >= 1_000_000)

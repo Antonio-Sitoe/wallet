@@ -2,14 +2,28 @@ import { Outlet } from "@tanstack/react-router";
 import { TooltipProvider } from "@wallet/ui/components/tooltip";
 import { ConfirmProvider } from "@/components/feedback/confirm-provider";
 import { AppShell } from "@/components/layout/app-shell";
+import { PinGate } from "@/components/settings/pin-gate";
+import {
+	DisplayBoundary,
+	PreferencesProvider,
+} from "@/components/settings/preferences-provider";
+import { SettingsProvider } from "@/components/settings/settings-provider";
 
 export function AuthLayout() {
 	return (
 		<TooltipProvider delay={300}>
 			<ConfirmProvider>
-				<AppShell>
-					<Outlet />
-				</AppShell>
+				<PreferencesProvider>
+					<PinGate>
+						<SettingsProvider>
+							<AppShell>
+								<DisplayBoundary>
+									<Outlet />
+								</DisplayBoundary>
+							</AppShell>
+						</SettingsProvider>
+					</PinGate>
+				</PreferencesProvider>
 			</ConfirmProvider>
 		</TooltipProvider>
 	);

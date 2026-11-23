@@ -4,14 +4,13 @@ import type { Transaction } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Input } from "@wallet/ui/components/input";
 import { Skeleton } from "@wallet/ui/components/skeleton";
-import { BusIcon, PlusIcon, XIcon } from "lucide-react";
+import { PlusIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import type { TransactionFilters } from "@/@types/transaction-filters";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useCategories } from "@/actions/categories/use-categories";
-import { useCreateTransaction } from "@/actions/transactions/use-create-transaction";
 import { useTransactionPages } from "@/actions/transactions/use-transaction-pages";
+import { QuickTemplates } from "@/components/transactions/quick-templates";
 import { TransactionDetail } from "@/components/transactions/transaction-detail";
 import { TxRow } from "@/components/transactions/tx-row";
 import { PERIODS, type Period } from "@/components/transactions/utils";
@@ -66,7 +65,6 @@ export function TransactionsPage() {
 	const accounts = useAccounts(true).data ?? [];
 	const categories = useCategories().data ?? [];
 	const openNew = useNewTransaction();
-	const create = useCreateTransaction();
 	const [q, setQ] = useState(search.q ?? "");
 
 	useEffect(() => {
@@ -136,36 +134,12 @@ export function TransactionsPage() {
 	const set = (patch: Partial<typeof search>) =>
 		navigate({ search: (s) => ({ ...s, ...patch }) });
 
-	async function quickRide() {
-		const transporte = categories.find(
-			(c) => c.name === "Transporte" && !c.parentId,
-		);
-		const cash =
-			accounts.find((a) => a.type === "cash" && !a.archived) ??
-			accounts.find((a) => !a.archived);
-		if (!cash) return toast.error("Crie uma conta primeiro");
-		await create.mutateAsync({
-			type: "expense",
-			accountId: cash.id,
-			categoryId: transporte?.id ?? null,
-			amount: 10_000,
-			occurredAt: new Date().toISOString(),
-		});
-		toast.success(`Transporte −100 · ${cash.name}`);
-	}
-
 	const selectedTx = txs.find((t) => t.id === search.id);
 
 	return (
 		<>
 			<PageHeader crumb={["transacções"]}>
-				<Button
-					variant="neutral"
-					onClick={quickRide}
-					disabled={create.isPending}
-				>
-					<BusIcon className="size-3.5" /> Transporte 100
-				</Button>
+				<QuickTemplates />
 				<Button variant="primary" onClick={() => openNew()}>
 					<PlusIcon className="size-3.5" strokeWidth={2.6} /> Transacção
 				</Button>
@@ -182,7 +156,6 @@ export function TransactionsPage() {
 
 				<div className="flex flex-wrap gap-2">
 					<Select
-						size="md"
 						className="w-auto"
 						aria-label="Período"
 						value={period}
@@ -195,7 +168,6 @@ export function TransactionsPage() {
 						]}
 					/>
 					<Select
-						size="md"
 						className="w-auto"
 						aria-label="Conta"
 						value={search.account ?? ""}
@@ -209,7 +181,6 @@ export function TransactionsPage() {
 						]}
 					/>
 					<Select
-						size="md"
 						className="w-auto max-w-[240px]"
 						aria-label="Categoria"
 						value={search.category ?? ""}
@@ -220,7 +191,6 @@ export function TransactionsPage() {
 						]}
 					/>
 					<Select
-						size="md"
 						className="w-auto"
 						aria-label="Tipo"
 						value={search.type ?? ""}
@@ -236,7 +206,6 @@ export function TransactionsPage() {
 						]}
 					/>
 					<Select
-						size="md"
 						className="w-auto"
 						aria-label="Mês do orçamento"
 						value={search.month ?? ""}
@@ -252,7 +221,7 @@ export function TransactionsPage() {
 						]}
 					/>
 					<Input
-						className="h-8 max-w-[220px]"
+						className="max-w-[220px]"
 						placeholder="procurar nota ou pessoa…"
 						value={q}
 						onChange={(e) => setQ(e.target.value)}

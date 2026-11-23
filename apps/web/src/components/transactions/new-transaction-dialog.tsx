@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useMonthBudget } from "@/actions/budgets/use-month-budget";
 import { useCategories } from "@/actions/categories/use-categories";
+import { useTemplates } from "@/actions/settings/use-templates";
 import { useCreateTransaction } from "@/actions/transactions/use-create-transaction";
 import { useCreateTransfer } from "@/actions/transactions/use-create-transfer";
 import { AccountPick } from "@/components/transactions/account-pick";
@@ -22,6 +23,7 @@ import { LabelsInput } from "@/components/transactions/labels-input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
+import { usePreferencesContext } from "@/contexts/preferences-context";
 import {
 	addMonths,
 	currentMonth,
@@ -186,6 +188,9 @@ export function NewTransactionDialog({
 	const categories = useCategories().data ?? [];
 	const createTx = useCreateTransaction();
 	const createTransfer = useCreateTransfer();
+	const savedTemplates = useTemplates().data ?? [];
+	const salaryAccountId =
+		usePreferencesContext().preferences?.salaryAccountId ?? null;
 
 	const [kind, setKind] = useState<Kind>("expense");
 	const [expr, setExpr] = useState("");
@@ -206,7 +211,12 @@ export function NewTransactionDialog({
 		if (!open) return;
 		setKind(defaults?.kind ?? "expense");
 		setExpr(defaults?.amount ? centsToExpr(defaults.amount) : "");
-		setAccountId(defaults?.accountId ?? readLast());
+		setAccountId(
+			defaults?.accountId ??
+				(defaults?.kind === "income" && salaryAccountId
+					? salaryAccountId
+					: readLast()),
+		);
 		setToAccountId(defaults?.toAccountId ?? "");
 		setCategoryId(defaults?.categoryId ?? "");
 		setDate(todayInput());
@@ -219,7 +229,7 @@ export function NewTransactionDialog({
 		setShowExtras(
 			!!defaults?.referenceMonth && defaults.referenceMonth !== currentMonth(),
 		);
-	}, [open, defaults]);
+	}, [open, defaults, salaryAccountId]);
 
 	const activeAccounts = accounts.filter((a) => !a.archived);
 	const accountsLoaded = accounts.length > 0;
@@ -340,6 +350,7 @@ export function NewTransactionDialog({
 
 	function changeKind(next: Kind) {
 		setKind(next);
+		if (next === "income" && salaryAccountId) setAccountId(salaryAccountId);
 		setCategoryId("");
 		setMonthItemId("");
 		setPickerOpen(false);
@@ -585,10 +596,49 @@ export function NewTransactionDialog({
 							/>
 						) : null}
 
-						{templates.length > 0 ? (
+						{savedTemplates.length > 0 ? (
 							<div className="flex flex-col gap-2">
 								<span className="num text-dim text-[11px] tracking-[.06em] uppercase">
 									Modelos
+								</span>
+								<div className="flex flex-wrap gap-1.5">
+									{savedTemplates.map((t) => (
+										<button
+											key={t.id}
+											type="button"
+											onClick={() => {
+												setKind(t.type);
+												setExpr(t.amount ? centsToExpr(t.amount) : "");
+												if (t.accountId) setAccountId(t.accountId);
+												setToAccountId(t.toAccountId ?? "");
+												setCategoryId(t.categoryId ?? "");
+												setPayee(t.payee ?? "");
+												setNote(t.note ?? "");
+												setMonthItemId("");
+												setPickerOpen(false);
+												if (t.payee || t.note) setShowExtras(true);
+												amountRef.current?.focus();
+											}}
+											className="bg-canvas border-line-strong hover:border-money h-row inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs whitespace-nowrap"
+										>
+											<i
+												className="inline-block size-2 rounded-full"
+												style={{ background: KINDS[t.type].accent }}
+											/>
+											{t.name}
+											{t.amount ? (
+												<span className="num text-dim">{money(t.amount)}</span>
+											) : null}
+										</button>
+									))}
+								</div>
+							</div>
+						) : null}
+
+						{templates.length > 0 ? (
+							<div className="flex flex-col gap-2">
+								<span className="num text-dim text-[11px] tracking-[.06em] uppercase">
+									Da lista do mês
 								</span>
 								<div className="flex flex-wrap gap-1.5">
 									{templates.map((t) => (

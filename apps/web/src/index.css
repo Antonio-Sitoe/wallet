@@ -420,3 +420,9 @@
 		animation: none;
 	}
 }
+
+html[data-density="comfortable"] {
+	font-size: 17px;
+	--spacing-input: 38px;
+	--spacing-row: 36px;
+}

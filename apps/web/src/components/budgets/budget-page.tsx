@@ -22,6 +22,7 @@ import { PageTitle } from "@/components/ui/page-title";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { useConfirm } from "@/contexts/confirm-context";
+import { usePreferencesContext } from "@/contexts/preferences-context";
 import {
 	addMonths,
 	currentMonth,
@@ -45,6 +46,7 @@ export function BudgetPage() {
 	const [addingUnplanned, setAddingUnplanned] = useState(false);
 	const unpay = useUnpayMonthItem();
 	const pay = usePayMonthItem();
+	const { preferences } = usePreferencesContext();
 	const go = (delta: number) =>
 		navigate({ search: { month: addMonths(month, delta) } });
 	const data = budget.data;
@@ -52,6 +54,24 @@ export function BudgetPage() {
 		accounts.find((a) => a.id === id)?.name ?? "sem conta";
 	const categoryName = (id: string | null) =>
 		categories.find((c) => c.id === id)?.name ?? "sem categoria";
+
+	async function check(item: MonthItem) {
+		const mode = preferences?.confirmOnCheck ?? "always";
+		const amount = item.partial
+			? (item.step ?? item.remaining)
+			: item.remaining || item.plannedAmount;
+		const amountAsPlanned =
+			!item.partial && item.remaining === item.plannedAmount;
+		const skipSheet =
+			!!item.defaultAccountId &&
+			amount > 0 &&
+			(mode === "never" || (mode === "changed" && amountAsPlanned));
+		if (!skipSheet) return setPaying(item);
+		const res = await pay.mutateAsync({ id: item.id, amount });
+		toast.success(
+			`${item.name} −${money(amount)} · ${accountName(res.payments[0]?.accountId ?? null)}`,
+		);
+	}
 
 	return (
 		<>
@@ -172,7 +192,7 @@ export function BudgetPage() {
 										items={items}
 										accountName={accountName}
 										categoryName={categoryName}
-										onCheck={(item) => setPaying(item)}
+										onCheck={check}
 										onUncheck={async (item) => {
 											if (
 												!(await confirmAction({

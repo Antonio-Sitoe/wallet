@@ -74,3 +74,29 @@ export function errorMessage(error: unknown): string {
 	}
 	return error instanceof Error ? error.message : "Erro inesperado";
 }
+
+export async function apiDownload(path: string, query?: Query) {
+	const headers: Record<string, string> = {};
+	if (isDesktop) headers.Authorization = `Bearer ${readDesktopToken()}`;
+	const res = await fetch(`${BASE}/api${path}${toSearch(query)}`, {
+		headers,
+		credentials: "include",
+	});
+	if (!res.ok) {
+		const data = await res.json().catch(() => null);
+		throw new ApiError(
+			res.status,
+			data?.error?.code ?? "HTTP_ERROR",
+			data?.error?.message ?? `Erro ${res.status}`,
+		);
+	}
+	const disposition = res.headers.get("content-disposition") ?? "";
+	const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? "wallet";
+	const url = URL.createObjectURL(await res.blob());
+	const link = document.createElement("a");
+	link.href = url;
+	link.download = filename;
+	link.click();
+	setTimeout(() => URL.revokeObjectURL(url), 1000);
+	return filename;
+}
