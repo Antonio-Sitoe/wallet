@@ -19,6 +19,7 @@
     "@wallet/shared": "*",
     "better-auth": "1.7.22",
     "fastify": "^5.12.8",
+    "fflate": "^0.8.2",
     "varlock": "1.25.0",
     "zod": "^4.6.7"
   },

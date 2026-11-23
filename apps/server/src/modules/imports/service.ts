@@ -121,7 +121,16 @@ const allHashes = (plan: WalletPlan) => [
 	...plan.review.map((r) => r.hash),
 ];
 
-export function createImportsService(db: Database, deps: ImportsDeps) {
+export function createImportsService(
+	db: Database,
+	deps: ImportsDeps,
+	sheet: {
+		remove(
+			userId: string,
+			id: string,
+		): Promise<{ removed: { transactions: number; transfers: number } }>;
+	},
+) {
 	async function findBatch(userId: string, id: string, exec: DbExecutor = db) {
 		const [row] = await exec
 			.select()
@@ -227,13 +236,50 @@ export function createImportsService(db: Database, deps: ImportsDeps) {
 					createdAt: importBatches.createdAt,
 					committedAt: importBatches.committedAt,
 					summary: importBatches.summary,
+					source: importBatches.source,
 				})
 				.from(importBatches)
 				.where(eq(importBatches.userId, userId))
 				.orderBy(desc(importBatches.createdAt));
-			return rows.map((r) => {
+			return rows.map((r): ImportBatchSummary => {
+				if (r.source === "sheet-xlsx") {
+					const sheetSummary = r.summary as {
+						fileName: string;
+						year: number;
+						months: { items: unknown[] }[];
+					};
+					const items = sheetSummary.months.reduce(
+						(n, m) => n + m.items.length,
+						0,
+					);
+					return {
+						id: r.id,
+						source: "sheet-xlsx",
+						status: r.status,
+						createdAt: r.createdAt.toISOString(),
+						committedAt: r.committedAt?.toISOString() ?? null,
+						totals: {
+							rows: items,
+							new: items,
+							duplicate: 0,
+							transactions: 0,
+							transferPairs: 0,
+							savingsTransfers: 0,
+							referenceMonthFromNote: 0,
+							debtNotes: 0,
+							toReview: 0,
+						},
+						fileNames: [sheetSummary.fileName],
+						sheet: {
+							year: sheetSummary.year,
+							months: sheetSummary.months.length,
+							items,
+						},
+					};
+				}
 				const summary = r.summary as StoredSummary;
 				return {
+					source: "wallet-csv",
 					id: r.id,
 					status: r.status,
 					createdAt: r.createdAt.toISOString(),
@@ -443,6 +489,7 @@ export function createImportsService(db: Database, deps: ImportsDeps) {
 		/** A draft is discarded; a committed import is undone (its transactions and transfers are deleted). */
 		async remove(userId: string, id: string) {
 			const batch = await findBatch(userId, id);
+			if (batch.source === "sheet-xlsx") return sheet.remove(userId, id);
 			if (batch.status === "draft") {
 				await db.delete(importBatches).where(eq(importBatches.id, id));
 				return { removed: { transactions: 0, transfers: 0 } };

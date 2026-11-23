@@ -6,8 +6,10 @@ import Fastify, { type FastifyError, type FastifyServerOptions } from "fastify";
 import { createAuthGuard, toHeaders } from "./lib/auth-guard";
 import { AppError } from "./lib/errors";
 import { createAccountsModule } from "./modules/accounts";
+import { createAnalyticsModule } from "./modules/analytics";
 import { createBudgetsModule } from "./modules/budgets";
 import { createCategoriesModule, SYSTEM_SLUGS } from "./modules/categories";
+import { createDashboardModule } from "./modules/dashboard";
 import { createImportsModule } from "./modules/imports";
 import { createTransactionsModule } from "./modules/transactions";
 
@@ -65,23 +67,59 @@ export function buildModules(db: Database) {
 		},
 		transactions: transactions.service,
 	});
-	const imports = createImportsModule(db, {
-		accounts: accounts.service,
-		categories: {
-			getWalletMap: categories.service.getWalletMap,
-			setWalletMappings: categories.service.setWalletMappings,
-			transferCategoryId: (userId, exec) =>
-				categories.service.systemCategoryId(
-					userId,
-					SYSTEM_SLUGS.transfer,
-					exec,
-				),
-			savingsCategoryId: (userId, exec) =>
-				categories.service.systemCategoryId(userId, SYSTEM_SLUGS.savings, exec),
+	const imports = createImportsModule(
+		db,
+		{
+			accounts: accounts.service,
+			categories: {
+				getWalletMap: categories.service.getWalletMap,
+				setWalletMappings: categories.service.setWalletMappings,
+				transferCategoryId: (userId, exec) =>
+					categories.service.systemCategoryId(
+						userId,
+						SYSTEM_SLUGS.transfer,
+						exec,
+					),
+				savingsCategoryId: (userId, exec) =>
+					categories.service.systemCategoryId(
+						userId,
+						SYSTEM_SLUGS.savings,
+						exec,
+					),
+			},
+			transactions: transactions.service,
 		},
+		{
+			accounts: accounts.service,
+			categories: {
+				idsBySlug: (userId) => categories.service.idsBySlug(userId),
+				ensureDefaults: (userId) => categories.service.ensureDefaults(userId),
+			},
+			budgets: budgets.service,
+			transactions: transactions.service,
+		},
+	);
+	const analytics = createAnalyticsModule({
 		transactions: transactions.service,
+		accounts: {
+			initialTotal: async (userId) =>
+				(await accounts.service.list(userId, { includeArchived: true })).reduce(
+					(s, a) => s + a.initialBalance,
+					0,
+				),
+		},
+		categories: { list: categories.service.list },
 	});
-	return { accounts, categories, transactions, budgets, imports };
+	const dashboard = createDashboardModule(db);
+	return {
+		accounts,
+		categories,
+		transactions,
+		budgets,
+		imports,
+		analytics,
+		dashboard,
+	};
 }
 
 export function buildApp({ db, auth, corsOrigins, logger = true }: AppOptions) {

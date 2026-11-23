@@ -563,6 +563,71 @@ export function createTransactionsService(
 			);
 		},
 
+		// ---- Aggregates for analytics (transfers move money between accounts: never income or expense) ----
+
+		/** Income and expense per day (Mozambique time) in [from, to). */
+		async dailyTotals(userId: string, from: Date, to: Date) {
+			const day = sql<string>`to_char(${transactions.occurredAt} at time zone 'Africa/Maputo', 'YYYY-MM-DD')`;
+			const rows = await db
+				.select({
+					day,
+					income: sql<string>`coalesce(sum(${transactions.amount}) filter (where ${transactions.amount} > 0), 0)`,
+					expense: sql<string>`coalesce(-sum(${transactions.amount}) filter (where ${transactions.amount} < 0), 0)`,
+				})
+				.from(transactions)
+				.where(
+					and(
+						eq(transactions.userId, userId),
+						sql`${transactions.type} <> 'transfer'`,
+						gte(transactions.occurredAt, from),
+						lt(transactions.occurredAt, to),
+					),
+				)
+				.groupBy(day)
+				.orderBy(day);
+			return rows.map((r) => ({
+				day: r.day,
+				income: Number(r.income),
+				expense: Number(r.expense),
+			}));
+		},
+
+		/** Sum of every transaction before `at` (all types: transfers cancel out across accounts). */
+		async netBefore(userId: string, at: Date) {
+			const [row] = await db
+				.select({ total: sum(transactions.amount) })
+				.from(transactions)
+				.where(
+					and(eq(transactions.userId, userId), lt(transactions.occurredAt, at)),
+				);
+			return Number(row?.total ?? 0);
+		},
+
+		/** Income and expense per category in [from, to). */
+		async categoryTotals(userId: string, from: Date, to: Date) {
+			const rows = await db
+				.select({
+					categoryId: transactions.categoryId,
+					income: sql<string>`coalesce(sum(${transactions.amount}) filter (where ${transactions.amount} > 0), 0)`,
+					expense: sql<string>`coalesce(-sum(${transactions.amount}) filter (where ${transactions.amount} < 0), 0)`,
+				})
+				.from(transactions)
+				.where(
+					and(
+						eq(transactions.userId, userId),
+						sql`${transactions.type} <> 'transfer'`,
+						gte(transactions.occurredAt, from),
+						lt(transactions.occurredAt, to),
+					),
+				)
+				.groupBy(transactions.categoryId);
+			return rows.map((r) => ({
+				categoryId: r.categoryId,
+				income: Number(r.income),
+				expense: Number(r.expense),
+			}));
+		},
+
 		async countByCategory(userId: string) {
 			const rows = await db
 				.select({ categoryId: transactions.categoryId, count: count() })

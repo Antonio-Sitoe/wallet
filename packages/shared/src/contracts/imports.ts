@@ -85,5 +85,90 @@ export type ImportBatchSummary = Pick<
 	ImportPreview,
 	"id" | "status" | "createdAt" | "committedAt" | "totals"
 > & {
+	source: "wallet-csv" | "sheet-xlsx";
 	fileNames: string[];
+	/** For spreadsheet imports: months and items read. */
+	sheet?: { year: number; months: number; items: number };
+};
+
+// ---- Spreadsheet ("Calculo Financeiro") import
+
+export const sheetImportInput = z.object({
+	name: z.string().trim().min(1).max(200),
+	/** The .xlsx file, base64-encoded. */
+	contentBase64: z.string().min(1).max(20_000_000),
+	/** The year the sheet's months belong to. */
+	year: z.number().int().min(2000).max(2100),
+});
+export type SheetImportInput = z.infer<typeof sheetImportInput>;
+
+export const commitSheetInput = z.object({
+	/** Account the "already paid" payments leave from; default: each item's last used account. */
+	accountId: id.nullable().default(null),
+	months: z
+		.array(
+			z.object({
+				month: z.string(),
+				include: z.boolean(),
+				createPayments: z.boolean(),
+			}),
+		)
+		.default([]),
+	/** Item key → category, overriding the guess. */
+	categories: z.record(z.string(), id.nullable()).default({}),
+	expectedIncome: z.number().int().min(0).optional(),
+});
+export type CommitSheetInput = z.infer<typeof commitSheetInput>;
+
+export type SheetPlanItem = {
+	key: string;
+	name: string;
+	amount: number;
+	months: number[];
+	group: "fixed" | "savings" | "variable" | "oneoff";
+	categoryId: string | null;
+	partial: boolean;
+	step: number | null;
+	toAccountId: string | null;
+};
+
+export type SheetMonthPreview = {
+	month: string;
+	label: string;
+	total: number;
+	/** Spending already registered (Wallet import, manual) that matches these items by category. */
+	walletSpent: number;
+	/** Suggest creating payments for what is still unpaid (past months the records barely cover). */
+	suggestPayments: boolean;
+	items: {
+		key: string;
+		name: string;
+		amount: number;
+		categoryId: string | null;
+		group: SheetPlanItem["group"];
+		planKey: string | null;
+		walletSpent: number;
+	}[];
+};
+
+export type SheetPreview = {
+	id: string;
+	source: "sheet-xlsx";
+	status: ImportStatus;
+	createdAt: string;
+	committedAt: string | null;
+	fileName: string;
+	year: number;
+	sheetName: string;
+	/** Other sheets in the file (Emergência, Dívidas…), not imported yet. */
+	otherSheets: string[];
+	planItems: SheetPlanItem[];
+	months: SheetMonthPreview[];
+	skipped: { row: number; text: string }[];
+	result?: {
+		monthItems: number;
+		planItems: number;
+		payments: number;
+		paymentsSkipped: number;
+	};
 };

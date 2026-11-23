@@ -46,7 +46,20 @@ const KINDS: Record<Kind, { label: string; accent: string; sign: string }> = {
 };
 
 /** Used for categories without a colour of their own. */
-const PALETTE = ["#E3B341", "#58A6FF", "#A371F7", "#39C5BB", "#79C0FF", "#F778BA", "#D2A8FF", "#D29922", "#56D364", "#FF7B72", "#DB61A2", "#FFA198"];
+const PALETTE = [
+	"#E3B341",
+	"#58A6FF",
+	"#A371F7",
+	"#39C5BB",
+	"#79C0FF",
+	"#F778BA",
+	"#D2A8FF",
+	"#D29922",
+	"#56D364",
+	"#FF7B72",
+	"#DB61A2",
+	"#FFA198",
+];
 
 const LAST_ACCOUNT_KEY = "wallet.last-account";
 const readLast = () => {
@@ -121,7 +134,24 @@ function press(expr: string, key: string): string {
 
 const centsToExpr = (cents: number) => String(cents / 100);
 
-const KEYS = ["7", "8", "9", "÷", "4", "5", "6", "×", "1", "2", "3", "−", ".", "0", "⌫", "+"];
+const KEYS = [
+	"7",
+	"8",
+	"9",
+	"÷",
+	"4",
+	"5",
+	"6",
+	"×",
+	"1",
+	"2",
+	"3",
+	"−",
+	".",
+	"0",
+	"⌫",
+	"+",
+];
 const KEY_LABEL: Record<string, string> = {
 	"÷": "dividir",
 	"×": "multiplicar",
@@ -211,7 +241,8 @@ export function NewTransactionDialog({
 				: undefined;
 	const linkedItem = kind === "income" ? undefined : (explicitItem ?? autoItem);
 	const linkUsable =
-		!!linkedItem && (linkedItem === explicitItem || linkedItem.status !== "paid");
+		!!linkedItem &&
+		(linkedItem === explicitItem || linkedItem.status !== "paid");
 
 	const templates = useMemo(() => {
 		const open = (i: MonthItem) => i.status !== "paid" || i.partial;
@@ -219,7 +250,9 @@ export function NewTransactionDialog({
 		if (kind === "income") return [];
 		return items
 			.filter((i) =>
-				kind === "transfer" ? !!i.toAccountId : !i.toAccountId && !!i.categoryId,
+				kind === "transfer"
+					? !!i.toAccountId
+					: !i.toAccountId && !!i.categoryId,
 			)
 			.filter((i) => open(i) && amountOf(i) > 0)
 			.slice(0, 6)
@@ -331,7 +364,9 @@ export function NewTransactionDialog({
 
 	const today = todayInput();
 	const dateText =
-		date === today ? `hoje · ${dayLabel(date).split(" · ")[1]}` : dayLabel(date);
+		date === today
+			? `hoje · ${dayLabel(date).split(" · ")[1]}`
+			: dayLabel(date);
 	const [refYear, refMonth] = referenceMonth.split("-").map(Number);
 	const monthText = `mês: ${MONTH_SHORT[(refMonth ?? 1) - 1]} ${refYear}`;
 	const monthOptions = (() => {
@@ -369,7 +404,9 @@ export function NewTransactionDialog({
 					onKeyDown={onKeyDown}
 					className="bg-panel text-fg fixed top-[8vh] left-1/2 z-50 flex max-h-[88vh] w-[calc(100vw-32px)] max-w-[680px] -translate-x-1/2 flex-col rounded-[14px] border border-[#30363d] shadow-[0_24px_64px_rgba(1,4,9,.7)] outline-none"
 				>
-					<BaseDialog.Title className="sr-only">Nova transacção</BaseDialog.Title>
+					<BaseDialog.Title className="sr-only">
+						Nova transacção
+					</BaseDialog.Title>
 
 					{/* Type tabs */}
 					<div className="border-line flex items-stretch border-b">
@@ -393,7 +430,10 @@ export function NewTransactionDialog({
 									)}
 									style={
 										k === kind
-											? { color: KINDS[k].accent, borderBottomColor: KINDS[k].accent }
+											? {
+													color: KINDS[k].accent,
+													borderBottomColor: KINDS[k].accent,
+												}
 											: undefined
 									}
 								>
@@ -421,7 +461,10 @@ export function NewTransactionDialog({
 									{hasOp ? expr.replace(/-/g, "−") : ""}
 								</span>
 								<div className="flex w-full items-baseline gap-2.5">
-									<span className="num text-[34px]" style={{ color: meta.accent }}>
+									<span
+										className="num text-[34px]"
+										style={{ color: meta.accent }}
+									>
 										{meta.sign}
 									</span>
 									<span
@@ -487,7 +530,8 @@ export function NewTransactionDialog({
 										aria-haspopup="listbox"
 										className={cn(
 											"bg-canvas border-line-strong flex w-full cursor-pointer flex-col items-start gap-[3px] rounded-[10px] border px-3 py-2.5 text-left",
-											!category && "border-[#1F6FEB] shadow-[0_0_0_3px_rgba(31,111,235,.25)]",
+											!category &&
+												"border-[#1F6FEB] shadow-[0_0_0_3px_rgba(31,111,235,.25)]",
 										)}
 									>
 										<small className="num text-dim text-[11px] tracking-[.06em] uppercase">
@@ -505,7 +549,9 @@ export function NewTransactionDialog({
 													style={{ background: catColor.get(category.id) }}
 												/>
 											) : null}
-											<span className="truncate">{category?.name ?? "Escolher"}</span>
+											<span className="truncate">
+												{category?.name ?? "Escolher"}
+											</span>
 										</span>
 									</button>
 								</div>
@@ -547,11 +593,16 @@ export function NewTransactionDialog({
 													setMonthItemId(t.item.id);
 													if (kind === "transfer") {
 														if (t.item.accountId ?? t.item.defaultAccountId)
-															setAccountId((t.item.accountId ?? t.item.defaultAccountId)!);
-														if (t.item.toAccountId) setToAccountId(t.item.toAccountId);
+															setAccountId(
+																(t.item.accountId ?? t.item.defaultAccountId)!,
+															);
+														if (t.item.toAccountId)
+															setToAccountId(t.item.toAccountId);
 													} else {
-														if (t.item.categoryId) setCategoryId(t.item.categoryId);
-														if (t.item.defaultAccountId) setAccountId(t.item.defaultAccountId);
+														if (t.item.categoryId)
+															setCategoryId(t.item.categoryId);
+														if (t.item.defaultAccountId)
+															setAccountId(t.item.defaultAccountId);
 													}
 													setPickerOpen(false);
 												}}
@@ -650,7 +701,9 @@ export function NewTransactionDialog({
 										key={k}
 										type="button"
 										aria-label={KEY_LABEL[k] ?? k}
-										onClick={() => setExpr((x) => press(x, k === "−" ? "-" : k))}
+										onClick={() =>
+											setExpr((x) => press(x, k === "−" ? "-" : k))
+										}
 										className={cn(
 											"num border-line h-12 cursor-pointer rounded-lg border text-lg hover:bg-[#1c2128]",
 											op ? "bg-panel text-fg-2" : "bg-hover text-fg",
@@ -675,7 +728,9 @@ export function NewTransactionDialog({
 							className="border-line-strong bg-hover text-fg inline-flex h-9 cursor-pointer items-center gap-2 rounded-[7px] border px-3.5 text-[13px] font-medium hover:bg-[#1c2128] disabled:cursor-not-allowed disabled:opacity-45"
 						>
 							Guardar e nova
-							<span className="num rounded bg-white/8 px-1 text-[11px]">⇧⌘↵</span>
+							<span className="num rounded bg-white/8 px-1 text-[11px]">
+								⇧⌘↵
+							</span>
 						</button>
 						<button
 							type="button"
@@ -684,7 +739,9 @@ export function NewTransactionDialog({
 							className="border-money bg-money text-money-ink hover:bg-money-2 inline-flex h-9 cursor-pointer items-center gap-2 rounded-[7px] border px-3.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
 						>
 							Guardar
-							<span className="num rounded bg-[rgba(4,19,10,.18)] px-1 text-[11px]">⌘↵</span>
+							<span className="num rounded bg-[rgba(4,19,10,.18)] px-1 text-[11px]">
+								⌘↵
+							</span>
 						</button>
 					</div>
 				</BaseDialog.Popup>
@@ -706,7 +763,9 @@ function AccountPick({
 }) {
 	return (
 		<label className="bg-canvas border-line-strong focus-within:border-info-2 flex w-full min-w-0 cursor-pointer flex-col items-start gap-[3px] rounded-[10px] border px-3 py-2.5">
-			<small className="num text-dim text-[11px] tracking-[.06em] uppercase">{label}</small>
+			<small className="num text-dim text-[11px] tracking-[.06em] uppercase">
+				{label}
+			</small>
 			<select
 				value={value}
 				onChange={(e) => onChange(e.target.value)}

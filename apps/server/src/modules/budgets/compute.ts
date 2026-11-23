@@ -38,6 +38,8 @@ export type MatchableItem = {
 	id: string;
 	month: string;
 	categoryId: string | null;
+	/** What the item can still take (planned − paid from the list). Lets items that share a category split it. */
+	capacity?: number;
 };
 export type UnlinkedOut = {
 	month: string;
@@ -50,8 +52,10 @@ export type UnlinkedOut = {
 /**
  * Money spent outside the list (the daily 100 MZN ride, imported history) still counts for the item of its
  * category in that month. A transaction goes to the one item with exactly its category; failing that, to the
- * one item with its parent category. Ambiguous or unmatched expenses stay "unassigned" for the month;
- * unmatched transfers are just money moving between accounts and are not counted.
+ * one item with its parent category. When several items share the category (Estique and Xitique Auzenda),
+ * the money fills them one by one up to their capacity, largest first, and any excess goes to the largest.
+ * Unmatched expenses stay "unassigned" for the month; unmatched transfers are just money moving between
+ * accounts and are not counted.
  */
 export function attributeSpending(
 	items: MatchableItem[],
@@ -76,9 +80,20 @@ export function attributeSpending(
 			exact.length > 0
 				? exact
 				: find(row.month, row.categoryId ? parentOf.get(row.categoryId) : null);
+		const splittable = candidates.length > 1 && candidates.every((c) => c.capacity !== undefined);
 		if (candidates.length === 1) {
 			const id = candidates[0]!.id;
 			matched.set(id, (matched.get(id) ?? 0) + row.spent);
+		} else if (splittable) {
+			const ordered = [...candidates].sort((a, b) => (b.capacity ?? 0) - (a.capacity ?? 0));
+			let left = row.spent;
+			for (const c of ordered) {
+				const room = Math.max(0, (c.capacity ?? 0) - (matched.get(c.id) ?? 0));
+				const take = Math.min(room, left);
+				if (take > 0) matched.set(c.id, (matched.get(c.id) ?? 0) + take);
+				left -= take;
+			}
+			if (left > 0) matched.set(ordered[0]!.id, (matched.get(ordered[0]!.id) ?? 0) + left);
 		} else if (row.type === "expense") {
 			unassigned.set(row.month, (unassigned.get(row.month) ?? 0) + row.spent);
 		}

@@ -1,4 +1,5 @@
 export * from "./contracts/accounts";
+export * from "./contracts/analytics";
 export * from "./contracts/budgets";
 export * from "./contracts/categories";
 export * from "./contracts/common";

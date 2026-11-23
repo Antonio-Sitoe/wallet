@@ -1,7 +1,7 @@
 {
   "info": {
     "_postman_id": "79955190-297c-4646-940c-9c6c33ad7286",
-    "name": "Wallet API — Fases 1 e 2",
+    "name": "Wallet API — Fases 1 a 3",
     "description": "Contas, categorias, transacções, transferências, orçamento (plano anual + lista do mês) e importação do Wallet.\n\n1. Corra **Auth › Registar** (ou **Entrar**) — o token fica guardado.\n2. Siga as pastas por ordem: os ids criados ficam em variáveis da collection.\n\nTodos os valores são em **centavos** (100 MZN = 10000). Datas em ISO 8601. Meses do orçamento em `AAAA-MM`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -102,6 +102,30 @@
     },
     {
       "key": "unplannedItemId",
+      "value": ""
+    },
+    {
+      "key": "periodFrom",
+      "value": "2026-11-01"
+    },
+    {
+      "key": "periodTo",
+      "value": "2026-11-30"
+    },
+    {
+      "key": "cardId",
+      "value": ""
+    },
+    {
+      "key": "newCardId",
+      "value": ""
+    },
+    {
+      "key": "sheetId",
+      "value": ""
+    },
+    {
+      "key": "sheetBase64",
       "value": ""
     }
   ],
@@ -2165,6 +2189,561 @@
               ]
             },
             "description": "Rascunho: apaga-o. Aplicada: apaga todas as transacções e transferências que ela criou."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Painel e análises",
+      "description": "Fase 3. Períodos em dias de Moçambique, as duas pontas incluídas (from/to = AAAA-MM-DD). Transferências não contam como entrada nem saída.",
+      "item": [
+        {
+          "name": "Resumo do período",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/overview?from={{periodFrom}}&to={{periodTo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "overview"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{periodFrom}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{periodTo}}"
+                }
+              ]
+            },
+            "description": "Entradas, saídas, saldo no início e no fim, e o período anterior do mesmo tamanho."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fluxo de caixa por dia/semana/mês",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/cashflow?from={{periodFrom}}&to={{periodTo}}&bucket=week",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "cashflow"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{periodFrom}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{periodTo}}"
+                },
+                {
+                  "key": "bucket",
+                  "value": "week"
+                }
+              ]
+            },
+            "description": "bucket opcional: day | week | month (por defeito escolhe pelo tamanho do período)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Evolução do saldo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/balance?from={{periodFrom}}&to={{periodTo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "balance"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{periodFrom}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{periodTo}}"
+                }
+              ]
+            },
+            "description": "Saldo total no fim de cada dia (ou semana/mês)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Saídas por categoria",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/categories?from={{periodFrom}}&to={{periodTo}}&limit=6",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{periodFrom}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{periodTo}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "6"
+                }
+              ]
+            },
+            "description": "Agrupadas pela categoria principal, com o período anterior."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Comparação de períodos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/comparison?from={{periodFrom}}&to={{periodTo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "comparison"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{periodFrom}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{periodTo}}"
+                }
+              ]
+            },
+            "description": "Fluxo acumulado: este período, o anterior e as mesmas datas há um ano."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cartas do painel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/cards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "cards"
+              ]
+            },
+            "description": "Na primeira chamada cria o painel do design. Guarda o id da primeira carta em `cardId`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const c = pm.response.json(); if (c.length) pm.collectionVariables.set(\"cardId\", c[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Adicionar carta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/cards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "cards"
+              ]
+            },
+            "description": "type: summary, cash-flow, cash-flow-trend, period-comparison, balance-trend, spending-by-category, accounts, upcoming, last-records. Guarda o id em `newCardId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"balance-trend\",\n  \"size\": \"half\",\n  \"config\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"newCardId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mudar tamanho / configuração",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/cards/{{newCardId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "cards",
+                "{{newCardId}}"
+              ]
+            },
+            "description": "size: half | full. config.range = year | period nas cartas de entradas/saídas e categorias.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"size\": \"full\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remover carta",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/cards/{{newCardId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "cards",
+                "{{newCardId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Repor painel inicial",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/cards/reset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "cards",
+                "reset"
+              ]
+            },
+            "description": "Volta às cartas do design."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Importar folha (Excel)",
+      "description": "A folha «Gastos com salario» do Calculo Financeiro: cada mês vira uma lista; os itens que se repetem (3+ meses) vão para o plano anual.",
+      "item": [
+        {
+          "name": "Enviar .xlsx (pré-visualizar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/imports/sheet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports",
+                "sheet"
+              ]
+            },
+            "description": "Ponha o ficheiro em base64 na variável `sheetBase64` (ex.: `base64 -i ficheiro.xlsx | pbcopy`). Guarda o id em `sheetId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Calculo Financeiro - 2026.xlsx\",\n  \"contentBase64\": \"{{sheetBase64}}\",\n  \"year\": 2026\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) pm.collectionVariables.set(\"sheetId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver pré-visualização",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/imports/sheet/{{sheetId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports",
+                "sheet",
+                "{{sheetId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aplicar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/imports/sheet/{{sheetId}}/commit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports",
+                "sheet",
+                "{{sheetId}}",
+                "commit"
+              ]
+            },
+            "description": "months: incluir e criar pagamentos por mês (sem a entrada, vale a sugestão). accountId: conta de onde saíram os pagamentos.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": \"{{accountId}}\",\n  \"months\": [\n    {\n      \"month\": \"2026-10\",\n      \"include\": true,\n      \"createPayments\": true\n    }\n  ],\n  \"categories\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desfazer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/imports/{{sheetId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "imports",
+                "{{sheetId}}"
+              ]
+            },
+            "description": "Apaga os pagamentos, itens e plano que a importação criou."
           },
           "event": [
             {

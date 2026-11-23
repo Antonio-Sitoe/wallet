@@ -248,8 +248,11 @@ export function createBudgetsService(db: Database, deps: BudgetsDeps) {
 			deps.transactions.monthActivity(userId, months),
 			deps.categories.parentMap(userId),
 		]);
+		// What each item can still take, so items sharing a category split its spending.
+		const linkedByItem = new Map<string, number>();
+		for (const p of payments) linkedByItem.set(p.monthItemId, (linkedByItem.get(p.monthItemId) ?? 0) - p.amount);
 		const { matched, unassigned } = attributeSpending(
-			rows,
+			rows.map((r) => ({ ...r, capacity: Math.max(0, r.plannedAmount - (linkedByItem.get(r.id) ?? 0)) })),
 			activity.unlinkedOut,
 			parents,
 		);
@@ -774,6 +777,208 @@ export function createBudgetsService(db: Database, deps: BudgetsDeps) {
 		},
 
 		// ---- Used by other modules ----
+
+		/** Spending already registered that would count for these (not yet created) items, by category. */
+		async previewMatches(
+			userId: string,
+			items: { id: string; month: string; categoryId: string | null; capacity?: number }[],
+		) {
+			const months = [...new Set(items.map((i) => i.month))];
+			const [activity, parents] = await Promise.all([
+				deps.transactions.monthActivity(userId, months),
+				deps.categories.parentMap(userId),
+			]);
+			return attributeSpending(items, activity.unlinkedOut, parents).matched;
+		},
+
+		/**
+		 * Writes monthly lists coming from a spreadsheet: the plan of `year` (created if missing), its recurring
+		 * items (an existing item with the same name is reused) and one month item per line. Returns what it
+		 * created so the import can be undone.
+		 */
+		async applySheet(
+			userId: string,
+			input: {
+				year: number;
+				expectedIncome?: number;
+				planItems: (Omit<CreatePlanItemInput, "months" | "frequency"> & {
+					key: string;
+					months: number[];
+				})[];
+				months: {
+					month: string;
+					items: {
+						key: string;
+						planKey: string | null;
+						name: string;
+						amount: number;
+						categoryId: string | null;
+						group: CreatePlanItemInput["group"];
+					}[];
+				}[];
+			},
+		) {
+			const created = {
+				planId: null as string | null,
+				planItemIds: [] as string[],
+				monthItemIds: [] as string[],
+			};
+			let [plan] = await db
+				.select()
+				.from(budgetPlans)
+				.where(
+					and(eq(budgetPlans.userId, userId), eq(budgetPlans.year, input.year)),
+				);
+			if (!plan) {
+				[plan] = await db
+					.insert(budgetPlans)
+					.values({
+						userId,
+						year: input.year,
+						expectedIncome: input.expectedIncome ?? 0,
+					})
+					.returning();
+				created.planId = plan!.id;
+			}
+			const existing = await db
+				.select()
+				.from(planItems)
+				.where(eq(planItems.planId, plan!.id));
+			const sameName = (a: string, b: string) =>
+				a.trim().toLowerCase() === b.trim().toLowerCase();
+			const planIdByKey = new Map<string, PlanItemRow>();
+			for (const [i, item] of input.planItems.entries()) {
+				const found = existing.find((e) => sameName(e.name, item.name));
+				if (found) {
+					planIdByKey.set(item.key, found);
+					continue;
+				}
+				const { key: _key, months, ...fields } = item;
+				const [row] = await db
+					.insert(planItems)
+					.values({
+						userId,
+						planId: plan!.id,
+						...fields,
+						frequency: months.length === 12 ? "monthly" : "months",
+						months: months.length === 12 ? [] : months,
+						sortOrder: existing.length + i,
+					})
+					.returning();
+				planIdByKey.set(item.key, row!);
+				created.planItemIds.push(row!.id);
+			}
+
+			const monthItemByKey = new Map<string, string>();
+			for (const m of input.months) {
+				const current = await db
+					.select()
+					.from(monthItems)
+					.where(
+						and(eq(monthItems.userId, userId), eq(monthItems.month, m.month)),
+					);
+				for (const [i, item] of m.items.entries()) {
+					const planItem = item.planKey
+						? planIdByKey.get(item.planKey)
+						: undefined;
+					const match = current.find((c) =>
+						planItem
+							? c.planItemId === planItem.id
+							: sameName(c.name, item.name),
+					);
+					if (match) {
+						// Keep a line that already has payments as it is; otherwise take the sheet's amount.
+						if ((await paidIds(userId, [match.id])).size === 0) {
+							await db
+								.update(monthItems)
+								.set({ plannedAmount: item.amount })
+								.where(eq(monthItems.id, match.id));
+						}
+						monthItemByKey.set(`${m.month}|${item.key}`, match.id);
+						continue;
+					}
+					const [row] = await db
+						.insert(monthItems)
+						.values({
+							userId,
+							planId: plan!.id,
+							planItemId: planItem?.id ?? null,
+							month: m.month,
+							name: item.name,
+							group: planItem?.group ?? item.group,
+							categoryId: item.categoryId ?? planItem?.categoryId ?? null,
+							accountId: planItem?.accountId ?? null,
+							toAccountId: planItem?.toAccountId ?? null,
+							plannedAmount: item.amount,
+							partial: planItem?.partial ?? false,
+							step: planItem?.step ?? null,
+							unplanned: !planItem,
+							sortOrder: planItem ? planItem.sortOrder : 1000 + i,
+						})
+						.returning({ id: monthItems.id });
+					created.monthItemIds.push(row!.id);
+					monthItemByKey.set(`${m.month}|${item.key}`, row!.id);
+				}
+			}
+			return { planYear: input.year, created, monthItemByKey };
+		},
+
+		/** Undoes applySheet: removes the month items, plan items and plan it created (payments first). */
+		async undoSheet(
+			userId: string,
+			created: {
+				planId: string | null;
+				planItemIds: string[];
+				monthItemIds: string[];
+			},
+		) {
+			const payments = await deps.transactions.linkedPayments(
+				userId,
+				created.monthItemIds,
+			);
+			for (const p of payments)
+				await deps.transactions.remove(userId, p.transactionId).catch(() => {});
+			if (created.monthItemIds.length) {
+				await db
+					.delete(monthItems)
+					.where(
+						and(
+							eq(monthItems.userId, userId),
+							inArray(monthItems.id, created.monthItemIds),
+						),
+					);
+			}
+			if (created.planItemIds.length) {
+				await db
+					.delete(planItems)
+					.where(
+						and(
+							eq(planItems.userId, userId),
+							inArray(planItems.id, created.planItemIds),
+						),
+					);
+			}
+			if (created.planId) {
+				const left = await db
+					.select({ id: monthItems.id })
+					.from(monthItems)
+					.where(eq(monthItems.planId, created.planId))
+					.limit(1);
+				const items = await db
+					.select({ id: planItems.id })
+					.from(planItems)
+					.where(eq(planItems.planId, created.planId))
+					.limit(1);
+				if (left.length === 0 && items.length === 0)
+					await db
+						.delete(budgetPlans)
+						.where(eq(budgetPlans.id, created.planId));
+			}
+			return {
+				payments: payments.length,
+				monthItems: created.monthItemIds.length,
+			};
+		},
 
 		async assertMonthItemOwned(userId: string, id: string) {
 			await findMonthItem(userId, id).catch(() => {

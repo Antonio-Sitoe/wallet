@@ -116,4 +116,19 @@ describe("attributeSpending", () => {
 		expect(matched.size).toBe(0);
 		expect(unassigned.get("2026-11")).toBe(6_000);
 	});
+
+	it("splits a shared category between items by what each can still take", () => {
+		const shared = [
+			{ id: "estique", month: "2026-07", categoryId: "xitique", capacity: 2_000_000 },
+			{ id: "auzenda", month: "2026-07", categoryId: "xitique", capacity: 400_000 },
+		];
+		const { matched, unassigned } = attributeSpending(
+			shared,
+			[{ month: "2026-07", categoryId: "xitique", type: "transfer", spent: 2_500_000 }],
+			new Map([["xitique", null]]),
+		);
+		expect(matched.get("estique")).toBe(2_100_000);
+		expect(matched.get("auzenda")).toBe(400_000);
+		expect(unassigned.size).toBe(0);
+	});
 });

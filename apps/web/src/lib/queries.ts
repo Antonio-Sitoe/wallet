@@ -8,21 +8,32 @@ import {
 } from "@tanstack/react-query";
 import type {
 	Account,
+	BalancePoint,
+	Bucket,
+	CardSize,
+	CashflowTrend,
 	Category,
+	CategoryBreakdown,
 	CommitImportInput,
+	CommitSheetInput,
+	ComparisonPoint,
 	CreateAccountInput,
 	CreateCategoryInput,
 	CreateMonthItemInput,
 	CreatePlanItemInput,
 	CreateTransactionInput,
 	CreateTransferInput,
+	DashboardCard,
+	DashboardCardType,
 	ImportBatchSummary,
 	ImportPreview,
 	MonthBudget,
 	MonthItem,
+	Overview,
 	PayMonthItemInput,
 	Plan,
 	PlanItem,
+	SheetPreview,
 	Transaction,
 	TransactionPage,
 	Transfer,
@@ -58,6 +69,7 @@ function refreshMoney(qc: QueryClient) {
 		"plan",
 		"categories",
 		"month-item",
+		"analytics",
 	]) {
 		qc.invalidateQueries({ queryKey: [key] });
 	}
@@ -447,4 +459,143 @@ export const useRemovePayment = () =>
 				method: "DELETE",
 			}),
 		refreshMoney,
+	);
+
+// ---- Analytics & dashboard (Fase 3)
+
+export type Period = { from: string; to: string };
+
+export const useOverview = (p: Period) =>
+	useQuery({
+		queryKey: ["analytics", "overview", p],
+		queryFn: () => api<Overview>("/analytics/overview", { query: p }),
+	});
+
+export const useCashflow = (p: Period, bucket?: Bucket) =>
+	useQuery({
+		queryKey: ["analytics", "cashflow", p, bucket],
+		queryFn: () =>
+			api<CashflowTrend>("/analytics/cashflow", { query: { ...p, bucket } }),
+	});
+
+export const useBalanceTrend = (p: Period) =>
+	useQuery({
+		queryKey: ["analytics", "balance", p],
+		queryFn: () => api<BalancePoint[]>("/analytics/balance", { query: p }),
+	});
+
+export const useCategorySpending = (p: Period, limit = 6) =>
+	useQuery({
+		queryKey: ["analytics", "categories", p, limit],
+		queryFn: () =>
+			api<CategoryBreakdown>("/analytics/categories", {
+				query: { ...p, limit },
+			}),
+	});
+
+export const useComparison = (p: Period) =>
+	useQuery({
+		queryKey: ["analytics", "comparison", p],
+		queryFn: () =>
+			api<ComparisonPoint[]>("/analytics/comparison", { query: p }),
+	});
+
+export const useDashboardCards = () =>
+	useQuery({
+		queryKey: ["dashboard-cards"],
+		queryFn: () => api<DashboardCard[]>("/dashboard/cards"),
+	});
+
+const refreshCards = (qc: QueryClient) =>
+	qc.invalidateQueries({ queryKey: ["dashboard-cards"] });
+
+export const useAddCard = () =>
+	useApiMutation(
+		(body: {
+			type: DashboardCardType;
+			size?: CardSize;
+			config?: Record<string, unknown>;
+		}) => api<DashboardCard>("/dashboard/cards", { method: "POST", body }),
+		refreshCards,
+	);
+
+export const useUpdateCard = () =>
+	useApiMutation(
+		({
+			id,
+			...body
+		}: {
+			id: string;
+			size?: CardSize;
+			config?: Record<string, unknown>;
+		}) =>
+			api<DashboardCard>(`/dashboard/cards/${id}`, { method: "PATCH", body }),
+		refreshCards,
+	);
+
+export const useRemoveCard = () =>
+	useApiMutation(
+		(id: string) => api<void>(`/dashboard/cards/${id}`, { method: "DELETE" }),
+		refreshCards,
+	);
+
+export const useReorderCards = () => {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: (ids: string[]) =>
+			api<DashboardCard[]>("/dashboard/cards/order", {
+				method: "PUT",
+				body: { ids },
+			}),
+		// Move the cards right away; the server answer confirms it.
+		onMutate: (ids) => {
+			const current = qc.getQueryData<DashboardCard[]>(["dashboard-cards"]);
+			if (current)
+				qc.setQueryData(
+					["dashboard-cards"],
+					ids.map((id) => current.find((c) => c.id === id)).filter(Boolean),
+				);
+		},
+		onError: (error) => {
+			toast.error(errorMessage(error));
+			refreshCards(qc);
+		},
+		onSettled: () => refreshCards(qc),
+	});
+};
+
+export const useResetCards = () =>
+	useApiMutation(
+		() => api<DashboardCard[]>("/dashboard/cards/reset", { method: "POST" }),
+		refreshCards,
+	);
+
+// ---- Spreadsheet import
+
+export const useUploadSheet = () =>
+	useApiMutation(
+		(body: { name: string; contentBase64: string; year: number }) =>
+			api<SheetPreview>("/imports/sheet", { method: "POST", body }),
+		(qc) => qc.invalidateQueries({ queryKey: ["imports"] }),
+	);
+
+export const useSheetPreview = (id: string | null) =>
+	useQuery({
+		queryKey: ["sheet", id],
+		queryFn: () => api<SheetPreview>(`/imports/sheet/${id}`),
+		enabled: !!id,
+	});
+
+export const useCommitSheet = () =>
+	useApiMutation(
+		({ id, ...body }: Partial<CommitSheetInput> & { id: string }) =>
+			api<SheetPreview>(`/imports/sheet/${id}/commit`, {
+				method: "POST",
+				body,
+			}),
+		(qc) => {
+			refreshMoney(qc);
+			qc.invalidateQueries({ queryKey: ["imports"] });
+			qc.invalidateQueries({ queryKey: ["sheet"] });
+		},
 	);
