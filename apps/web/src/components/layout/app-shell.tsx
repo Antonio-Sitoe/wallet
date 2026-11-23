@@ -20,7 +20,6 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { SidebarAccounts } from "@/components/layout/sidebar-accounts";
 import {
 	ThemeCycleButton,
 	ThemeSwitch,
@@ -176,8 +175,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 							);
 						})}
 					</div>
-
-					<SidebarAccounts />
 
 					<div className="border-line mt-auto hidden flex-col gap-1 border-t pt-3 md:flex">
 						<ThemeSwitch />

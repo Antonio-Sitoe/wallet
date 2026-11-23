@@ -78,6 +78,7 @@ export function TransactionEditor({
 						payee: payee || null,
 					});
 					toast.success("Transacção guardada");
+					onClose();
 				}}
 			>
 				<div className="grid grid-cols-2 gap-2.5">

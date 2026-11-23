@@ -92,6 +92,7 @@ export function TransferEditor({
 						note: form.note || null,
 					});
 					toast.success("Transferência guardada");
+					onClose();
 				}}
 			>
 				<div className="grid grid-cols-2 gap-2.5">
