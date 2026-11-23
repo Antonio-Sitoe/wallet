@@ -216,3 +216,19 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 **Retirado do plano em 2026-11-23**
 
 - Definições › Segurança: impressão digital / Touch ID ao abrir o app — decidido não fazer; o bloqueio fica só com PIN
+
+## Fase 5 — Pagamentos planeados — 2026-11-24
+
+**Design (UI)**
+
+- [x] Pagamentos planeados: próximos, atrasados, confirmar num clique — artboard «Pagamentos planeados» na linha «Fase 5» do Claude Design (indicadores, separadores, grupos por data, confirmar com Desfazer, detalhe com próximas datas e histórico; Xitique como transferência). O artboard «Novo pagamento e lembretes» ficou por publicar.
+
+**Backend**
+
+- [x] Pagamentos planeados: tabelas `planned_payments` (despesa ou transferência, valor, conta, conta de destino, categoria, primeira data, frequência uma vez / mensal / anual, lembrete em dias, item do plano anual) e `planned_payment_events` (pago / saltado por vencimento, com a transacção ou transferência criada); estados pago / saltado / atrasado / por pagar (7 dias) / agendado; confirmar cria a despesa ou a transferência no mês do vencimento e liga ao item da lista desse mês; desfazer apaga-a; apagar a transacção nas Transacções volta a pôr o vencimento por pagar; saltar uma vez
+- [x] Estique / Xitique como pagamento planeado mensal: tipo transferência para a conta Xitique (Poupança), com atalho «Xitique mensal» no formulário
+- [x] Lembretes agendados dos pagamentos planeados: `GET /planned-payments/reminders` (no dia, 1, 3 ou 7 dias antes; atrasados até 3 dias), usado pelo módulo de notificações; os itens por pagar da lista do mês entram pelo envio de notificações (Fase 7)
+
+**Frontend**
+
+- [x] Ecrã Pagamentos planeados (`/payments`, «Pagamentos» no menu depois de Orçamento): indicadores (atrasados, próximos 7 dias, falta este mês, pagos este mês), separadores Próximos / Atrasados / Pagos / Todos, grupos por data, Confirmar num clique com Desfazer no aviso, detalhe com saltar, editar, arquivar, apagar, próximas datas e histórico; novo / editar pagamento com pré-visualização das próximas datas e do total por ano

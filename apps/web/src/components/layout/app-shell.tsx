@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
 import {
 	ArrowLeftRightIcon,
+	CalendarCheckIcon,
 	CalendarRangeIcon,
 	ChartColumnIcon,
 	DownloadIcon,
@@ -42,6 +43,7 @@ import { authClient, clearDesktopToken } from "@/lib/auth-client";
 export const NAV = [
 	{ to: "/dashboard", label: "Painel", icon: LayoutDashboardIcon },
 	{ to: "/budget", label: "Orçamento", icon: ListChecksIcon },
+	{ to: "/payments", label: "Pagamentos", icon: CalendarCheckIcon },
 	{ to: "/plan", label: "Plano anual", icon: CalendarRangeIcon },
 	{ to: "/transactions", label: "Transacções", icon: ArrowLeftRightIcon },
 	{ to: "/accounts", label: "Contas", icon: LandmarkIcon },
