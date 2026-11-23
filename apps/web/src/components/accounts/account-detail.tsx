@@ -12,6 +12,7 @@ import { useTransactionPages } from "@/actions/transactions/use-transaction-page
 import { initials } from "@/components/accounts/utils";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
+import { Hint } from "@/components/ui/hint";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
 import { Swatch } from "@/components/ui/swatch";
@@ -207,29 +208,33 @@ export function AccountDetail({
 				>
 					{account.archived ? "Reactivar" : "Arquivar"}
 				</Button>
-				<Button
-					variant="danger"
-					className="ml-auto"
-					disabled={account.transactionCount > 0}
-					title={
+				<Hint
+					label={
 						account.transactionCount > 0
 							? "Tem transacções: arquive em vez de apagar"
 							: undefined
 					}
-					onClick={async () => {
-						if (
-							!(await confirmAction({
-								title: `Apagar a conta ${account.name}?`,
-							}))
-						)
-							return;
-						await remove.mutateAsync(account.id);
-						toast.success("Conta apagada");
-						onDeleted();
-					}}
+					wrap
 				>
-					Apagar
-				</Button>
+					<Button
+						variant="danger"
+						className="ml-auto"
+						disabled={account.transactionCount > 0}
+						onClick={async () => {
+							if (
+								!(await confirmAction({
+									title: `Apagar a conta ${account.name}?`,
+								}))
+							)
+								return;
+							await remove.mutateAsync(account.id);
+							toast.success("Conta apagada");
+							onDeleted();
+						}}
+					>
+						Apagar
+					</Button>
+				</Hint>
 			</div>
 		</Dialog>
 	);

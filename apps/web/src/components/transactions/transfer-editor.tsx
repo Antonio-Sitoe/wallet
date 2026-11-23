@@ -1,6 +1,7 @@
 import type { Account } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Input } from "@wallet/ui/components/input";
+import { Skeleton } from "@wallet/ui/components/skeleton";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useDeleteTransfer } from "@/actions/transactions/use-delete-transfer";
@@ -11,7 +12,6 @@ import { monthChoices } from "@/components/transactions/utils";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useConfirm } from "@/contexts/confirm-context";
 import {
 	dateInputOf,

@@ -1,6 +1,12 @@
 import type { Category } from "@wallet/shared";
+import {
+	InputGroup,
+	InputGroupAddon,
+	InputGroupInput,
+} from "@wallet/ui/components/input-group";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Hint } from "@/components/ui/hint";
 
 export function CategoryPicker({
 	categories,
@@ -37,12 +43,14 @@ export function CategoryPicker({
 			aria-label="Escolher categoria"
 			className="bg-hover -mt-2 flex w-full flex-col gap-2 rounded-xl border border-[#30363d] p-2.5"
 		>
-			<label className="border-line-strong bg-canvas flex h-8 items-center gap-2 rounded-[7px] border px-2.5">
-				<SearchIcon aria-hidden="true" className="text-dim size-[13px]" />
-				<span className="sr-only">Procurar categoria</span>
-				<input
+			<InputGroup className="border-line-strong bg-canvas h-8 rounded-[7px]">
+				<InputGroupAddon>
+					<SearchIcon aria-hidden="true" className="text-dim size-3.25" />
+				</InputGroupAddon>
+				<InputGroupInput
 					ref={searchRef}
 					type="search"
+					aria-label="Procurar categoria"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
 					onKeyDown={(e) => {
@@ -52,31 +60,31 @@ export function CategoryPicker({
 						}
 					}}
 					placeholder="categoria…"
-					className="num text-fg h-7 min-w-0 flex-1 bg-transparent text-xs outline-none"
+					className="num text-fg h-7 text-xs md:text-xs"
 				/>
-			</label>
+			</InputGroup>
 			<div className="grid max-h-[260px] grid-cols-3 gap-0.5 overflow-y-auto sm:grid-cols-4">
 				{shown.map((c) => {
 					const color = colorOf(c.id);
 					const parent = parentName(c);
 					return (
-						<button
-							key={c.id}
-							type="button"
-							role="option"
-							aria-selected={false}
-							title={parent ? `${parent} › ${c.name}` : c.name}
-							onClick={() => onPick(c.id)}
-							className="hover:bg-hover hover:border-line-strong flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-transparent px-1 py-2.5 text-xs"
-						>
-							<b
-								className="num flex size-[34px] items-center justify-center rounded-[9px] text-[13px]"
-								style={{ background: `${color}26`, color }}
+						<Hint key={c.id} label={parent ? `${parent} › ${c.name}` : c.name}>
+							<button
+								type="button"
+								role="option"
+								aria-selected={false}
+								onClick={() => onPick(c.id)}
+								className="hover:bg-hover hover:border-line-strong flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-transparent px-1 py-2.5 text-xs"
 							>
-								{c.name.slice(0, 2)}
-							</b>
-							<span className="max-w-[76px] truncate">{c.name}</span>
-						</button>
+								<b
+									className="num flex size-[34px] items-center justify-center rounded-[9px] text-[13px]"
+									style={{ background: `${color}26`, color }}
+								>
+									{c.name.slice(0, 2)}
+								</b>
+								<span className="max-w-[76px] truncate">{c.name}</span>
+							</button>
+						</Hint>
 					);
 				})}
 				{shown.length === 0 ? (

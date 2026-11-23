@@ -14,6 +14,7 @@ import {
 } from "@dnd-kit/sortable";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
+import { Skeleton } from "@wallet/ui/components/skeleton";
 import {
 	ChevronLeftIcon,
 	ChevronRightIcon,
@@ -36,7 +37,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useConfirm } from "@/contexts/confirm-context";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
 import {

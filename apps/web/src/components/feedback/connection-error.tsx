@@ -1,4 +1,9 @@
 import type { ErrorComponentProps } from "@tanstack/react-router";
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@wallet/ui/components/collapsible";
 import { cn } from "@wallet/ui/lib/utils";
 import { RotateCwIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -171,32 +176,34 @@ export function ConnectionError({ error }: ErrorComponentProps) {
 					{status}
 				</div>
 
-				<details className="group border-line bg-panel w-full rounded-[10px] border text-left">
-					<summary className="text-fg-2 flex cursor-pointer list-none items-center justify-between px-3.5 py-2.5 text-xs [&::-webkit-details-marker]:hidden">
+				<Collapsible className="group border-line bg-panel w-full rounded-[10px] border text-left">
+					<CollapsibleTrigger className="text-fg-2 flex w-full cursor-pointer items-center justify-between px-3.5 py-2.5 text-xs">
 						Detalhes técnicos
-						<span className="num text-dim group-open:hidden">mostrar</span>
-						<span className="num text-dim hidden group-open:inline">
+						<span className="num text-dim group-data-open:hidden">mostrar</span>
+						<span className="num text-dim hidden group-data-open:inline">
 							esconder
 						</span>
-					</summary>
-					<div className="num border-line text-dim flex flex-col gap-1 border-t px-3.5 pt-2.5 pb-3 text-xs break-all">
-						<span>
-							<span className="text-[#F85149]">✗</span> {details[0]}
-						</span>
-						{details.slice(1).map((line) => (
-							<span key={line}>{line}</span>
-						))}
-					</div>
-					<div className="flex gap-2 px-3.5 pb-3">
-						<button
-							type="button"
-							onClick={copyDetails}
-							className="border-line-strong text-fg-2 hover:bg-hover hover:text-fg inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-[7px] border bg-transparent px-2.5 text-xs"
-						>
-							Copiar detalhes
-						</button>
-					</div>
-				</details>
+					</CollapsibleTrigger>
+					<CollapsibleContent>
+						<div className="num border-line text-dim flex flex-col gap-1 border-t px-3.5 pt-2.5 pb-3 text-xs break-all">
+							<span>
+								<span className="text-[#F85149]">✗</span> {details[0]}
+							</span>
+							{details.slice(1).map((line) => (
+								<span key={line}>{line}</span>
+							))}
+						</div>
+						<div className="flex gap-2 px-3.5 pb-3">
+							<button
+								type="button"
+								onClick={copyDetails}
+								className="border-line-strong text-fg-2 hover:bg-hover hover:text-fg inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-[7px] border bg-transparent px-2.5 text-xs"
+							>
+								Copiar detalhes
+							</button>
+						</div>
+					</CollapsibleContent>
+				</Collapsible>
 			</section>
 		</main>
 	);

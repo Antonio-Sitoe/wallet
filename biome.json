@@ -46,7 +46,7 @@
         "noLabelWithoutControl": {
           "level": "error",
           "options": {
-            "inputComponents": ["TextInput", "MoneyInput", "Select"]
+            "inputComponents": ["Input", "MoneyInput", "Select", "Checkbox"]
           }
         }
       },

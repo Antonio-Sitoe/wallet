@@ -3,6 +3,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import type { Transaction } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Input } from "@wallet/ui/components/input";
+import { Skeleton } from "@wallet/ui/components/skeleton";
 import { BusIcon, PlusIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -21,7 +22,6 @@ import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
 import {
 	addMonths,

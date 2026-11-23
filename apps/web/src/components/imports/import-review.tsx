@@ -8,6 +8,7 @@ import { useCommitImport } from "@/actions/imports/use-commit-import";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
 import { categoryItems } from "@/components/ui/category-items";
+import { Hint } from "@/components/ui/hint";
 import { Pill } from "@/components/ui/pill";
 import { Select } from "@/components/ui/select";
 import { Stat } from "@/components/ui/stat";
@@ -221,30 +222,34 @@ export function ImportReview({
 					<Button variant="neutral" onClick={onDone}>
 						Cancelar
 					</Button>
-					<Button
-						variant="primary"
-						disabled={unmapped.length > 0 || commit.isPending}
-						title={
+					<Hint
+						label={
 							unmapped.length
 								? "Mapeie todas as categorias primeiro"
 								: undefined
 						}
-						onClick={async () => {
-							const filled = Object.fromEntries(
-								Object.entries(categoryMap).filter(([, v]) => v),
-							);
-							const res = await commit.mutateAsync({
-								id: preview.id,
-								categoryMap: filled,
-								resolutions,
-							});
-							toast.success(
-								`Importadas ${res.result.transactions} transacções (${res.result.transfers} transferências)`,
-							);
-						}}
+						wrap
 					>
-						{commit.isPending ? "A importar…" : `Importar ${t.new} linhas`}
-					</Button>
+						<Button
+							variant="primary"
+							disabled={unmapped.length > 0 || commit.isPending}
+							onClick={async () => {
+								const filled = Object.fromEntries(
+									Object.entries(categoryMap).filter(([, v]) => v),
+								);
+								const res = await commit.mutateAsync({
+									id: preview.id,
+									categoryMap: filled,
+									resolutions,
+								});
+								toast.success(
+									`Importadas ${res.result.transactions} transacções (${res.result.transfers} transferências)`,
+								);
+							}}
+						>
+							{commit.isPending ? "A importar…" : `Importar ${t.new} linhas`}
+						</Button>
+					</Hint>
 				</div>
 			) : (
 				<Pill tone="ok" className="self-start">

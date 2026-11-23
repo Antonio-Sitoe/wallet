@@ -1,6 +1,7 @@
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { ACCOUNT_TYPES, type AccountType } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
+import { Skeleton } from "@wallet/ui/components/skeleton";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useAccounts } from "@/actions/accounts/use-accounts";
@@ -16,7 +17,6 @@ import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Pill } from "@/components/ui/pill";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { Swatch } from "@/components/ui/swatch";

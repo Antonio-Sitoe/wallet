@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { Account, AccountType } from "@wallet/shared";
+import { Skeleton } from "@wallet/ui/components/skeleton";
 import {
 	LandmarkIcon,
 	type LucideIcon,
@@ -9,7 +10,6 @@ import {
 	WalletIcon,
 } from "lucide-react";
 import { useAccounts } from "@/actions/accounts/use-accounts";
-import { Skeleton } from "@/components/ui/skeleton";
 import { money } from "@/utils/format";
 
 const ICON_BY_TYPE: Record<AccountType, LucideIcon> = {

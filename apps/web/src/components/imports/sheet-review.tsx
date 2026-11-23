@@ -1,11 +1,19 @@
 import type { SheetPreview } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
+import { Checkbox } from "@wallet/ui/components/checkbox";
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@wallet/ui/components/collapsible";
+import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useCategories } from "@/actions/categories/use-categories";
 import { useCommitSheet } from "@/actions/imports/use-commit-sheet";
 import { categoryItems } from "@/components/ui/category-items";
+import { Hint } from "@/components/ui/hint";
 import { Pill } from "@/components/ui/pill";
 import { Select } from "@/components/ui/select";
 import { GROUP_LABEL, MONTH_SHORT, money } from "@/utils/format";
@@ -111,24 +119,21 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 							createPayments: false,
 						};
 						return (
-							<details
+							<Collapsible
 								key={m.month}
 								className="border-hover border-b last:border-0"
 							>
-								<summary className="flex cursor-pointer flex-wrap items-center gap-3 px-3 py-2">
+								<div className="flex flex-wrap items-center gap-3 px-3 py-2">
 									<label className="flex items-center gap-2">
-										<input
-											type="checkbox"
+										<Checkbox
 											disabled={!draft}
 											checked={state.include}
-											onClick={(e) => e.stopPropagation()}
-											onChange={(e) =>
+											onCheckedChange={(checked) =>
 												setMonths((s) => ({
 													...s,
-													[m.month]: { ...state, include: e.target.checked },
+													[m.month]: { ...state, include: checked },
 												}))
 											}
-											className="size-4 accent-[#3FB950]"
 										/>
 										<span className="font-medium">{m.label}</span>
 									</label>
@@ -140,47 +145,60 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 										já registado {money(m.walletSpent)}
 									</span>
 									<label className="text-fg-2 flex items-center gap-1.5 text-xs">
-										<input
-											type="checkbox"
+										<Checkbox
 											disabled={!draft || !state.include}
 											checked={state.createPayments}
-											onClick={(e) => e.stopPropagation()}
-											onChange={(e) =>
+											onCheckedChange={(checked) =>
 												setMonths((s) => ({
 													...s,
 													[m.month]: {
 														...state,
-														createPayments: e.target.checked,
+														createPayments: checked,
 													},
 												}))
 											}
-											className="size-4 accent-[#3FB950]"
 										/>
 										criar pagamentos
 									</label>
-								</summary>
-								<ul className="bg-panel-2 px-3 py-2">
-									{m.items.map((i) => (
-										<li key={i.key} className="num flex gap-3 py-0.5 text-xs">
-											<span className="min-w-0 flex-1 truncate font-sans">
-												{i.name}
-												{i.planKey ? "" : " · não planeado"}
-											</span>
-											<span className="text-dim w-40 truncate">
-												{name(
-													i.key in overrides
-														? (overrides[i.key] ?? null)
-														: i.categoryId,
-												)}
-											</span>
-											<span className="w-20 text-right">{money(i.amount)}</span>
-											<span className="text-dim w-24 text-right">
-												{i.walletSpent ? `${money(i.walletSpent)} reg.` : ""}
-											</span>
-										</li>
-									))}
-								</ul>
-							</details>
+									<CollapsibleTrigger
+										render={
+											<Button
+												variant="quiet"
+												size="icon-sm"
+												aria-label={`Ver itens de ${m.label}`}
+												className="group/trigger"
+											/>
+										}
+									>
+										<ChevronDownIcon className="size-4 transition-transform group-data-panel-open/trigger:rotate-180" />
+									</CollapsibleTrigger>
+								</div>
+								<CollapsibleContent>
+									<ul className="bg-panel-2 px-3 py-2">
+										{m.items.map((i) => (
+											<li key={i.key} className="num flex gap-3 py-0.5 text-xs">
+												<span className="min-w-0 flex-1 truncate font-sans">
+													{i.name}
+													{i.planKey ? "" : " · não planeado"}
+												</span>
+												<span className="text-dim w-40 truncate">
+													{name(
+														i.key in overrides
+															? (overrides[i.key] ?? null)
+															: i.categoryId,
+													)}
+												</span>
+												<span className="w-20 text-right">
+													{money(i.amount)}
+												</span>
+												<span className="text-dim w-24 text-right">
+													{i.walletSpent ? `${money(i.walletSpent)} reg.` : ""}
+												</span>
+											</li>
+										))}
+									</ul>
+								</CollapsibleContent>
+							</Collapsible>
 						);
 					})}
 				</div>
@@ -222,40 +240,44 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 							]}
 						/>
 					</label>
-					<Button
-						variant="primary"
-						disabled={
-							included.length === 0 ||
-							commit.isPending ||
-							(paying.length > 0 && !accountId)
-						}
-						title={
+					<Hint
+						label={
 							paying.length > 0 && !accountId
 								? "Escolha a conta dos pagamentos"
 								: undefined
 						}
-						onClick={async () => {
-							const res = await commit.mutateAsync({
-								id: preview.id,
-								accountId: accountId || null,
-								months: preview.months.map((m) => ({
-									month: m.month,
-									...(months[m.month] ?? {
-										include: true,
-										createPayments: false,
-									}),
-								})),
-								categories: overrides,
-							});
-							toast.success(
-								`Folha importada: ${res.result?.monthItems ?? 0} itens, ${res.result?.payments ?? 0} pagamentos`,
-							);
-						}}
+						wrap
 					>
-						{commit.isPending
-							? "A importar…"
-							: `Importar ${included.length} meses${paying.length ? ` · pagar ${paying.length}` : ""}`}
-					</Button>
+						<Button
+							variant="primary"
+							disabled={
+								included.length === 0 ||
+								commit.isPending ||
+								(paying.length > 0 && !accountId)
+							}
+							onClick={async () => {
+								const res = await commit.mutateAsync({
+									id: preview.id,
+									accountId: accountId || null,
+									months: preview.months.map((m) => ({
+										month: m.month,
+										...(months[m.month] ?? {
+											include: true,
+											createPayments: false,
+										}),
+									})),
+									categories: overrides,
+								});
+								toast.success(
+									`Folha importada: ${res.result?.monthItems ?? 0} itens, ${res.result?.payments ?? 0} pagamentos`,
+								);
+							}}
+						>
+							{commit.isPending
+								? "A importar…"
+								: `Importar ${included.length} meses${paying.length ? ` · pagar ${paying.length}` : ""}`}
+						</Button>
+					</Hint>
 				</div>
 			) : null}
 		</div>

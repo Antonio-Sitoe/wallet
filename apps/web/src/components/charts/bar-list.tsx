@@ -1,3 +1,4 @@
+import { Hint } from "@/components/ui/hint";
 import { money } from "@/utils/format";
 
 export const SERIES = {
@@ -26,32 +27,32 @@ export function BarList({
 	return (
 		<ul aria-label={label} className="flex flex-col gap-2.5">
 			{rows.map((r) => (
-				<li
-					key={r.key}
-					className="grid grid-cols-[minmax(110px,1.2fr)_2fr_auto] items-center gap-3"
-					title={r.note}
-				>
-					<span className="flex min-w-0 items-center gap-2 truncate">
-						{r.dot ? (
+				<Hint key={r.key} label={r.note}>
+					<li className="grid grid-cols-[minmax(110px,1.2fr)_2fr_auto] items-center gap-3">
+						<span className="flex min-w-0 items-center gap-2 truncate">
+							{r.dot ? (
+								<span
+									aria-hidden="true"
+									className="size-2 shrink-0 rounded-sm"
+									style={{ background: r.dot }}
+								/>
+							) : null}
+							<span className="truncate">{r.name}</span>
+						</span>
+						<span className="bg-hover h-1.5 overflow-hidden rounded-full">
 							<span
-								aria-hidden="true"
-								className="size-2 shrink-0 rounded-sm"
-								style={{ background: r.dot }}
+								className="block h-1.5 rounded-full"
+								style={{
+									width: `${(r.value / max) * 100}%`,
+									background: SERIES.magnitude,
+								}}
 							/>
-						) : null}
-						<span className="truncate">{r.name}</span>
-					</span>
-					<span className="bg-hover h-1.5 overflow-hidden rounded-full">
-						<span
-							className="block h-1.5 rounded-full"
-							style={{
-								width: `${(r.value / max) * 100}%`,
-								background: SERIES.magnitude,
-							}}
-						/>
-					</span>
-					<span className="num min-w-[72px] text-right">{money(r.value)}</span>
-				</li>
+						</span>
+						<span className="num min-w-[72px] text-right">
+							{money(r.value)}
+						</span>
+					</li>
+				</Hint>
 			))}
 		</ul>
 	);

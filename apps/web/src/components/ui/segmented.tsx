@@ -1,3 +1,7 @@
+import {
+	ToggleGroup,
+	ToggleGroupItem,
+} from "@wallet/ui/components/toggle-group";
 import { cn } from "@wallet/ui/lib/utils";
 
 export function Segmented<T extends string>({
@@ -12,26 +16,27 @@ export function Segmented<T extends string>({
 	className?: string;
 }) {
 	return (
-		<div
+		<ToggleGroup
+			value={[value]}
+			onValueChange={(next) => {
+				const picked = next[0];
+				if (picked) onChange(picked as T);
+			}}
 			className={cn(
-				"border-line bg-canvas flex gap-0.5 rounded-lg border p-[3px]",
+				"border-line bg-canvas flex w-auto gap-0.5 rounded-lg border p-0.75",
 				className,
 			)}
 		>
 			{options.map((o) => (
-				<button
+				<ToggleGroupItem
 					key={o.value}
-					type="button"
-					aria-pressed={value === o.value}
-					onClick={() => onChange(o.value)}
-					className={cn(
-						"text-fg-2 h-7 flex-1 cursor-pointer rounded-md px-3 text-xs",
-						value === o.value && "bg-info-bg text-info font-medium",
-					)}
+					value={o.value}
+					size="sm"
+					className="text-fg-2 data-pressed:bg-info-bg data-pressed:text-info hover:text-fg h-7 flex-1 cursor-pointer rounded-md px-3 text-xs font-normal data-pressed:font-medium"
 				>
 					{o.label}
-				</button>
+				</ToggleGroupItem>
 			))}
-		</div>
+		</ToggleGroup>
 	);
 }

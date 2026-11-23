@@ -8,6 +8,7 @@ import { useUpdateCategory } from "@/actions/categories/use-update-category";
 import { KIND_LABEL } from "@/components/categories/utils";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
+import { Hint } from "@/components/ui/hint";
 import { Pill } from "@/components/ui/pill";
 import { useConfirm } from "@/contexts/confirm-context";
 
@@ -155,26 +156,32 @@ export function CategoryDetail({
 					>
 						{category.archived ? "Reactivar" : "Arquivar"}
 					</Button>
-					<Button
-						variant="danger"
-						className="ml-auto"
-						disabled={category.transactionCount > 0 || hasChildren}
-						title={
+					<Hint
+						label={
 							category.transactionCount > 0
 								? "Em uso: arquive em vez de apagar"
 								: hasChildren
 									? "Tem subcategorias"
 									: undefined
 						}
-						onClick={async () => {
-							if (!(await confirmAction({ title: `Apagar ${category.name}?` })))
-								return;
-							await remove.mutateAsync(category.id);
-							onDeleted();
-						}}
+						wrap
 					>
-						Apagar
-					</Button>
+						<Button
+							variant="danger"
+							className="ml-auto"
+							disabled={category.transactionCount > 0 || hasChildren}
+							onClick={async () => {
+								if (
+									!(await confirmAction({ title: `Apagar ${category.name}?` }))
+								)
+									return;
+								await remove.mutateAsync(category.id);
+								onDeleted();
+							}}
+						>
+							Apagar
+						</Button>
+					</Hint>
 				</div>
 			) : null}
 		</Dialog>

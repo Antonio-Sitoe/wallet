@@ -22,6 +22,7 @@ import {
 	HAS_RANGE_TOGGLE,
 } from "@/components/dashboard/utils";
 import { Card } from "@/components/ui/card";
+import { Hint } from "@/components/ui/hint";
 
 export function DashboardCardFrame({
 	card,
@@ -60,55 +61,58 @@ export function DashboardCardFrame({
 			className={`flex min-w-0 flex-col overflow-hidden ${card.size === "full" ? "lg:col-span-2" : ""} ${isDragging ? "ring-info-2/50 relative z-10 opacity-80 shadow-2xl ring-2" : ""}`}
 		>
 			<div className="border-line flex items-center gap-2 border-b px-4 py-3">
-				<button
-					type="button"
-					ref={setActivatorNodeRef}
-					{...attributes}
-					{...listeners}
-					aria-label="Arrastar para mudar a ordem"
-					title="Arrastar para mudar a ordem"
-					className={`text-faint hover:text-fg-2 touch-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-				>
-					<GripVerticalIcon className="size-4" aria-hidden="true" />
-				</button>
+				<Hint label={"Arrastar para mudar a ordem"}>
+					<button
+						type="button"
+						ref={setActivatorNodeRef}
+						{...attributes}
+						{...listeners}
+						aria-label="Arrastar para mudar a ordem"
+						className={`text-faint hover:text-fg-2 touch-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+					>
+						<GripVerticalIcon className="size-4" aria-hidden="true" />
+					</button>
+				</Hint>
 				<h2 className="min-w-0 flex-1 truncate text-sm font-semibold">
 					{cardTitle(card.type, period, card.config)}
 				</h2>
 				{hasFlow ? (
-					<button
-						type="button"
-						className="num border-line-strong text-fg-2 hover:bg-hover cursor-pointer rounded-md border px-2 py-0.5 text-[11px]"
-						onClick={() =>
-							update.mutate({
-								id: card.id,
-								config: {
-									...card.config,
-									flow: card.config.flow === "income" ? "expense" : "income",
-								},
-							})
-						}
-						title="Alternar entre saídas e entradas"
-					>
-						{card.config.flow === "income" ? "entradas" : "saídas"}
-					</button>
+					<Hint label={"Alternar entre saídas e entradas"}>
+						<button
+							type="button"
+							className="num border-line-strong text-fg-2 hover:bg-hover cursor-pointer rounded-md border px-2 py-0.5 text-[11px]"
+							onClick={() =>
+								update.mutate({
+									id: card.id,
+									config: {
+										...card.config,
+										flow: card.config.flow === "income" ? "expense" : "income",
+									},
+								})
+							}
+						>
+							{card.config.flow === "income" ? "entradas" : "saídas"}
+						</button>
+					</Hint>
 				) : null}
 				{hasRange ? (
-					<button
-						type="button"
-						className="num border-line-strong text-fg-2 hover:bg-hover cursor-pointer rounded-md border px-2 py-0.5 text-[11px]"
-						onClick={() =>
-							update.mutate({
-								id: card.id,
-								config: {
-									...card.config,
-									range: card.config.range === "year" ? "period" : "year",
-								},
-							})
-						}
-						title="Alternar entre o período escolhido e o ano inteiro"
-					>
-						{card.config.range === "year" ? "ano" : "período"}
-					</button>
+					<Hint label={"Alternar entre o período escolhido e o ano inteiro"}>
+						<button
+							type="button"
+							className="num border-line-strong text-fg-2 hover:bg-hover cursor-pointer rounded-md border px-2 py-0.5 text-[11px]"
+							onClick={() =>
+								update.mutate({
+									id: card.id,
+									config: {
+										...card.config,
+										range: card.config.range === "year" ? "period" : "year",
+									},
+								})
+							}
+						>
+							{card.config.range === "year" ? "ano" : "período"}
+						</button>
+					</Hint>
 				) : null}
 				<IconButton
 					label="Subir"

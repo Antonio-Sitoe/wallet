@@ -1,6 +1,7 @@
 import { getRouteApi } from "@tanstack/react-router";
 import { BUDGET_GROUPS, type PlanItemYear } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
+import { Skeleton } from "@wallet/ui/components/skeleton";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -15,13 +16,13 @@ import { PlanItemDialog } from "@/components/plan/plan-item-dialog";
 import { Th } from "@/components/plan/th";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Hint } from "@/components/ui/hint";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Pill } from "@/components/ui/pill";
 import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { ApiError } from "@/lib/api";
@@ -262,15 +263,18 @@ export function PlanPage() {
 																		: "#1F5F33";
 													return (
 														<td key={month} className="px-0.5 py-2">
-															<span
-																title={
+															<Hint
+																label={
 																	cell
 																		? `${month}: ${money(cell.spent)} / ${money(cell.planned)}`
 																		: undefined
 																}
-																className={`mx-auto block h-3.5 w-full max-w-[22px] rounded-[3px] ${month === nowMonth ? "ring-fg-2 ring-1" : ""}`}
-																style={{ background: color }}
-															/>
+															>
+																<span
+																	className={`mx-auto block h-3.5 w-full max-w-[22px] rounded-[3px] ${month === nowMonth ? "ring-fg-2 ring-1" : ""}`}
+																	style={{ background: color }}
+																/>
+															</Hint>
 														</td>
 													);
 												})}
@@ -303,13 +307,13 @@ export function PlanPage() {
 												por mês
 											</td>
 											{data.months.map((m) => (
-												<td
-													key={m.month}
-													className={`num px-0.5 py-2 text-center text-[10px] ${m.overIncome ? "text-warn" : "text-dim"}`}
-													title={money(m.planned)}
-												>
-													{Math.round(m.planned / 100_000)}k
-												</td>
+												<Hint key={m.month} label={money(m.planned)}>
+													<td
+														className={`num px-0.5 py-2 text-center text-[10px] ${m.overIncome ? "text-warn" : "text-dim"}`}
+													>
+														{Math.round(m.planned / 100_000)}k
+													</td>
+												</Hint>
 											))}
 											<td className="num px-3 py-2 text-right">
 												{money(data.totals.year)}

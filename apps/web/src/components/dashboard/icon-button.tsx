@@ -1,9 +1,14 @@
+import { Button } from "@wallet/ui/components/button";
+import { cn } from "@wallet/ui/lib/utils";
+import type * as React from "react";
+import { Hint } from "@/components/ui/hint";
+
 export function IconButton({
 	label,
 	children,
 	onClick,
 	disabled,
-	className = "flex",
+	className,
 }: {
 	className?: string;
 	label: string;
@@ -12,15 +17,17 @@ export function IconButton({
 	disabled?: boolean;
 }) {
 	return (
-		<button
-			type="button"
-			aria-label={label}
-			title={label}
-			disabled={disabled}
-			onClick={onClick}
-			className={`border-line-strong bg-hover text-fg-2 hover:text-fg ${className} size-7 cursor-pointer items-center justify-center rounded-md border disabled:cursor-not-allowed disabled:opacity-30`}
-		>
-			{children}
-		</button>
+		<Hint label={label}>
+			<Button
+				variant="neutral"
+				size="icon-sm"
+				aria-label={label}
+				disabled={disabled}
+				onClick={onClick}
+				className={cn("text-fg-2 hover:text-fg disabled:opacity-30", className)}
+			>
+				{children}
+			</Button>
+		</Hint>
 	);
 }

@@ -1,3 +1,9 @@
+import {
+	CardAction,
+	CardDescription,
+	CardHeader as CardHeaderRoot,
+	CardTitle,
+} from "@wallet/ui/components/card";
 import type * as React from "react";
 
 export function CardHeader({
@@ -10,14 +16,18 @@ export function CardHeader({
 	actions?: React.ReactNode;
 }) {
 	return (
-		<div className="border-line flex flex-wrap items-center justify-between gap-2 border-b px-3.5 py-3">
-			<div className="flex min-w-0 flex-col gap-0.5">
-				<h2 className="text-sm font-semibold">{title}</h2>
-				{meta ? <span className="num text-dim text-[11px]">{meta}</span> : null}
-			</div>
-			{actions ? (
-				<div className="flex flex-wrap items-center gap-2">{actions}</div>
+		<CardHeaderRoot className="border-line items-center gap-0.5 border-b px-3.5 py-3">
+			<CardTitle className="text-sm font-semibold">{title}</CardTitle>
+			{meta ? (
+				<CardDescription className="num text-dim text-[11px]">
+					{meta}
+				</CardDescription>
 			) : null}
-		</div>
+			{actions ? (
+				<CardAction className="row-span-2 flex flex-wrap items-center gap-2 self-center">
+					{actions}
+				</CardAction>
+			) : null}
+		</CardHeaderRoot>
 	);
 }

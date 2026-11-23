@@ -1,4 +1,5 @@
 import { Button } from "@wallet/ui/components/button";
+import { Skeleton } from "@wallet/ui/components/skeleton";
 import { useRef, useState } from "react";
 import { useSheetPreview } from "@/actions/imports/use-sheet-preview";
 import { useUploadSheet } from "@/actions/imports/use-upload-sheet";
@@ -6,7 +7,6 @@ import { SheetReview } from "@/components/imports/sheet-review";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
 import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export function SheetImport({
 	id,

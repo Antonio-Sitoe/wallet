@@ -1,6 +1,7 @@
 import { getRouteApi } from "@tanstack/react-router";
 import type { Category } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
+import { Skeleton } from "@wallet/ui/components/skeleton";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useCategories } from "@/actions/categories/use-categories";
@@ -14,7 +15,6 @@ import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Segmented } from "@/components/ui/segmented";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const route = getRouteApi("/_private/categories");
 

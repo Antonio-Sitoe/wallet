@@ -1,5 +1,11 @@
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyTitle,
+} from "@wallet/ui/components/empty";
 import type * as React from "react";
-import { Card } from "@/components/ui/card";
 
 export function EmptyState({
 	title,
@@ -11,16 +17,22 @@ export function EmptyState({
 	actions?: React.ReactNode;
 }) {
 	return (
-		<Card className="border-line-strong flex flex-col items-center gap-4 border-dashed px-6 py-12 text-center">
-			<h2 className="text-[17px] font-semibold">{title}</h2>
-			{children ? (
-				<div className="text-fg-2 max-w-[460px] leading-relaxed">
-					{children}
-				</div>
-			) : null}
+		<Empty className="border-line-strong bg-panel rounded-[10px] border border-dashed px-6 py-12">
+			<EmptyHeader className="max-w-[460px]">
+				<EmptyTitle className="text-fg text-[17px] font-semibold">
+					{title}
+				</EmptyTitle>
+				{children ? (
+					<EmptyDescription className="text-fg-2 text-[13px] leading-relaxed">
+						{children}
+					</EmptyDescription>
+				) : null}
+			</EmptyHeader>
 			{actions ? (
-				<div className="flex flex-wrap justify-center gap-2">{actions}</div>
+				<EmptyContent className="flex-row flex-wrap justify-center gap-2">
+					{actions}
+				</EmptyContent>
 			) : null}
-		</Card>
+		</Empty>
 	);
 }

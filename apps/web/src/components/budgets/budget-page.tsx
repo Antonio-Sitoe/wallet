@@ -1,6 +1,7 @@
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { BUDGET_GROUPS, type MonthItem } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
+import { Skeleton } from "@wallet/ui/components/skeleton";
 import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -18,7 +19,6 @@ import { ErrorNote } from "@/components/ui/error-note";
 import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { useConfirm } from "@/contexts/confirm-context";

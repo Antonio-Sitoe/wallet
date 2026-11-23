@@ -1,5 +1,6 @@
 import { getRouteApi } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
+import { Skeleton } from "@wallet/ui/components/skeleton";
 import { UploadIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -16,7 +17,6 @@ import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Pill } from "@/components/ui/pill";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useConfirm } from "@/contexts/confirm-context";
 import { dayKey, dayLabel } from "@/utils/format";
 
