@@ -24,7 +24,7 @@ export function LoginPage() {
 		setBusy(true);
 		const options = {
 			onSuccess: () => {
-				navigate({ to: "/dashboard" });
+				navigate({ to: "/" });
 			},
 			onError: (ctx: { error: { message?: string; statusText?: string } }) => {
 				toast.error(
