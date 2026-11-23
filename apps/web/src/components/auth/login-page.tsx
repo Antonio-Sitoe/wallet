@@ -3,6 +3,7 @@ import { Button } from "@wallet/ui/components/button";
 import { Input } from "@wallet/ui/components/input";
 import { useState } from "react";
 import { toast } from "sonner";
+import { BrandMark } from "@/components/ui/brand-mark";
 import { Card } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Segmented } from "@/components/ui/segmented";
@@ -47,22 +48,7 @@ export function LoginPage() {
 		<main className="bg-canvas flex min-h-svh items-center justify-center p-4">
 			<Card className="w-full max-w-[380px] overflow-hidden">
 				<div className="border-line flex items-center gap-2.5 border-b px-5 py-4">
-					<div className="bg-money flex size-7 items-center justify-center rounded-[7px]">
-						<svg
-							aria-hidden="true"
-							width="17"
-							height="17"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="#04130A"
-							strokeWidth="2.2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-						>
-							<rect x="3" y="6" width="18" height="13" rx="2" />
-							<path d="M16 12.5h2M3 9h18" />
-						</svg>
-					</div>
+					<BrandMark />
 					<div className="flex flex-col">
 						<h1 className="text-[15px] font-semibold">Wallet</h1>
 						<span className="num text-dim text-[11px]">

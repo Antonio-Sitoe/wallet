@@ -16,7 +16,7 @@ export function CardHeader({
 	actions?: React.ReactNode;
 }) {
 	return (
-		<CardHeaderRoot className="border-line items-center gap-0.5 border-b px-3.5 py-3">
+		<CardHeaderRoot className="border-line items-center gap-0.5 border-b px-3.5 py-3 max-sm:has-data-[slot=card-action]:grid-cols-1">
 			<CardTitle className="text-sm font-semibold">{title}</CardTitle>
 			{meta ? (
 				<CardDescription className="num text-dim text-[11px]">
@@ -24,7 +24,7 @@ export function CardHeader({
 				</CardDescription>
 			) : null}
 			{actions ? (
-				<CardAction className="row-span-2 flex flex-wrap items-center gap-2 self-center">
+				<CardAction className="flex flex-wrap items-center gap-2 max-sm:col-start-1 max-sm:row-span-1 max-sm:row-start-auto max-sm:mt-2 max-sm:justify-self-start sm:row-span-2 sm:self-center">
 					{actions}
 				</CardAction>
 			) : null}

@@ -197,7 +197,7 @@ export function Dashboard() {
 				<AccountTiles />
 
 				{unset[0] ? (
-					<div className="border-warn-line flex flex-wrap items-center gap-3 rounded-[10px] border bg-[#221608] px-4 py-3 text-[#F0C9A2]">
+					<div className="border-warn-line rounded-card bg-warn-bg text-warn-fg flex flex-wrap items-center gap-3 border px-4 py-3">
 						<TriangleAlertIcon
 							className="text-warn size-4"
 							aria-hidden="true"

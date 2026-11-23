@@ -6,8 +6,8 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 
 ## 0. Preparação
 
-- [ ] API a correr: `npm run dev` em `apps/server` (porta 3000). `GET http://localhost:3000/` responde `OK`.
-- [ ] Web a correr: `npm run dev` em `apps/web` (porta 3001).
+- [x] API a correr: `npm run dev` em `apps/server` (porta 3000). `GET http://localhost:3000/` responde `OK`.
+- [x] Web a correr: `npm run dev` em `apps/web` (porta 3001).
 - [ ] Ter à mão:
   - os 3 CSV exportados do Wallet;
   - a folha "Calculo Financeiro" (.xlsx);
@@ -27,39 +27,41 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 
 ## 1. Autenticação
 
-- [ ] **A1** Abrir `/dashboard` sem sessão → redirecciona para `/login`.
-- [ ] **A2** Criar conta com palavra-passe de 7 caracteres → erro "pelo menos 8 caracteres".
-- [ ] **A3** Criar conta com nome, email e palavra-passe válidos → entra e vai para o painel.
-- [ ] **A4** Criar conta com um email que já existe → mensagem de erro, sem entrar.
-- [ ] **A5** Sair (ícone na barra lateral) → volta ao `/login`.
-- [ ] **A6** Entrar com a palavra-passe errada → erro, continua no login.
-- [ ] **A7** Entrar com as credenciais certas → painel.
-- [ ] **A8** Recarregar a página (F5) → a sessão mantém-se.
-- [ ] **A9** Isolamento: entrar com o segundo utilizador → não vê contas, transacções, categorias editadas nem orçamento do primeiro.
+- [x] **A1** Abrir `/dashboard` sem sessão → redirecciona para `/login`.
+- [x] **A2** Criar conta com palavra-passe de 7 caracteres → erro "pelo menos 8 caracteres".
+- [x] **A3** Criar conta com nome, email e palavra-passe válidos → entra e vai para o painel.
+- [x] **A4** Criar conta com um email que já existe → mensagem de erro, sem entrar.
+- [x] **A5** Sair (ícone na barra lateral) → volta ao `/login`.
+- [x] **A6** Entrar com a palavra-passe errada → erro, continua no login.
+- [x] **A7** Entrar com as credenciais certas → painel.
+- [x] **A8** Recarregar a página (F5) → a sessão mantém-se.
+- [x] **A9** Isolamento: entrar com o segundo utilizador → não vê contas, transacções, categorias editadas nem orçamento do primeiro.
 
 ## 2. Navegação, atalhos e estados globais
 
-- [ ] **N1** A barra lateral tem Painel, Orçamento, Plano anual, Transacções, Contas, Categorias e Importar, e cada link abre a página certa.
-- [ ] **N2** `⌘/Ctrl + 1…7` abre as páginas pela ordem do menu.
-- [ ] **N3** `⌘/Ctrl + N` em qualquer página abre "Nova transacção".
-- [ ] **N4** A lista de contas da barra lateral mostra os saldos e muda logo depois de uma transacção.
-- [ ] **N5** Um URL inexistente (`/xpto`) mostra a página 404, com links para as secções.
-- [ ] **N6** Com a API parada, recarregar mostra a página de erro de ligação. "mostrar" abre os detalhes e copiar diz "Detalhes copiados". Com a API de volta, a app recupera.
-- [ ] **N7** Durante os carregamentos aparece o loader ou os skeletons, sem ecrã branco.
-- [ ] **N8** Responsivo: a largura de telemóvel (~390 px) não tem scroll horizontal e o menu continua acessível.
+- [x] **N1** A barra lateral tem Painel, Orçamento, Plano anual, Transacções, Contas, Categorias e Importar, e cada link abre a página certa.
+- [x] **N2** `⌘/Ctrl + 1…7` abre as páginas pela ordem do menu.
+- [x] **N3** `⌘/Ctrl + N` em qualquer página abre "Nova transacção".
+- [x] **N4** A lista de contas da barra lateral mostra os saldos e muda logo depois de uma transacção.
+- [x] **N5** Um URL inexistente (`/xpto`) mostra a página 404, com links para as secções.
+- [x] **N6** Com a API parada, recarregar mostra a página de erro de ligação. "mostrar" abre os detalhes e copiar diz "Detalhes copiados". Com a API de volta, a app recupera.
+- [x] **N7** Durante os carregamentos aparece o loader ou os skeletons, sem ecrã branco.
+- [x] **N8** Responsivo: a largura de telemóvel (~390 px) não tem scroll horizontal e o menu continua acessível.
 
 ## 3. Contas
 
 ### Criar e ver
-- [ ] **C1** Sem contas, a página mostra "Ainda não há contas" com os botões "Criar conta" e "Importar do Wallet".
-- [ ] **C2** "Nova conta" abre o formulário: nome, tipo, saldo inicial e cor.
-- [ ] **C3** Criar as 4 contas de referência → toast "Conta … criada", e cada uma aparece no seu grupo (Bancos, Poupança, Dinheiro e carteiras).
+
+- [x] **C1** Sem contas, a página mostra "Ainda não há contas" com os botões "Criar conta" e "Importar do Wallet".
+- [x] **C2** "Nova conta" abre o formulário: nome, tipo, saldo inicial e cor.
+- [x] **C3** Criar as 4 contas de referência → toast "Conta … criada", e cada uma aparece no seu grupo (Bancos, Poupança, Dinheiro e carteiras).
 - [ ] **C4** Nome vazio → não deixa criar.
 - [ ] **C5** Nome repetido com outra capitalização ("fcbank") → erro de nome duplicado.
 - [ ] **C6** Saldo inicial vazio → a conta é criada com 0.
 - [ ] **C7** Os totais no topo batem com as contas: total 10 500,00, Bancos 10 000,00, Poupança 0, Dinheiro e carteiras 500,00.
 
 ### Editar, arquivar e apagar
+
 - [ ] **C8** Seleccionar uma conta mostra o detalhe com os movimentos recentes ("Sem movimentos." quando não há).
 - [ ] **C9** Mudar o nome, o tipo e a cor → "Conta actualizada", e a mudança aparece na lista, na barra lateral e no painel.
 - [ ] **C10** Arquivar M-Pesa → desaparece da lista e do painel. "Mostrar arquivadas" mostra-a com a etiqueta "arquivada". Desarquivar → volta.
@@ -67,11 +69,13 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 - [ ] **C12** Apagar uma conta com transacções → recusa e sugere arquivar.
 
 ### Saldo real e acertos
+
 - [ ] **C13** No detalhe, "Saldo real hoje" = 12 000,00 em FCBANK → o saldo passa a 12 000,00 e aparece uma transacção "Acerto de saldo" de +2 000,00. O saldo inicial fica igual.
 - [ ] **C14** "Validar saldos" abre o diálogo com todas as contas activas. Alterar duas → "2 saldos acertados", com um acerto por conta.
 - [ ] **C15** Validar com o mesmo saldo → não cria nenhum acerto.
 
 ### Começar do zero
+
 - [ ] **C16** "Começar do zero" → "Zerar saldos (recomendado)" → todas as contas ficam a 0 com acertos, e o histórico mantém-se.
 - [ ] **C17** "Apagar tudo" fica desactivado até escrever exactamente `APAGAR`.
 - [ ] **C18** "Apagar tudo" → apaga transacções, transferências e importações. As contas ficam (com saldo inicial) e o toast diz quantas transacções saíram.
@@ -95,6 +99,7 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 ## 5. Transacções
 
 ### Nova transacção (diálogo)
+
 - [ ] **T1** Abrir com o botão, com `⌘N` e no painel com "Nova transacção".
 - [ ] **T2** Despesa de 250 em Numerário, categoria Transporte → toast "Despesa de 250,00…", e o saldo de Numerário desce 250.
 - [ ] **T3** Entrada de 55 000 em FCBANK, categoria Salário → o saldo sobe 55 000.
@@ -109,6 +114,7 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 - [ ] **T12** Pesquisa de categoria: escrever "trans" filtra a lista.
 
 ### Lista, filtros e detalhe
+
 - [ ] **T13** "Transporte 100" cria uma despesa de 100 na conta Dinheiro. Sem nenhuma conta de dinheiro → "Crie uma conta primeiro".
 - [ ] **T14** O filtro de período (30 dias, mês, …) muda a lista.
 - [ ] **T15** Filtro por conta → só mostra movimentos dessa conta, incluindo as pernas das transferências.
@@ -121,6 +127,7 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 - [ ] **T22** Clicar numa linha abre o detalhe ao lado e a linha fica seleccionada.
 
 ### Editar e apagar
+
 - [ ] **T23** Editar o valor, a categoria, a nota e o payee → "Transacção guardada", e os saldos ficam actualizados.
 - [ ] **T24** Mudar a data para outro mês → o mês do orçamento acompanha, desde que não tenha sido mudado à mão.
 - [ ] **T25** Com o mês do orçamento definido à mão e diferente da data, mudar a data → o mês fica o que foi escolhido.
@@ -176,6 +183,7 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 ## 8. Importação
 
 ### CSV do Wallet
+
 - [ ] **I1** Escolher ficheiros que não são .csv → erro "Escolha ficheiros .csv exportados do Wallet".
 - [ ] **I2** Carregar os 3 CSV → pré-visualização com ficheiros, contas (marca as que já existem), categorias, e os totais: novas, duplicadas, transferências, Xitique, mês da nota e para rever.
 - [ ] **I3** Com uma categoria do Wallet sem mapeamento, "Importar" fica desactivado.
@@ -188,6 +196,7 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 - [ ] **I10** Apagar um rascunho → desaparece sem mexer em nada.
 
 ### Folha "Calculo Financeiro" (.xlsx)
+
 - [ ] **I11** Escolher o ano e carregar a folha → mostra os meses encontrados, os itens recorrentes e as linhas ignoradas.
 - [ ] **I12** Um ficheiro inválido ou sem meses → erro claro.
 - [ ] **I13** Desmarcar meses → só os marcados são importados, e o botão mostra quantos são.
@@ -199,6 +208,7 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 ## 9. Painel
 
 ### Saldos das contas (faixa fixa)
+
 - [ ] **D1** Os saldos aparecem no topo, um cartão por conta activa, com o ícone do tipo, a cor da conta, o nome e o saldo em MZN.
 - [ ] **D2** Um saldo negativo aparece na cor de aviso.
 - [ ] **D3** Clicar num cartão abre essa conta em Contas.
@@ -208,12 +218,14 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 - [ ] **D7** Grelha: 5 por linha num ecrã largo, 2–3 num tablet e 1 num telemóvel.
 
 ### Período e avisos
+
 - [ ] **D8** O selector de período (mês, 30 dias, ano) e as setas mudam o intervalo, e o texto do intervalo fica certo.
 - [ ] **D9** O período fica no URL e mantém-se ao recarregar.
 - [ ] **D10** Uma conta com saldo negativo e saldo inicial 0 mostra o aviso "o export do Wallet não traz saldos iniciais", e "Definir saldos →" abre "Validar saldos".
 - [ ] **D11** A saudação mostra o mês e o resumo da lista (itens, pagos, parcial, por pagar).
 
 ### Cartas
+
 - [ ] **D12** Um utilizador novo vê o painel por defeito (Resumo, Fluxo de caixa no ano, Contas, Onde vai o dinheiro, Próximos por pagar, Comparação, Últimas transacções).
 - [ ] **D13** "Adicionar carta" lista os 9 tipos, e adicionar um põe-no no fim.
 - [ ] **D14** Cada carta mostra dados coerentes com Transacções no mesmo período:
@@ -233,6 +245,7 @@ Testes manuais de tudo o que a app faz até agora (fases 1–3 e o painel novo).
 - [ ] **D19** "Repor painel inicial" → pede confirmação → volta às cartas por defeito.
 
 ### Arrastar e largar
+
 - [ ] **D20** Arrastar pela pega (⋮⋮) move a carta, e as outras afastam-se em tempo real.
 - [ ] **D21** Funciona entre cartas de tamanhos diferentes (meia e inteira).
 - [ ] **D22** Largar fora da grelha ou no mesmo sítio → nada muda.
@@ -265,6 +278,6 @@ Depois de fazeres as secções acima, confirma que estes números batem entre p�
 
 ### Registo de falhas
 
-| ID | O que fiz | O que esperava | O que aconteceu | Captura |
-| -- | --------- | -------------- | --------------- | ------- |
-|    |           |                |                 |         |
+| ID  | O que fiz | O que esperava | O que aconteceu | Captura |
+| --- | --------- | -------------- | --------------- | ------- |
+|     |           |                |                 |         |

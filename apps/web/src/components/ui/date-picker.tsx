@@ -44,7 +44,7 @@ export function DatePicker({
 				id={id}
 				aria-label={ariaLabel}
 				className={cn(
-					"border-input bg-background hover:bg-secondary focus-visible:border-ring focus-visible:ring-ring/50 num flex h-[34px] w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border px-2.5 text-left text-[13px] outline-none focus-visible:ring-3",
+					"border-input bg-background hover:bg-secondary focus-visible:border-ring focus-visible:ring-ring/50 num h-input flex w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border px-2.5 text-left text-[13px] outline-none focus-visible:ring-3",
 					!value && "text-muted-foreground",
 					className,
 				)}

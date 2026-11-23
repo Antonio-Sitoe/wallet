@@ -82,7 +82,7 @@ export function BudgetPage() {
 								key={m}
 								to="/budget"
 								search={{ month: m }}
-								className={`rounded-[5px] border px-2 py-1 no-underline ${d === 0 ? "border-line-strong text-fg bg-[#21262D]" : "text-dim hover:text-fg border-transparent"}`}
+								className={`rounded-check border px-2 py-1 no-underline ${d === 0 ? "border-line-strong text-fg bg-track" : "text-dim hover:text-fg border-transparent"}`}
 							>
 								{shortMonth(m)}
 							</Link>

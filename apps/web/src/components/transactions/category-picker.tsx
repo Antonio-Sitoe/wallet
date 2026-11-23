@@ -7,6 +7,7 @@ import {
 import { SearchIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Hint } from "@/components/ui/hint";
+import { tint } from "@/utils/color";
 
 export function CategoryPicker({
 	categories,
@@ -41,9 +42,9 @@ export function CategoryPicker({
 		<div
 			role="listbox"
 			aria-label="Escolher categoria"
-			className="bg-hover -mt-2 flex w-full flex-col gap-2 rounded-xl border border-[#30363d] p-2.5"
+			className="bg-hover border-line-overlay -mt-2 flex w-full flex-col gap-2 rounded-xl border p-2.5"
 		>
-			<InputGroup className="border-line-strong bg-canvas h-8 rounded-[7px]">
+			<InputGroup className="border-line-strong bg-canvas rounded-control h-8">
 				<InputGroupAddon>
 					<SearchIcon aria-hidden="true" className="text-dim size-[13px]" />
 				</InputGroupAddon>
@@ -78,7 +79,7 @@ export function CategoryPicker({
 							>
 								<b
 									className="num flex size-[34px] items-center justify-center rounded-[9px] text-[13px]"
-									style={{ background: `${color}26`, color }}
+									style={{ background: tint(color, 15), color }}
 								>
 									{c.name.slice(0, 2)}
 								</b>

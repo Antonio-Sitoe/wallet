@@ -2,6 +2,7 @@ import type { FastifyRequest } from "fastify";
 
 import { parse } from "../../shared/utils/validate";
 import {
+	balanceQuery,
 	breakdownQuery,
 	categoriesQuery,
 	periodQuery,
@@ -24,9 +25,9 @@ export class AnalyticsController {
 	};
 
 	balance = async (req: FastifyRequest) => {
-		const { from, to, bucket } = parse(trendQuery, req.query);
+		const { from, to, bucket, accountId } = parse(balanceQuery, req.query);
 		parse(periodQuery, { from, to });
-		return this.service.balance(req.userId, from, to, bucket);
+		return this.service.balance(req.userId, from, to, bucket, accountId);
 	};
 
 	categories = async (req: FastifyRequest) => {

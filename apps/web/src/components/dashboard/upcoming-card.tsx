@@ -33,7 +33,7 @@ export function UpcomingCard({ period }: { period: Period }) {
 					>
 						<span
 							aria-hidden="true"
-							className="size-[18px] rounded-[5px] border-[1.5px] border-[#6E7681]"
+							className="size-check rounded-check border-control border-[1.5px]"
 						/>
 						<span className="min-w-0 flex-1 truncate">{i.name}</span>
 						{i.status === "partial" ? <StatusPill status="partial" /> : null}

@@ -48,7 +48,7 @@ export function NotFound() {
 				<div className="flex flex-wrap items-center justify-center gap-2.5">
 					<Link
 						to="/dashboard"
-						className="bg-money text-money-ink hover:bg-money-2 focus-visible:ring-offset-canvas focus-visible:ring-money inline-flex h-11 items-center justify-center gap-2.5 rounded-[10px] px-[22px] text-[15px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+						className="bg-money text-money-ink hover:bg-money-2 focus-visible:ring-offset-canvas focus-visible:ring-money rounded-card inline-flex h-11 items-center justify-center gap-2.5 px-[22px] text-[15px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
 					>
 						<LayoutDashboardIcon
 							aria-hidden="true"
@@ -60,7 +60,7 @@ export function NotFound() {
 					<Button
 						variant="neutral"
 						onClick={() => router.history.back()}
-						className="border-line-strong text-fg-2 hover:bg-hover hover:text-fg focus-visible:ring-info-2 inline-flex h-11 cursor-pointer items-center gap-2 rounded-[10px] border bg-transparent px-[18px] text-sm outline-none focus-visible:ring-2"
+						className="border-line-strong text-fg-2 hover:bg-hover hover:text-fg focus-visible:ring-info-2 rounded-card inline-flex h-11 cursor-pointer items-center gap-2 border bg-transparent px-[18px] text-sm outline-none focus-visible:ring-2"
 					>
 						<ArrowLeftIcon aria-hidden="true" className="size-4" />
 						Voltar

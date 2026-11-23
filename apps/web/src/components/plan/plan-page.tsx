@@ -22,7 +22,7 @@ import { useUpdatePlan } from "@/actions/plan/use-update-plan";
 import { CreatePlan } from "@/components/plan/create-plan";
 import { Legend } from "@/components/plan/legend";
 import { PlanItemDialog } from "@/components/plan/plan-item-dialog";
-import { Th } from "@/components/plan/th";
+import { STICKY_COLUMN, Th } from "@/components/plan/th";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Hint } from "@/components/ui/hint";
@@ -210,7 +210,7 @@ export function PlanPage() {
 								<Table className="w-full min-w-[980px] border-collapse text-[13px]">
 									<TableHeader>
 										<TableRow className="bg-panel-2 border-0 hover:bg-transparent">
-											<Th>Item</Th>
+											<Th sticky>Item</Th>
 											<Th>Frequência</Th>
 											<Th right>Valor</Th>
 											{MONTH_INITIALS.map((m, i) => (
@@ -233,10 +233,12 @@ export function PlanPage() {
 										).map((item) => (
 											<TableRow
 												key={item.id}
-												className="border-hover hover:bg-hover cursor-pointer border-b"
+												className="group border-hover hover:bg-hover cursor-pointer border-b"
 												onClick={() => setEditing(item)}
 											>
-												<TableCell className="px-3 py-2 whitespace-normal">
+												<TableCell
+													className={`${STICKY_COLUMN} bg-panel group-hover:bg-hover max-w-[160px] px-3 py-2 whitespace-normal md:max-w-none`}
+												>
 													<button
 														type="button"
 														className="cursor-pointer text-left font-medium"
@@ -260,16 +262,16 @@ export function PlanPage() {
 														(m) => m.month === month,
 													);
 													const color = !cell
-														? "#161B22"
+														? "var(--color-hover)"
 														: cell.status === "over"
-															? "#F0883E"
+															? "var(--color-over)"
 															: cell.status === "paid"
-																? "#3FB950"
+																? "var(--color-money)"
 																: cell.status === "partial"
-																	? "#58A6FF"
+																	? "var(--color-info-2)"
 																	: month < nowMonth
-																		? "#5A3416"
-																		: "#1F5F33";
+																		? "var(--color-missed)"
+																		: "var(--color-planned)";
 													return (
 														<TableCell
 															key={month}
@@ -338,11 +340,13 @@ export function PlanPage() {
 									</TableFooter>
 								</Table>
 								<div className="num border-line text-dim flex flex-wrap gap-4 border-t px-3 py-2 text-[11px]">
-									<Legend color="#1F5F33">planeado</Legend>
-									<Legend color="#58A6FF">parcial</Legend>
-									<Legend color="#3FB950">pago</Legend>
-									<Legend color="#F0883E">acima</Legend>
-									<Legend color="#5A3416">passou sem pagamento</Legend>
+									<Legend color="var(--color-planned)">planeado</Legend>
+									<Legend color="var(--color-info-2)">parcial</Legend>
+									<Legend color="var(--color-money)">pago</Legend>
+									<Legend color="var(--color-over)">acima</Legend>
+									<Legend color="var(--color-missed)">
+										passou sem pagamento
+									</Legend>
 									<span>
 										meses acima do salário previsto a laranja · clique num item
 										para editar

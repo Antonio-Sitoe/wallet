@@ -24,12 +24,12 @@ export function SidebarAccounts() {
 						key={a.id}
 						to="/accounts"
 						search={{ id: a.id }}
-						className="text-fg-2 hover:bg-hover hover:text-fg flex h-[30px] items-center gap-2.5 rounded-md px-2 no-underline"
+						className="text-fg-2 hover:bg-hover hover:text-fg h-row flex items-center gap-2.5 rounded-md px-2 no-underline"
 					>
 						<span
 							aria-hidden="true"
 							className="size-2 rounded-sm"
-							style={{ background: a.color ?? "#8B949E" }}
+							style={{ background: a.color ?? "var(--color-dim)" }}
 						/>
 						<span className="min-w-0 flex-1 truncate">{a.name}</span>
 						<span

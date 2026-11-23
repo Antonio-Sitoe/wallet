@@ -20,14 +20,15 @@ function serviceWith(
 		transactions: {
 			dailyTotals: async () => [],
 			netBefore: async () => 0,
+			dailyNet: async () => [],
 			categoryTotals: async (_u, from, to) => inRange(from, to),
 			accountTotals: async (_u, from, to) => inRange(from, to),
 		},
 		accounts: {
 			initialTotal: async () => 0,
 			list: async () => [
-				{ id: "bci", name: "BCI", color: "#58A6FF" },
-				{ id: "cash", name: "Numerário", color: null },
+				{ id: "bci", name: "BCI", color: "#58A6FF", initialBalance: 0 },
+				{ id: "cash", name: "Numerário", color: null, initialBalance: 0 },
 			],
 		},
 		categories: {

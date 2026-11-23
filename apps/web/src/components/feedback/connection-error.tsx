@@ -117,7 +117,7 @@ export function ConnectionError({ error }: ErrorComponentProps) {
 		}
 	};
 
-	const ledColor = busy ? "#D29922" : "#F85149";
+	const ledColor = busy ? "var(--color-caution)" : "var(--color-danger-2)";
 	const status = busy
 		? `a ligar a ${SERVER_HOST}…`
 		: offline
@@ -153,7 +153,7 @@ export function ConnectionError({ error }: ErrorComponentProps) {
 					variant="primary"
 					onClick={() => void retry()}
 					aria-busy={busy}
-					className="bg-money text-money-ink hover:bg-money-2 focus-visible:ring-offset-canvas focus-visible:ring-money inline-flex h-11 cursor-pointer items-center justify-center gap-2.5 rounded-[10px] px-[22px] text-[15px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+					className="bg-money text-money-ink hover:bg-money-2 focus-visible:ring-offset-canvas focus-visible:ring-money rounded-card inline-flex h-11 cursor-pointer items-center justify-center gap-2.5 px-[22px] text-[15px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
 				>
 					<RotateCwIcon
 						aria-hidden="true"
@@ -161,7 +161,7 @@ export function ConnectionError({ error }: ErrorComponentProps) {
 						strokeWidth={2.4}
 					/>
 					{busy ? "A tentar…" : "Tentar de novo"}
-					<span className="num rounded bg-[rgba(4,19,10,.18)] px-[5px] text-[11px]">
+					<span className="num bg-money-ink/18 rounded px-[5px] text-[11px]">
 						⌘R
 					</span>
 				</Button>
@@ -177,7 +177,7 @@ export function ConnectionError({ error }: ErrorComponentProps) {
 					{status}
 				</div>
 
-				<Collapsible className="group border-line bg-panel w-full rounded-[10px] border text-left">
+				<Collapsible className="group border-line bg-panel rounded-card w-full border text-left">
 					<CollapsibleTrigger className="text-fg-2 flex w-full cursor-pointer items-center justify-between px-3.5 py-2.5 text-xs">
 						Detalhes técnicos
 						<span className="num text-dim group-data-open:hidden">mostrar</span>
@@ -188,7 +188,7 @@ export function ConnectionError({ error }: ErrorComponentProps) {
 					<CollapsibleContent>
 						<div className="num border-line text-dim flex flex-col gap-1 border-t px-3.5 pt-2.5 pb-3 text-xs break-all">
 							<span>
-								<span className="text-[#F85149]">✗</span> {details[0]}
+								<span className="text-danger-2">✗</span> {details[0]}
 							</span>
 							{details.slice(1).map((line) => (
 								<span key={line}>{line}</span>
@@ -199,7 +199,7 @@ export function ConnectionError({ error }: ErrorComponentProps) {
 								variant="neutral"
 								size="sm"
 								onClick={copyDetails}
-								className="border-line-strong text-fg-2 hover:bg-hover hover:text-fg inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-[7px] border bg-transparent px-2.5 text-xs"
+								className="border-line-strong text-fg-2 hover:bg-hover hover:text-fg rounded-control inline-flex h-8 cursor-pointer items-center gap-1.5 border bg-transparent px-2.5 text-xs"
 							>
 								Copiar detalhes
 							</Button>

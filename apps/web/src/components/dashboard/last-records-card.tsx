@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowLeftRightIcon, ScaleIcon } from "lucide-react";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useCategories } from "@/actions/categories/use-categories";
 import { useTransactionPages } from "@/actions/transactions/use-transaction-pages";
 import { Empty } from "@/components/dashboard/empty";
 import { Loading } from "@/components/dashboard/loading";
+import { tint } from "@/utils/color";
 import { dayKey, dayLabel, signedMoney } from "@/utils/format";
 
 export function LastRecordsCard() {
@@ -27,15 +29,17 @@ export function LastRecordsCard() {
 								aria-hidden="true"
 								className="num flex size-7 items-center justify-center rounded-md text-xs font-semibold"
 								style={{
-									background: `${c?.color ?? "#8B949E"}24`,
-									color: c?.color ?? "#8B949E",
+									background: tint(c?.color ?? "var(--color-dim)"),
+									color: c?.color ?? "var(--color-dim)",
 								}}
 							>
-								{t.type === "transfer"
-									? "⇄"
-									: t.type === "adjustment"
-										? "≈"
-										: (c?.name[0] ?? "?")}
+								{t.type === "transfer" ? (
+									<ArrowLeftRightIcon className="size-3.5" />
+								) : t.type === "adjustment" ? (
+									<ScaleIcon className="size-3.5" />
+								) : (
+									(c?.name[0] ?? "?")
+								)}
 							</span>
 							<span className="flex min-w-0 flex-1 flex-col">
 								<span className="truncate">

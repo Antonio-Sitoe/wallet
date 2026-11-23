@@ -1,4 +1,5 @@
 import { cn } from "@wallet/ui/lib/utils";
+import { tint } from "@/utils/color";
 
 export function Swatch({
 	color,
@@ -9,7 +10,7 @@ export function Swatch({
 	label?: string;
 	className?: string;
 }) {
-	const c = color ?? "#8B949E";
+	const c = color ?? "var(--color-dim)";
 	return (
 		<span
 			aria-hidden="true"
@@ -17,7 +18,7 @@ export function Swatch({
 				"num inline-flex size-7 shrink-0 items-center justify-center rounded-md text-xs font-semibold",
 				className,
 			)}
-			style={{ background: `${c}24`, color: c }}
+			style={{ background: tint(c), color: c }}
 		>
 			{label}
 		</span>

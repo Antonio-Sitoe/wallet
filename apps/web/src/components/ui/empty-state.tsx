@@ -17,7 +17,7 @@ export function EmptyState({
 	actions?: React.ReactNode;
 }) {
 	return (
-		<Empty className="border-line-strong bg-panel rounded-[10px] border border-dashed px-6 py-12">
+		<Empty className="border-line-strong bg-panel rounded-card border border-dashed px-6 py-12">
 			<EmptyHeader className="max-w-[460px]">
 				<EmptyTitle className="text-fg text-[17px] font-semibold">
 					{title}

@@ -1,5 +1,6 @@
 import type { BudgetGroup, MonthItem } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
+import { CheckIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { StatusPill } from "@/components/ui/status-pill";
@@ -60,7 +61,7 @@ export function GroupCard({
 					>
 						{item.partial ? (
 							<span
-								className="num border-line-strong text-dim flex size-[18px] items-center justify-center rounded-[5px] border text-[10px]"
+								className="num border-line-strong text-dim size-check rounded-check flex items-center justify-center border text-[10px]"
 								aria-hidden="true"
 							>
 								≈
@@ -77,20 +78,14 @@ export function GroupCard({
 								onClick={() =>
 									item.payments.length > 0 ? onUncheck(item) : onCheck(item)
 								}
-								className={`flex size-[18px] cursor-pointer items-center justify-center rounded-[5px] border-[1.5px] ${item.checked ? "border-money bg-money text-money-ink" : "hover:border-info-2 border-[#6E7681]"}`}
+								className={`size-check rounded-check flex cursor-pointer items-center justify-center border-[1.5px] ${item.checked ? "border-money bg-money text-money-ink" : "hover:border-info-2 border-control"}`}
 							>
 								{item.checked ? (
-									<svg
-										width="11"
-										height="11"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="4"
+									<CheckIcon
 										aria-hidden="true"
-									>
-										<path d="M5 12l5 5L20 7" />
-									</svg>
+										className="size-[11px]"
+										strokeWidth={4}
+									/>
 								) : null}
 							</button>
 						)}

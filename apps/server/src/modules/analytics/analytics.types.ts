@@ -5,7 +5,13 @@ export type AnalyticsDeps = {
 			from: Date,
 			to: Date,
 		): Promise<{ day: string; income: number; expense: number }[]>;
-		netBefore(userId: string, at: Date): Promise<number>;
+		netBefore(userId: string, at: Date, accountId?: string): Promise<number>;
+		dailyNet(
+			userId: string,
+			from: Date,
+			to: Date,
+			accountId?: string,
+		): Promise<{ day: string; net: number }[]>;
 		categoryTotals(
 			userId: string,
 			from: Date,
@@ -21,9 +27,14 @@ export type AnalyticsDeps = {
 	};
 	accounts: {
 		initialTotal(userId: string): Promise<number>;
-		list(
-			userId: string,
-		): Promise<{ id: string; name: string; color: string | null }[]>;
+		list(userId: string): Promise<
+			{
+				id: string;
+				name: string;
+				color: string | null;
+				initialBalance: number;
+			}[]
+		>;
 	};
 	categories: {
 		list(userId: string): Promise<

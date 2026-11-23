@@ -9,6 +9,7 @@ import { useReconcileAccount } from "@/actions/accounts/use-reconcile-account";
 import { useUpdateAccount } from "@/actions/accounts/use-update-account";
 import { useCategories } from "@/actions/categories/use-categories";
 import { useTransactionPages } from "@/actions/transactions/use-transaction-pages";
+import { AccountBalanceChart } from "@/components/accounts/account-balance-chart";
 import { initials } from "@/components/accounts/utils";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
@@ -79,6 +80,8 @@ export function AccountDetail({
 				</span>
 			}
 		>
+			<AccountBalanceChart accountId={account.id} />
+
 			<form
 				className="grid grid-cols-[1fr_auto] items-end gap-2"
 				onSubmit={async (e) => {

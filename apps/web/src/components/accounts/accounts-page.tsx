@@ -143,7 +143,7 @@ export function AccountsPage() {
 												onClick={() =>
 													navigate({ search: { id: a.id, archived } })
 												}
-												className={`border-hover hover:bg-hover flex w-full cursor-pointer items-center gap-3 border-b px-3.5 py-2.5 text-left ${a.id === selected?.id ? "bg-hover shadow-[inset_0_0_0_1px_#2D333B]" : ""}`}
+												className={`border-hover hover:bg-hover flex w-full cursor-pointer items-center gap-3 border-b px-3.5 py-2.5 text-left ${a.id === selected?.id ? "bg-hover shadow-[inset_0_0_0_1px_var(--color-line-strong)]" : ""}`}
 											>
 												<Swatch color={a.color} label={initials(a.name)} />
 												<span className="flex min-w-0 flex-1 flex-col gap-0.5">

@@ -32,7 +32,7 @@ export function Dialog({
 		<DialogRoot open={open} onOpenChange={onOpenChange}>
 			<DialogContent
 				showCloseButton={false}
-				className="bg-panel text-fg flex max-h-[84vh] w-[calc(100vw-32px)] max-w-none flex-col gap-0 overflow-hidden border border-[#30363d] p-0 text-[13px] shadow-[0_24px_64px_rgba(1,4,9,.7)] ring-0 sm:max-w-none"
+				className="bg-panel text-fg border-line-overlay shadow-overlay flex max-h-[84vh] w-[calc(100vw-32px)] max-w-none flex-col gap-0 overflow-hidden border p-0 text-[13px] ring-0 sm:max-w-none"
 				style={{ maxWidth: width }}
 			>
 				<DialogHeader className="border-line flex-row items-start justify-between gap-3 border-b px-[18px] py-3.5">

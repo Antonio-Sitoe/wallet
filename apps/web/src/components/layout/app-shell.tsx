@@ -23,6 +23,7 @@ import {
 	type NewTransactionDefaults,
 	NewTransactionDialog,
 } from "@/components/transactions/new-transaction-dialog";
+import { BrandMark } from "@/components/ui/brand-mark";
 import { NewTransactionContext } from "@/contexts/new-transaction-context";
 import { ApiError } from "@/lib/api";
 import { authClient, clearDesktopToken } from "@/lib/auth-client";
@@ -100,25 +101,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 			<div className="bg-canvas flex min-h-svh flex-col md:flex-row">
 				<nav
 					aria-label="Menu principal"
-					className="border-line bg-panel flex w-full flex-col gap-3 border-b px-2.5 pt-3.5 pb-3 md:sticky md:top-0 md:h-svh md:w-[232px] md:shrink-0 md:gap-[18px] md:border-r md:border-b-0"
+					className="border-line bg-panel md:w-sidebar flex w-full flex-col gap-3 border-b px-2.5 pt-3.5 pb-3 md:sticky md:top-0 md:h-svh md:shrink-0 md:gap-[18px] md:border-r md:border-b-0"
 				>
 					<div className="flex items-center gap-2.5 px-1.5">
-						<div className="bg-money flex size-7 items-center justify-center rounded-[7px]">
-							<svg
-								aria-hidden="true"
-								width="17"
-								height="17"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="#04130A"
-								strokeWidth="2.2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-							>
-								<rect x="3" y="6" width="18" height="13" rx="2" />
-								<path d="M16 12.5h2M3 9h18" />
-							</svg>
-						</div>
+						<BrandMark />
 						<div className="flex min-w-0 flex-col gap-px">
 							<span className="font-semibold">Wallet</span>
 							<span className="num text-dim truncate text-[11px]">
@@ -139,11 +125,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 					<Button
 						variant="primary"
 						onClick={() => openNew()}
-						className="bg-money text-money-ink hover:bg-money-2 flex h-[34px] cursor-pointer items-center gap-2 rounded-[7px] pr-2 pl-2.5 font-semibold"
+						className="bg-money text-money-ink hover:bg-money-2 h-input rounded-control flex cursor-pointer items-center gap-2 pr-2 pl-2.5 font-semibold"
 					>
 						<PlusIcon className="size-[15px]" strokeWidth={2.6} />
 						<span className="flex-1 text-left">Nova transacção</span>
-						<span className="num rounded bg-[rgba(4,19,10,.18)] px-1 text-[11px]">
+						<span className="num bg-money-ink/18 rounded px-1 text-[11px]">
 							{MOD}N
 						</span>
 					</Button>
@@ -162,8 +148,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 									aria-current={active ? "page" : undefined}
 									className={
 										active
-											? "bg-selected text-fg flex h-[34px] shrink-0 items-center gap-2.5 rounded-md px-2 font-medium whitespace-nowrap"
-											: "text-fg-2 hover:bg-hover hover:text-fg flex h-[34px] shrink-0 items-center gap-2.5 rounded-md px-2 whitespace-nowrap"
+											? "bg-selected text-fg h-input flex shrink-0 items-center gap-2.5 rounded-md px-2 font-medium whitespace-nowrap"
+											: "text-fg-2 hover:bg-hover hover:text-fg h-input flex shrink-0 items-center gap-2.5 rounded-md px-2 whitespace-nowrap"
 									}
 								>
 									<Icon
@@ -188,7 +174,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 						</span>
 						<Button
 							variant="quiet"
-							className="text-fg-2 hover:bg-hover hover:text-fg flex h-[34px] cursor-pointer items-center gap-2.5 rounded-md px-2"
+							className="text-fg-2 hover:bg-hover hover:text-fg h-input flex cursor-pointer items-center gap-2.5 rounded-md px-2"
 							onClick={signOut}
 						>
 							<LogOutIcon className="size-4" strokeWidth={1.8} />

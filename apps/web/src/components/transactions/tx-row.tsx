@@ -1,5 +1,6 @@
 import type { Category, Transaction } from "@wallet/shared";
 import { Pill } from "@/components/ui/pill";
+import { tint } from "@/utils/color";
 import { monthLabel, signedMoney } from "@/utils/format";
 
 export function TxRow({
@@ -34,21 +35,21 @@ export function TxRow({
 	]
 		.filter(Boolean)
 		.join(" · ");
-	const color = category?.color ?? "#8B949E";
+	const color = category?.color ?? "var(--color-dim)";
 	return (
 		<button
 			type="button"
 			onClick={onSelect}
 			aria-pressed={selected}
-			className={`border-hover hover:bg-hover flex w-full cursor-pointer items-center gap-3 border-b px-3.5 py-2.5 text-left ${selected ? "bg-hover shadow-[inset_0_0_0_1px_#58A6FF]" : ""}`}
+			className={`border-hover hover:bg-hover flex w-full cursor-pointer items-center gap-3 border-b px-3.5 py-2.5 text-left ${selected ? "bg-hover shadow-[inset_0_0_0_1px_var(--color-info-2)]" : ""}`}
 		>
 			<span
 				aria-hidden="true"
 				className="num flex size-7 shrink-0 items-center justify-center rounded-md text-xs font-semibold"
 				style={
 					isTransfer
-						? { background: "#161B22", color: "#8B949E" }
-						: { background: `${color}24`, color }
+						? { background: "var(--color-hover)", color: "var(--color-dim)" }
+						: { background: tint(color), color }
 				}
 			>
 				{isAdjustment ? "≈" : isTransfer ? "⇄" : title[0]}

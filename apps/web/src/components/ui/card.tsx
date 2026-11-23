@@ -6,7 +6,7 @@ export function Card({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<CardRoot
 			className={cn(
-				"border-line bg-panel text-fg gap-0 rounded-[10px] border py-0 text-[13px] ring-0",
+				"border-line bg-panel text-fg rounded-card gap-0 border py-0 text-[13px] ring-0",
 				className,
 			)}
 			{...props}

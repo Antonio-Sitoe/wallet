@@ -144,3 +144,11 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 
 - [x] Saldos iniciais: decidido — saldo real de cada conta na data de corte (1 Dez 2026); reconciliação mensal com acerto.
 - [x] Out–Nov 2026: decidido — ficam na folha; o app começa em Dezembro.
+
+## Checklist de design (UI) — 2026-11-23
+
+- [x] Conjunto de ícones único: Lucide em toda a app (logótipo `BrandMark`, check do orçamento, transferência e acerto nas últimas transacções); ficam só as ilustrações (loader, 404, erro de ligação)
+- [x] Painel: lista de períodos aberta (o selector de período é um dropdown que abre a lista)
+- [x] Contas: curva do histórico de saldo no detalhe da conta (3 meses / 1 ano / 3 anos); `GET /analytics/balance?accountId=` conta entradas, saídas, transferências e acertos; o saldo total também passa a contar os acertos
+- [x] Versão web estreita revista: os 7 ecrãs a 390 e 768 px sem scroll horizontal; coluna Item fixa no Plano anual, coluna «No Wallet» escondida nas Categorias em ecrã estreito, acções dos cartões passam para baixo do texto no telemóvel
+- [x] Tokens formais em `apps/web/src/index.css`: cores (incluindo estados, séries dos gráficos, superfícies), raios (`check`, `control`, `card`, `overlay`), sombras (`overlay`, `popover`, `focus`) e tamanhos (`sidebar`, `input`, `row`, `check`); as cores fixas da interface passaram a tokens (ficam em hex só as paletas de cores de contas/categorias e a do donut)

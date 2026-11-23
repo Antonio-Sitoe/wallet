@@ -30,6 +30,8 @@ export const trendQuery = z.object({
 	bucket: z.enum(BUCKETS).optional(),
 });
 
+export const balanceQuery = trendQuery.extend({ accountId: id.optional() });
+
 export const categoriesQuery = z.object({
 	from: dateOnly,
 	to: dateOnly,
@@ -112,7 +114,6 @@ export type ComparisonPoint = {
 	previous: number;
 	yearAgo: number;
 };
-
 
 export const DASHBOARD_CARD_TYPES = [
 	"summary",

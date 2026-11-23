@@ -48,7 +48,7 @@ export function AccountsCard() {
 									<span
 										aria-hidden="true"
 										className="size-2 rounded-sm"
-										style={{ background: a.color ?? "#8B949E" }}
+										style={{ background: a.color ?? "var(--color-dim)" }}
 									/>
 									{a.name}
 								</Link>

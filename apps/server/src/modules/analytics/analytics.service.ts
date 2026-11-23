@@ -1,4 +1,4 @@
-import { unprocessable } from "../../shared/errors/app-error";
+import { notFound, unprocessable } from "../../shared/errors/app-error";
 import {
 	addDays,
 	addYears,
@@ -56,6 +56,16 @@ export class AnalyticsService {
 		);
 	}
 
+	private async accountBalanceAt(userId: string, accountId: string, at: Date) {
+		const [accounts, net] = await Promise.all([
+			this.deps.accounts.list(userId),
+			this.deps.transactions.netBefore(userId, at, accountId),
+		]);
+		const account = accounts.find((a) => a.id === accountId);
+		if (!account) throw notFound("Conta");
+		return account.initialBalance + net;
+	}
+
 	async overview(userId: string, from: string, to: string): Promise<Overview> {
 		const previous = previousRange(from, to);
 		const [current, before, start, end] = await Promise.all([
@@ -104,13 +114,21 @@ export class AnalyticsService {
 		from: string,
 		to: string,
 		bucket?: Bucket,
+		accountId?: string,
 	): Promise<BalancePoint[]> {
 		const chosen = bucket ?? autoBucket(from, to);
-		const [start, byDay] = await Promise.all([
-			this.balanceAt(userId, startOf(from)),
-			this.daily(userId, from, to),
+		const [start, rows] = await Promise.all([
+			accountId
+				? this.accountBalanceAt(userId, accountId, startOf(from))
+				: this.balanceAt(userId, startOf(from)),
+			this.deps.transactions.dailyNet(
+				userId,
+				startOf(from),
+				endOf(to),
+				accountId,
+			),
 		]);
-		const nets = new Map([...byDay].map(([d, r]) => [d, r.income - r.expense]));
+		const nets = new Map(rows.map((r) => [r.day, r.net]));
 		const running = cumulative(from, to, nets);
 		return buckets(from, to, chosen).map((b) => ({
 			date: b.end,

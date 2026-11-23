@@ -19,7 +19,7 @@ const ICON_BY_TYPE: Record<AccountType, LucideIcon> = {
 	savings: PiggyBankIcon,
 };
 
-const FALLBACK_COLOR = "#8B949E";
+const FALLBACK_COLOR = "var(--color-dim)";
 
 const SKELETON_KEYS = ["a", "b", "c", "d", "e"];
 
@@ -33,7 +33,7 @@ function AccountTile({ account }: { account: Account }) {
 		<Link
 			to="/accounts"
 			search={{ id: account.id }}
-			className="group border-line flex min-w-0 items-center gap-3 rounded-[10px] border p-3 no-underline transition-colors hover:brightness-125"
+			className="group border-line rounded-card flex min-w-0 items-center gap-3 border p-3 no-underline transition-colors hover:brightness-125"
 			style={{
 				background: `color-mix(in srgb, ${color} 16%, var(--color-panel))`,
 			}}
@@ -79,7 +79,7 @@ export function AccountTiles() {
 			<Link
 				to="/accounts"
 				search={{ create: true }}
-				className="border-line-strong text-fg-2 hover:text-fg hover:border-fg-2 flex min-h-16.5 items-center justify-center gap-1.5 rounded-[10px] border border-dashed text-sm no-underline transition-colors"
+				className="border-line-strong text-fg-2 hover:text-fg hover:border-fg-2 rounded-card flex min-h-16.5 items-center justify-center gap-1.5 border border-dashed text-sm no-underline transition-colors"
 			>
 				<PlusIcon className="size-4" aria-hidden="true" /> Adicionar conta
 			</Link>

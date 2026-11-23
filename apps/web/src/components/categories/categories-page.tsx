@@ -86,7 +86,7 @@ export function CategoriesPage() {
 												<TableHead
 													key={h}
 													scope="col"
-													className={`num border-line text-dim border-b px-3.5 py-2 text-[11px] font-medium tracking-[.06em] uppercase ${i === 3 ? "text-right" : "text-left"} h-auto whitespace-normal`}
+													className={`num border-line text-dim border-b px-3.5 py-2 text-[11px] font-medium tracking-[.06em] uppercase ${i === 3 ? "text-right" : "text-left"} ${i === 2 ? "hidden md:table-cell" : ""} h-auto whitespace-normal`}
 												>
 													{h}
 												</TableHead>
@@ -115,7 +115,9 @@ export function CategoriesPage() {
 													>
 														<span
 															className="size-2.5 rounded-sm"
-															style={{ background: c.color ?? "#8B949E" }}
+															style={{
+																background: c.color ?? "var(--color-dim)",
+															}}
 														/>
 														<button
 															type="button"
@@ -128,7 +130,7 @@ export function CategoriesPage() {
 												<TableCell className="num text-fg-2 px-3.5 py-2 text-xs whitespace-normal">
 													{KIND_LABEL[c.kind]}
 												</TableCell>
-												<TableCell className="num text-dim max-w-[260px] truncate px-3.5 py-2 text-xs">
+												<TableCell className="num text-dim hidden max-w-[260px] truncate px-3.5 py-2 text-xs md:table-cell">
 													{c.walletNames.join(", ") || "—"}
 												</TableCell>
 												<TableCell className="num px-3.5 py-2 text-right text-xs whitespace-normal">

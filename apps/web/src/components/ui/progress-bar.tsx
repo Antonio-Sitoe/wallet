@@ -17,7 +17,7 @@ export function ProgressBar({
 			className={cn(
 				"**:data-[slot=progress-track]:bg-hover block **:data-[slot=progress-track]:rounded-sm",
 				over
-					? "**:data-[slot=progress-indicator]:bg-[#f0883e]"
+					? "**:data-[slot=progress-indicator]:bg-over"
 					: "**:data-[slot=progress-indicator]:bg-money",
 			)}
 		/>

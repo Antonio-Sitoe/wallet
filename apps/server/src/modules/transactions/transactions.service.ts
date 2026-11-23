@@ -358,8 +358,13 @@ export class TransactionsService {
 		}));
 	}
 
-	async netBefore(userId: string, at: Date) {
-		return this.repository.netBefore(userId, at);
+	async netBefore(userId: string, at: Date, accountId?: string) {
+		return this.repository.netBefore(userId, at, accountId);
+	}
+
+	async dailyNet(userId: string, from: Date, to: Date, accountId?: string) {
+		const rows = await this.repository.dailyNet(userId, from, to, accountId);
+		return rows.map((r) => ({ day: r.day, net: Number(r.net) }));
 	}
 
 	async categoryTotals(userId: string, from: Date, to: Date) {

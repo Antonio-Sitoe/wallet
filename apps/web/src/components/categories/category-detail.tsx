@@ -11,6 +11,7 @@ import { Field } from "@/components/ui/field";
 import { Hint } from "@/components/ui/hint";
 import { Pill } from "@/components/ui/pill";
 import { useConfirm } from "@/contexts/confirm-context";
+import { tint } from "@/utils/color";
 
 export const PALETTE = [
 	"#56D364",
@@ -56,7 +57,7 @@ export function CategoryDetail({
 				<span className="flex items-center gap-3">
 					<span
 						className="size-9 shrink-0 rounded-lg"
-						style={{ background: `${color}24`, border: `1px solid ${color}` }}
+						style={{ background: tint(color), border: `1px solid ${color}` }}
 					/>
 					<span className="flex min-w-0 flex-col">
 						<span>{category.name}</span>

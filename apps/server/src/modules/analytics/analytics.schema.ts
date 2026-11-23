@@ -3,6 +3,7 @@ export {
 	type Breakdown,
 	type BreakdownQuery,
 	type Bucket,
+	balanceQuery,
 	breakdownQuery,
 	type CashflowTrend,
 	type CategoryBreakdown,

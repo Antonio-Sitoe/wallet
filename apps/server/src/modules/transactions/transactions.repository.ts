@@ -286,14 +286,38 @@ export class TransactionsRepository implements ITransactionsRepository {
 			.orderBy(day);
 	}
 
-	async netBefore(userId: string, at: Date) {
+	async netBefore(userId: string, at: Date, accountId?: string) {
 		const [row] = await this.db
 			.select({ total: sum(transactions.amount) })
 			.from(transactions)
 			.where(
-				and(eq(transactions.userId, userId), lt(transactions.occurredAt, at)),
+				and(
+					eq(transactions.userId, userId),
+					lt(transactions.occurredAt, at),
+					accountId ? eq(transactions.accountId, accountId) : undefined,
+				),
 			);
 		return Number(row?.total ?? 0);
+	}
+
+	dailyNet(userId: string, from: Date, to: Date, accountId?: string) {
+		const day = sql<string>`to_char(${transactions.occurredAt} at time zone 'Africa/Maputo', 'YYYY-MM-DD')`;
+		return this.db
+			.select({
+				day,
+				net: sql<string>`coalesce(sum(${transactions.amount}), 0)`,
+			})
+			.from(transactions)
+			.where(
+				and(
+					eq(transactions.userId, userId),
+					gte(transactions.occurredAt, from),
+					lt(transactions.occurredAt, to),
+					accountId ? eq(transactions.accountId, accountId) : undefined,
+				),
+			)
+			.groupBy(day)
+			.orderBy(day);
 	}
 
 	categoryTotals(userId: string, from: Date, to: Date) {

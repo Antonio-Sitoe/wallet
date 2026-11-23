@@ -49,9 +49,13 @@ export const KINDS: Record<
 	Kind,
 	{ label: string; accent: string; sign: string }
 > = {
-	expense: { label: "Despesa", accent: "#FFA657", sign: "−" },
-	income: { label: "Entrada", accent: "#3FB950", sign: "+" },
-	transfer: { label: "Transferência", accent: "#58A6FF", sign: "⇄" },
+	expense: { label: "Despesa", accent: "var(--color-warn)", sign: "−" },
+	income: { label: "Entrada", accent: "var(--color-money)", sign: "+" },
+	transfer: {
+		label: "Transferência",
+		accent: "var(--color-info-2)",
+		sign: "⇄",
+	},
 };
 
 export const PALETTE = [
@@ -62,7 +66,7 @@ export const PALETTE = [
 	"#79C0FF",
 	"#F778BA",
 	"#D2A8FF",
-	"#D29922",
+	"var(--color-caution)",
 	"#56D364",
 	"#FF7B72",
 	"#DB61A2",
@@ -268,7 +272,7 @@ export function NewTransactionDialog({
 				color:
 					kind === "transfer"
 						? KINDS.transfer.accent
-						: (catColor.get(i.categoryId ?? "") ?? "#8B949E"),
+						: (catColor.get(i.categoryId ?? "") ?? "var(--color-dim)"),
 			}));
 	}, [items, kind, catColor, accounts]);
 
@@ -400,7 +404,7 @@ export function NewTransactionDialog({
 				showCloseButton={false}
 				initialFocus={amountRef}
 				onKeyDown={onKeyDown}
-				className="bg-panel text-fg flex max-h-[88vh] w-[calc(100vw-32px)] max-w-[680px] flex-col gap-0 rounded-[14px] border border-[#30363d] p-0 text-[13px] shadow-[0_24px_64px_rgba(1,4,9,.7)] ring-0 sm:max-w-[680px]"
+				className="bg-panel text-fg rounded-overlay border-line-overlay shadow-overlay flex max-h-[88vh] w-[calc(100vw-32px)] max-w-[680px] flex-col gap-0 border p-0 text-[13px] ring-0 sm:max-w-[680px]"
 			>
 				<DialogTitle className="sr-only">Nova transacção</DialogTitle>
 
@@ -421,7 +425,7 @@ export function NewTransactionDialog({
 								onClick={() => changeKind(k)}
 								className={cn(
 									"text-dim hover:text-fg-2 h-10 flex-1 cursor-pointer border-b-2 border-transparent text-xs font-semibold tracking-[.02em] uppercase sm:text-[13px]",
-									k === kind && "bg-[#131820]",
+									k === kind && "bg-surface-sunken",
 								)}
 								style={
 									k === kind
@@ -470,7 +474,7 @@ export function NewTransactionDialog({
 									{money(Math.max(cents, 0))}
 									<span
 										aria-hidden="true"
-										className="ml-1 inline-block h-[34px] w-0.5 animate-pulse align-[-4px] sm:h-[42px]"
+										className="h-input ml-1 inline-block w-0.5 animate-pulse align-[-4px] sm:h-[42px]"
 										style={{ background: meta.accent }}
 									/>
 								</span>
@@ -521,9 +525,8 @@ export function NewTransactionDialog({
 									aria-expanded={pickerOpen}
 									aria-haspopup="listbox"
 									className={cn(
-										"bg-canvas border-line-strong flex w-full min-w-0 cursor-pointer flex-col items-stretch gap-[3px] rounded-[10px] border px-3 py-2.5 text-left",
-										!category &&
-											"border-[#1F6FEB] shadow-[0_0_0_3px_rgba(31,111,235,.25)]",
+										"bg-canvas border-line-strong rounded-card flex w-full min-w-0 cursor-pointer flex-col items-stretch gap-[3px] border px-3 py-2.5 text-left",
+										!category && "border-focus shadow-focus",
 									)}
 								>
 									<small className="num text-dim text-[11px] tracking-[.06em] uppercase">
@@ -559,7 +562,7 @@ export function NewTransactionDialog({
 							<CategoryPicker
 								categories={categories}
 								kind={kind}
-								colorOf={(id) => catColor.get(id) ?? "#8B949E"}
+								colorOf={(id) => catColor.get(id) ?? "var(--color-dim)"}
 								onPick={(id) => {
 									setCategoryId(id);
 									setMonthItemId("");
@@ -597,7 +600,7 @@ export function NewTransactionDialog({
 												}
 												setPickerOpen(false);
 											}}
-											className="bg-canvas border-line-strong hover:border-info-2 inline-flex h-[30px] cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs whitespace-nowrap"
+											className="bg-canvas border-line-strong hover:border-info-2 h-row inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs whitespace-nowrap"
 										>
 											<i
 												className="inline-block size-2 rounded-[2px]"
@@ -683,7 +686,7 @@ export function NewTransactionDialog({
 									aria-label={KEY_LABEL[k] ?? k}
 									onClick={() => setExpr((x) => press(x, k === "−" ? "-" : k))}
 									className={cn(
-										"num border-line h-12 cursor-pointer rounded-lg border text-lg hover:bg-[#1c2128]",
+										"num border-line hover:bg-surface-raised h-12 cursor-pointer rounded-lg border text-lg",
 										op ? "bg-panel text-fg-2" : "bg-hover text-fg",
 									)}
 								>
@@ -702,7 +705,7 @@ export function NewTransactionDialog({
 						variant="neutral"
 						disabled={!valid || pending}
 						onClick={() => void save(true)}
-						className="border-line-strong bg-hover text-fg inline-flex h-9 cursor-pointer items-center gap-2 rounded-[7px] border px-3.5 text-[13px] font-medium hover:bg-[#1c2128] disabled:cursor-not-allowed disabled:opacity-45"
+						className="border-line-strong bg-hover text-fg rounded-control hover:bg-surface-raised inline-flex h-9 cursor-pointer items-center gap-2 border px-3.5 text-[13px] font-medium disabled:cursor-not-allowed disabled:opacity-45"
 					>
 						Guardar e nova
 						<span className="num rounded bg-white/8 px-1 text-[11px]">⇧⌘↵</span>
@@ -711,10 +714,10 @@ export function NewTransactionDialog({
 						variant="primary"
 						disabled={!valid || pending}
 						onClick={() => void save(false)}
-						className="border-money bg-money text-money-ink hover:bg-money-2 inline-flex h-9 cursor-pointer items-center gap-2 rounded-[7px] border px-3.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
+						className="border-money bg-money text-money-ink hover:bg-money-2 rounded-control inline-flex h-9 cursor-pointer items-center gap-2 border px-3.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
 					>
 						Guardar
-						<span className="num rounded bg-[rgba(4,19,10,.18)] px-1 text-[11px]">
+						<span className="num bg-money-ink/18 rounded px-1 text-[11px]">
 							⌘↵
 						</span>
 					</Button>

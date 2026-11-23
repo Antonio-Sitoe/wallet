@@ -43,7 +43,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 					if (!open) answer(false);
 				}}
 			>
-				<AlertDialogContent className="bg-panel text-fg border border-[#30363d] text-[13px] ring-0">
+				<AlertDialogContent className="bg-panel text-fg border-line-overlay border text-[13px] ring-0">
 					<AlertDialogHeader>
 						<AlertDialogTitle className="text-fg text-[15px] font-semibold">
 							{request?.title}

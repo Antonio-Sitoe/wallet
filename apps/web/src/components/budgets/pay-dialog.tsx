@@ -129,9 +129,9 @@ export function PayDialog({
 					<div
 						className={`rounded-md border px-3 py-2.5 text-xs leading-relaxed ${
 							after > item.plannedAmount
-								? "border-warn-line bg-[#221608] text-[#F0C9A2]"
+								? "border-warn-line bg-warn-bg text-warn-fg"
 								: after < item.plannedAmount
-									? "border-info-line bg-info-bg text-[#B6D8FF]"
+									? "border-info-line bg-info-bg text-info-fg"
 									: "border-money-line bg-money-bg text-money-2"
 						}`}
 					>

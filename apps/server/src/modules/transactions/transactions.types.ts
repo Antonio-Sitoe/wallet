@@ -153,7 +153,13 @@ export interface ITransactionsRepository {
 		from: Date,
 		to: Date,
 	): Promise<{ day: string; income: string; expense: string }[]>;
-	netBefore(userId: string, at: Date): Promise<number>;
+	netBefore(userId: string, at: Date, accountId?: string): Promise<number>;
+	dailyNet(
+		userId: string,
+		from: Date,
+		to: Date,
+		accountId?: string,
+	): Promise<{ day: string; net: string }[]>;
 	categoryTotals(
 		userId: string,
 		from: Date,
