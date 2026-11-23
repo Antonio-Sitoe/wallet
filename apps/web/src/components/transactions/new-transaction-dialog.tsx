@@ -18,6 +18,7 @@ import { useCreateTransaction } from "@/actions/transactions/use-create-transact
 import { useCreateTransfer } from "@/actions/transactions/use-create-transfer";
 import { AccountPick } from "@/components/transactions/account-pick";
 import { CategoryPicker } from "@/components/transactions/category-picker";
+import { LabelsInput } from "@/components/transactions/labels-input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
@@ -196,6 +197,7 @@ export function NewTransactionDialog({
 	const [monthItemId, setMonthItemId] = useState("");
 	const [note, setNote] = useState("");
 	const [payee, setPayee] = useState("");
+	const [labels, setLabels] = useState<string[]>([]);
 	const [pickerOpen, setPickerOpen] = useState(false);
 	const [showExtras, setShowExtras] = useState(false);
 	const amountRef = useRef<HTMLFieldSetElement>(null);
@@ -212,6 +214,7 @@ export function NewTransactionDialog({
 		setMonthItemId(defaults?.monthItemId ?? "");
 		setNote("");
 		setPayee("");
+		setLabels([]);
 		setPickerOpen(false);
 		setShowExtras(
 			!!defaults?.referenceMonth && defaults.referenceMonth !== currentMonth(),
@@ -316,6 +319,7 @@ export function NewTransactionDialog({
 				referenceMonth,
 				note: note || null,
 				payee: payee || null,
+				labels,
 				monthItemId: itemId,
 			});
 		}
@@ -327,6 +331,7 @@ export function NewTransactionDialog({
 			setMonthItemId("");
 			setNote("");
 			setPayee("");
+			setLabels([]);
 			amountRef.current?.focus();
 		} else {
 			onOpenChange(false);
@@ -665,12 +670,17 @@ export function NewTransactionDialog({
 										/>
 									</Field>
 									{kind !== "transfer" ? (
-										<Field label="Payee">
+										<Field label="Pessoa">
 											<Input
 												value={payee}
 												onChange={(e) => setPayee(e.target.value)}
 												placeholder="opcional"
 											/>
+										</Field>
+									) : null}
+									{kind !== "transfer" ? (
+										<Field label="Etiquetas" className="col-span-full">
+											<LabelsInput value={labels} onChange={setLabels} />
 										</Field>
 									) : null}
 								</div>

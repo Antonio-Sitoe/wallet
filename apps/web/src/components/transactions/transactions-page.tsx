@@ -86,6 +86,8 @@ export function TransactionsPage() {
 		categoryId: search.category ? [search.category] : undefined,
 		type: search.type,
 		referenceMonth: search.month,
+		payee: search.payee,
+		label: search.label,
 		q: search.q,
 	};
 	const pages = useTransactionPages(filters);
@@ -251,15 +253,37 @@ export function TransactionsPage() {
 					/>
 					<Input
 						className="h-8 max-w-[220px]"
-						placeholder="procurar nota ou payee…"
+						placeholder="procurar nota ou pessoa…"
 						value={q}
 						onChange={(e) => setQ(e.target.value)}
 						aria-label="Procurar"
 					/>
+					{search.payee ? (
+						<Button
+							variant="neutral"
+							size="sm"
+							aria-label={`Tirar o filtro pessoa ${search.payee}`}
+							onClick={() => set({ payee: undefined })}
+						>
+							pessoa: {search.payee} <XIcon className="size-3" />
+						</Button>
+					) : null}
+					{search.label ? (
+						<Button
+							variant="neutral"
+							size="sm"
+							aria-label={`Tirar o filtro etiqueta ${search.label}`}
+							onClick={() => set({ label: undefined })}
+						>
+							#{search.label} <XIcon className="size-3" />
+						</Button>
+					) : null}
 					{search.account ||
 					search.category ||
 					search.type ||
 					search.month ||
+					search.payee ||
+					search.label ||
 					search.q ? (
 						<Button
 							variant="quiet"

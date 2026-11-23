@@ -15,6 +15,8 @@ function serviceWith(movements: Movement[], initial: Record<string, number>) {
 			dailyTotals: async () => [],
 			categoryTotals: async () => [],
 			accountTotals: async () => [],
+			payeeTotals: async () => [],
+			labelTotals: async () => [],
 			netBefore: async (_u, at, accountId) =>
 				pick(accountId)
 					.filter((m) => new Date(m.at) < at)

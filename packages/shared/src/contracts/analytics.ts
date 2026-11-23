@@ -38,7 +38,12 @@ export const categoriesQuery = z.object({
 	limit: z.coerce.number().int().min(1).max(50).default(8),
 });
 
-export const BREAKDOWN_DIMENSIONS = ["category", "account"] as const;
+export const BREAKDOWN_DIMENSIONS = [
+	"category",
+	"account",
+	"payee",
+	"label",
+] as const;
 export type BreakdownDimension = (typeof BREAKDOWN_DIMENSIONS)[number];
 export const MONEY_FLOWS = ["expense", "income"] as const;
 export type MoneyFlow = (typeof MONEY_FLOWS)[number];
@@ -48,7 +53,7 @@ export const breakdownQuery = z.object({
 	to: dateOnly,
 	by: z.enum(BREAKDOWN_DIMENSIONS),
 	flow: z.enum(MONEY_FLOWS).default("expense"),
-	limit: z.coerce.number().int().min(1).max(20).default(7),
+	limit: z.coerce.number().int().min(1).max(50).default(7),
 });
 export type BreakdownQuery = z.infer<typeof breakdownQuery>;
 

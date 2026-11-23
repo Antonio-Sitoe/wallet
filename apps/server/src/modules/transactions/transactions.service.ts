@@ -40,6 +40,7 @@ function toTransaction({
 		referenceMonth: tx.referenceMonth,
 		note: tx.note,
 		payee: tx.payee,
+		labels: tx.labels,
 		transferId: tx.transferId,
 		counterpartAccountId,
 		importBatchId: tx.importBatchId,
@@ -147,6 +148,7 @@ export class TransactionsService {
 			referenceMonth: input.referenceMonth ?? yearMonthOf(input.occurredAt),
 			note: input.note ?? null,
 			payee: input.payee ?? null,
+			labels: input.labels ?? [],
 			monthItemId: input.monthItemId ?? null,
 			debtId: options.debtId ?? null,
 		});
@@ -189,6 +191,7 @@ export class TransactionsService {
 			),
 			note: input.note,
 			payee: input.payee,
+			labels: input.labels,
 			monthItemId: input.monthItemId,
 		});
 		return this.get(userId, id);
@@ -393,6 +396,30 @@ export class TransactionsService {
 			income: Number(r.income),
 			expense: Number(r.expense),
 		}));
+	}
+
+	async payeeTotals(userId: string, from: Date, to: Date) {
+		const rows = await this.repository.payeeTotals(userId, from, to);
+		return rows.map((r) => ({
+			key: r.key,
+			name: r.name,
+			income: Number(r.income),
+			expense: Number(r.expense),
+		}));
+	}
+
+	async labelTotals(userId: string, from: Date, to: Date) {
+		const rows = await this.repository.labelTotals(userId, from, to);
+		return rows.map((r) => ({
+			key: r.name,
+			name: r.name,
+			income: Number(r.income),
+			expense: Number(r.expense),
+		}));
+	}
+
+	labels(userId: string) {
+		return this.repository.labelUsage(userId);
 	}
 
 	async countByCategory(userId: string) {

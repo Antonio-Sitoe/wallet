@@ -2,6 +2,7 @@ import type { Database, DbExecutor } from "@wallet/db";
 import { transactions, transfers } from "@wallet/db/schema/transactions";
 import {
 	and,
+	arrayContains,
 	count,
 	desc,
 	eq,
@@ -78,7 +79,10 @@ export class TransactionsRepository implements ITransactionsRepository {
 					f.referenceMonth
 						? eq(transactions.referenceMonth, f.referenceMonth)
 						: undefined,
-					f.payee ? ilike(transactions.payee, f.payee) : undefined,
+					f.payee
+						? sql`lower(btrim(${transactions.payee})) = lower(${f.payee})`
+						: undefined,
+					f.label ? arrayContains(transactions.labels, [f.label]) : undefined,
 					f.q
 						? or(
 								ilike(transactions.note, like(f.q)),
@@ -356,6 +360,56 @@ export class TransactionsRepository implements ITransactionsRepository {
 				),
 			)
 			.groupBy(transactions.accountId);
+	}
+
+	payeeTotals(userId: string, from: Date, to: Date) {
+		const key = sql<string>`lower(btrim(${transactions.payee}))`;
+		return this.db
+			.select({
+				key,
+				name: sql<string>`min(btrim(${transactions.payee}) collate "C")`,
+				income: sql<string>`coalesce(sum(${transactions.amount}) filter (where ${transactions.amount} > 0), 0)`,
+				expense: sql<string>`coalesce(-sum(${transactions.amount}) filter (where ${transactions.amount} < 0), 0)`,
+			})
+			.from(transactions)
+			.where(
+				and(
+					eq(transactions.userId, userId),
+					incomeOrExpense,
+					gte(transactions.occurredAt, from),
+					lt(transactions.occurredAt, to),
+					sql`btrim(coalesce(${transactions.payee}, '')) <> ''`,
+				),
+			)
+			.groupBy(key);
+	}
+
+	async labelTotals(userId: string, from: Date, to: Date) {
+		const rows = await this.db.execute<{
+			name: string;
+			income: string;
+			expense: string;
+		}>(sql`
+			select l.name,
+				coalesce(sum(t.amount) filter (where t.amount > 0), 0) as income,
+				coalesce(-sum(t.amount) filter (where t.amount < 0), 0) as expense
+			from ${transactions} t, unnest(t.labels) as l(name)
+			where t.user_id = ${userId}
+				and t.type in ('expense', 'income')
+				and t.occurred_at >= ${from}
+				and t.occurred_at < ${to}
+			group by l.name`);
+		return rows.rows;
+	}
+
+	async labelUsage(userId: string) {
+		const rows = await this.db.execute<{ name: string; count: number }>(sql`
+			select l.name, count(*)::int as count
+			from ${transactions} t, unnest(t.labels) as l(name)
+			where t.user_id = ${userId}
+			group by l.name
+			order by count desc, l.name`);
+		return rows.rows;
 	}
 
 	countByCategory(userId: string) {

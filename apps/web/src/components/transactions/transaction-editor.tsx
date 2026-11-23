@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useDeleteTransaction } from "@/actions/transactions/use-delete-transaction";
 import { useUpdateTransaction } from "@/actions/transactions/use-update-transaction";
 import { DetailDialog } from "@/components/transactions/detail-dialog";
+import { LabelsInput } from "@/components/transactions/labels-input";
 import { monthChoices } from "@/components/transactions/utils";
 import { categoryItems } from "@/components/ui/category-items";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -47,6 +48,7 @@ export function TransactionEditor({
 	const [referenceMonth, setReferenceMonth] = useState(tx.referenceMonth);
 	const [note, setNote] = useState(tx.note ?? "");
 	const [payee, setPayee] = useState(tx.payee ?? "");
+	const [labels, setLabels] = useState(tx.labels);
 	const cents = parseMoney(amount);
 
 	return (
@@ -76,6 +78,7 @@ export function TransactionEditor({
 						referenceMonth,
 						note: note || null,
 						payee: payee || null,
+						labels,
 					});
 					toast.success("Transacção guardada");
 					onClose();
@@ -136,12 +139,15 @@ export function TransactionEditor({
 						/>
 					</Field>
 				</div>
-				<Field label="Payee">
+				<Field label="Pessoa">
 					<Input
 						value={payee}
 						onChange={(e) => setPayee(e.target.value)}
-						placeholder="sem payee"
+						placeholder="quem recebeu ou pagou"
 					/>
+				</Field>
+				<Field label="Etiquetas" hint="Enter ou vírgula para juntar">
+					<LabelsInput value={labels} onChange={setLabels} />
 				</Field>
 				<Field label="Nota">
 					<Input

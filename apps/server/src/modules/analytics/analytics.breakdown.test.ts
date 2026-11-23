@@ -9,6 +9,8 @@ function serviceWith(
 	rows: {
 		categoryId: string | null;
 		accountId: string;
+		payee?: string;
+		labels?: string[];
 		income: number;
 		expense: number;
 		at: Date;
@@ -23,6 +25,28 @@ function serviceWith(
 			dailyNet: async () => [],
 			categoryTotals: async (_u, from, to) => inRange(from, to),
 			accountTotals: async (_u, from, to) => inRange(from, to),
+			payeeTotals: async (_u, from, to) =>
+				inRange(from, to).flatMap((r) =>
+					r.payee
+						? [
+								{
+									key: r.payee.toLowerCase(),
+									name: r.payee,
+									income: r.income,
+									expense: r.expense,
+								},
+							]
+						: [],
+				),
+			labelTotals: async (_u, from, to) =>
+				inRange(from, to).flatMap((r) =>
+					(r.labels ?? []).map((name) => ({
+						key: name,
+						name,
+						income: r.income,
+						expense: r.expense,
+					})),
+				),
 		},
 		accounts: {
 			initialTotal: async () => 0,
@@ -50,6 +74,8 @@ describe("breakdown", () => {
 		{
 			categoryId: "market",
 			accountId: "bci",
+			payee: "Sarita",
+			labels: ["Obra", "Casamento"],
 			income: 0,
 			expense: 3000,
 			at: NOVEMBER,
@@ -57,6 +83,8 @@ describe("breakdown", () => {
 		{
 			categoryId: "food",
 			accountId: "cash",
+			payee: "Auzenda",
+			labels: ["Obra"],
 			income: 0,
 			expense: 1000,
 			at: NOVEMBER,
@@ -64,6 +92,7 @@ describe("breakdown", () => {
 		{
 			categoryId: "home",
 			accountId: "bci",
+			payee: "Sarita",
 			income: 0,
 			expense: 6000,
 			at: NOVEMBER,
@@ -138,5 +167,32 @@ describe("breakdown", () => {
 		});
 		expect(capped.items).toHaveLength(1);
 		expect(capped.others).toBe(4500);
+	});
+
+	it("groups by person and leaves out transactions without one", async () => {
+		const result = await service.breakdown("u", {
+			...period,
+			by: "payee",
+			flow: "expense",
+			limit: 7,
+		});
+		expect(result.total).toBe(10000);
+		expect(result.items.map((i) => [i.id, i.name, i.value])).toEqual([
+			["sarita", "Sarita", 9000],
+			["auzenda", "Auzenda", 1000],
+		]);
+	});
+
+	it("counts a transaction under each of its labels", async () => {
+		const result = await service.breakdown("u", {
+			...period,
+			by: "label",
+			flow: "expense",
+			limit: 7,
+		});
+		expect(result.items.map((i) => [i.name, i.value])).toEqual([
+			["Obra", 4000],
+			["Casamento", 3000],
+		]);
 	});
 });

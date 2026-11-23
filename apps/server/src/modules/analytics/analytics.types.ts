@@ -24,6 +24,8 @@ export type AnalyticsDeps = {
 			from: Date,
 			to: Date,
 		): Promise<{ accountId: string; income: number; expense: number }[]>;
+		payeeTotals(userId: string, from: Date, to: Date): Promise<NamedTotals[]>;
+		labelTotals(userId: string, from: Date, to: Date): Promise<NamedTotals[]>;
 	};
 	accounts: {
 		initialTotal(userId: string): Promise<number>;
@@ -46,4 +48,11 @@ export type AnalyticsDeps = {
 			}[]
 		>;
 	};
+};
+
+export type NamedTotals = {
+	key: string;
+	name: string;
+	income: number;
+	expense: number;
 };

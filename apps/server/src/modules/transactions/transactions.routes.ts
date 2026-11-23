@@ -7,6 +7,7 @@ export function transactionsRoutes(
 ): FastifyPluginAsync {
 	return async (app) => {
 		app.get("/transactions", controller.list);
+		app.get("/transactions/labels", controller.labels);
 		app.post("/transactions", controller.create);
 		app.get("/transactions/:id", controller.get);
 		app.patch("/transactions/:id", controller.update);

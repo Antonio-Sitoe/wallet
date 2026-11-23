@@ -5,5 +5,7 @@ export type TransactionFilters = {
 	categoryId?: string[];
 	type?: "expense" | "income" | "transfer" | "adjustment";
 	referenceMonth?: string;
+	payee?: string;
+	label?: string;
 	q?: string;
 };

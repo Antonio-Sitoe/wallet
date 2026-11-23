@@ -3,6 +3,7 @@ import { Button } from "@wallet/ui/components/button";
 import {
 	ArrowLeftRightIcon,
 	CalendarRangeIcon,
+	ChartColumnIcon,
 	DownloadIcon,
 	HandCoinsIcon,
 	LandmarkIcon,
@@ -46,6 +47,7 @@ export const NAV = [
 	{ to: "/goals", label: "Metas", icon: TargetIcon },
 	{ to: "/debts", label: "Dívidas", icon: HandCoinsIcon },
 	{ to: "/shopping", label: "Compras", icon: ShoppingCartIcon },
+	{ to: "/stats", label: "Estatísticas", icon: ChartColumnIcon },
 ] as const;
 
 export const isMac =
@@ -169,10 +171,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 										strokeWidth={1.8}
 									/>
 									<span className="flex-1">{item.label}</span>
-									<span className="num text-dim hidden text-[11px] md:inline">
-										{MOD}
-										{(i + 1) % 10}
-									</span>
+									{i < 10 ? (
+										<span className="num text-dim hidden text-[11px] md:inline">
+											{MOD}
+											{(i + 1) % 10}
+										</span>
+									) : null}
 								</Link>
 							);
 						})}

@@ -179,3 +179,17 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 **Frontend**
 
 - [x] Ecrã Lista de compras (`/shopping`, «Compras» no menu, ⌘0): listas em separadores, indicadores (estimado, real, diferença, por comprar), adicionar rápido numa linha («Arroz 2x 350», «2 Arroz 350», «Leite 85»), marcar comprado com preço real e conta, comprados em secção própria com diferença face ao estimado, editar item, nova / editar lista com conta, item do orçamento do mês e categoria, arquivar e apagar
+
+## Fase 9 — Estatísticas, exportar e lançamento — 2026-11-23
+
+**Backend**
+
+- [x] Estatísticas e etiquetas por pessoa (API): `GET /analytics/breakdown?by=payee|label` (além de categoria e conta), com o período anterior para comparar; pessoas agrupadas sem diferença de maiúsculas nem espaços; uma transacção com várias etiquetas conta em cada uma
+- [x] Etiquetas nas transacções: `labels` em criar / editar / ler (até 10, sem repetidas), filtro `GET /transactions?label=` e lista das etiquetas usadas `GET /transactions/labels`; filtro `payee` passa a ignorar maiúsculas e espaços
+- [x] Exportar CSV / Excel: colunas Pessoa e Etiquetas no ficheiro exportado
+
+**Frontend**
+
+- [x] Ecrã Estatísticas (barra lateral, depois de Compras): período mês / 30 dias / ano, totais com comparação (entradas, saídas, sobra, taxa de poupança), evolução por mês ou semana, ranking por Categorias / Pessoas / Etiquetas / Contas em saídas ou entradas; cada linha abre as transacções filtradas
+- [x] Campo Etiquetas (com sugestões das já usadas) no modal Nova transacção e no detalhe da transacção; «Payee» passa a chamar-se «Pessoa»; etiquetas aparecem na linha da transacção (#Obra) e como filtro no ecrã Transacções
+- [x] Ícone do app desktop (gráfico em W) e BrandMark na barra lateral, login e PIN

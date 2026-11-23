@@ -14,6 +14,8 @@ import type { TransactionsService } from "./transactions.service";
 export class TransactionsController {
 	constructor(private readonly service: TransactionsService) {}
 
+	labels = async (req: FastifyRequest) => this.service.labels(req.userId);
+
 	list = async (req: FastifyRequest) =>
 		this.service.list(req.userId, parse(listTransactionsQuery, req.query));
 

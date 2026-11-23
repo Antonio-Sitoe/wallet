@@ -21,11 +21,15 @@ const FLOW_LABEL: Record<MoneyFlow, string> = {
 const DIMENSION_LABEL: Record<BreakdownDimension, string> = {
 	category: "categoria",
 	account: "conta",
+	payee: "pessoa",
+	label: "etiqueta",
 };
 
 const DIMENSION_PLURAL: Record<BreakdownDimension, string> = {
 	category: "categorias",
 	account: "contas",
+	payee: "pessoas",
+	label: "etiquetas",
 };
 
 export function PieBreakdownCard({

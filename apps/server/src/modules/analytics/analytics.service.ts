@@ -23,6 +23,13 @@ import type {
 } from "./analytics.schema";
 import type { AnalyticsDeps } from "./analytics.types";
 
+type FlowRow = {
+	key: string | null;
+	name?: string;
+	income: number;
+	expense: number;
+};
+
 const todayInMaputo = () =>
 	new Date(Date.now() + 2 * 3_600_000).toISOString().slice(0, 10);
 
@@ -193,14 +200,15 @@ export class AnalyticsService {
 	async breakdown(userId: string, query: BreakdownQuery): Promise<Breakdown> {
 		const { from, to, by, flow, limit } = query;
 		const previous = previousRange(from, to);
-		const [labels, current, before] = await Promise.all([
-			this.breakdownLabels(userId, by),
+		const [current, before] = await Promise.all([
 			this.flowTotals(userId, by, from, to),
 			this.flowTotals(userId, by, previous.from, previous.to),
 		]);
-		const sumBy = (
-			rows: { key: string | null; income: number; expense: number }[],
-		) => {
+		const labels = await this.breakdownLabels(userId, by, [
+			...current,
+			...before,
+		]);
+		const sumBy = (rows: FlowRow[]) => {
 			const totals = new Map<string | null, number>();
 			for (const row of rows) {
 				const value = row[flow];
@@ -236,12 +244,31 @@ export class AnalyticsService {
 		};
 	}
 
-	private async breakdownLabels(userId: string, by: BreakdownQuery["by"]) {
+	private async breakdownLabels(
+		userId: string,
+		by: BreakdownQuery["by"],
+		rows: FlowRow[],
+	): Promise<{
+		byId: Map<string, { name: string; color: string | null }>;
+		groupOf: (id: string | null) => string | null;
+		fallbackName: string;
+	}> {
+		if (by === "payee" || by === "label") {
+			const byId = new Map<string, { name: string; color: null }>();
+			for (const row of rows)
+				if (row.key && !byId.has(row.key))
+					byId.set(row.key, { name: row.name ?? row.key, color: null });
+			return {
+				byId,
+				groupOf: (id) => id,
+				fallbackName: by === "payee" ? "Sem pessoa" : "Sem etiqueta",
+			};
+		}
 		if (by === "account") {
 			const accounts = await this.deps.accounts.list(userId);
 			return {
 				byId: new Map(accounts.map((a) => [a.id, a])),
-				groupOf: (id: string | null) => id,
+				groupOf: (id) => id,
 				fallbackName: "Sem conta",
 			};
 		}
@@ -249,8 +276,7 @@ export class AnalyticsService {
 		const byId = new Map(categories.map((c) => [c.id, c]));
 		return {
 			byId,
-			groupOf: (id: string | null) =>
-				id ? (byId.get(id)?.parentId ?? id) : null,
+			groupOf: (id) => (id ? (byId.get(id)?.parentId ?? id) : null),
 			fallbackName: "Sem categoria",
 		};
 	}
@@ -260,19 +286,25 @@ export class AnalyticsService {
 		by: BreakdownQuery["by"],
 		from: string,
 		to: string,
-	) {
+	): Promise<FlowRow[]> {
+		const start = startOf(from);
+		const end = endOf(to);
+		if (by === "payee")
+			return this.deps.transactions.payeeTotals(userId, start, end);
+		if (by === "label")
+			return this.deps.transactions.labelTotals(userId, start, end);
 		if (by === "account") {
 			const rows = await this.deps.transactions.accountTotals(
 				userId,
-				startOf(from),
-				endOf(to),
+				start,
+				end,
 			);
-			return rows.map((r) => ({ ...r, key: r.accountId as string | null }));
+			return rows.map((r) => ({ ...r, key: r.accountId }));
 		}
 		const rows = await this.deps.transactions.categoryTotals(
 			userId,
-			startOf(from),
-			endOf(to),
+			start,
+			end,
 		);
 		return rows.map((r) => ({ ...r, key: r.categoryId }));
 	}

@@ -12,6 +12,11 @@ export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 
 const text = (max: number) => z.string().trim().max(max);
 
+export const labelList = z
+	.array(z.string().trim().min(1).max(40))
+	.max(10)
+	.transform((list) => [...new Set(list)]);
+
 export const createTransactionInput = z.object({
 	type: z.enum(["expense", "income"]),
 	accountId: id,
@@ -23,6 +28,7 @@ export const createTransactionInput = z.object({
 	referenceMonth: yearMonth.optional(),
 	note: text(500).nullable().optional(),
 	payee: text(120).nullable().optional(),
+	labels: labelList.optional(),
 	/** Pays this item of a month's list. */
 	monthItemId: id.nullable().optional(),
 });
@@ -74,6 +80,7 @@ export const listTransactionsQuery = z.object({
 	type: z.enum(TRANSACTION_TYPES).optional(),
 	referenceMonth: yearMonth.optional(),
 	payee: z.string().trim().min(1).max(120).optional(),
+	label: z.string().trim().min(1).max(40).optional(),
 	/** Searches note and payee. */
 	q: z.string().trim().min(1).max(120).optional(),
 	cursor: z.string().max(200).optional(),
@@ -92,6 +99,7 @@ export type Transaction = {
 	referenceMonth: string;
 	note: string | null;
 	payee: string | null;
+	labels: string[];
 	transferId: string | null;
 	/** For a transfer leg: the account on the other side. */
 	counterpartAccountId: string | null;
@@ -116,3 +124,5 @@ export type Transfer = {
 	monthItemId: string | null;
 	legs: { outId: string; inId: string };
 };
+
+export type LabelUsage = { name: string; count: number };

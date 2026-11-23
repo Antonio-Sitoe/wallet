@@ -10,6 +10,8 @@ export const Route = createFileRoute("/_private/transactions")({
 		category: z.string().optional(),
 		type: z.enum(["expense", "income", "transfer", "adjustment"]).optional(),
 		month: z.string().optional(),
+		payee: z.string().optional(),
+		label: z.string().optional(),
 		q: z.string().optional(),
 		id: z.string().optional(),
 	}),

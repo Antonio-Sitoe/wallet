@@ -30,6 +30,7 @@ export function TxRow({
 	const meta = [
 		account,
 		tx.payee,
+		tx.labels.map((l) => `#${l}`).join(" "),
 		tx.note,
 		`mês ${monthLabel(tx.referenceMonth).toLowerCase()}`,
 	]

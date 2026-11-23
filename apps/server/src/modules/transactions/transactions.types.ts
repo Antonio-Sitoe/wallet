@@ -170,6 +170,17 @@ export interface ITransactionsRepository {
 		from: Date,
 		to: Date,
 	): Promise<{ accountId: string; income: string; expense: string }[]>;
+	payeeTotals(
+		userId: string,
+		from: Date,
+		to: Date,
+	): Promise<{ key: string; name: string; income: string; expense: string }[]>;
+	labelTotals(
+		userId: string,
+		from: Date,
+		to: Date,
+	): Promise<{ name: string; income: string; expense: string }[]>;
+	labelUsage(userId: string): Promise<{ name: string; count: number }[]>;
 	countByCategory(
 		userId: string,
 	): Promise<{ categoryId: string | null; count: number }[]>;
