@@ -1,4 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Button } from "@wallet/ui/components/button";
 import {
 	ArrowLeftRightIcon,
 	CalendarRangeIcon,
@@ -124,18 +125,19 @@ export function AppShell({ children }: { children: ReactNode }) {
 								{session?.user.name ?? "—"}
 							</span>
 						</div>
-						<button
-							type="button"
+						<Button
+							variant="quiet"
+							size="icon-sm"
 							aria-label="Sair"
 							className="text-fg-2 hover:bg-hover ml-auto cursor-pointer rounded-md p-2 md:hidden"
 							onClick={signOut}
 						>
 							<LogOutIcon className="size-4" strokeWidth={1.8} />
-						</button>
+						</Button>
 					</div>
 
-					<button
-						type="button"
+					<Button
+						variant="primary"
 						onClick={() => openNew()}
 						className="bg-money text-money-ink hover:bg-money-2 flex h-[34px] cursor-pointer items-center gap-2 rounded-[7px] pr-2 pl-2.5 font-semibold"
 					>
@@ -144,7 +146,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 						<span className="num rounded bg-[rgba(4,19,10,.18)] px-1 text-[11px]">
 							{MOD}N
 						</span>
-					</button>
+					</Button>
 
 					<div className="flex gap-0.5 overflow-x-auto md:flex-col">
 						<div className="num text-dim hidden px-2 pb-1.5 text-[11px] tracking-[.06em] uppercase md:block">
@@ -184,14 +186,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 						<span className="num text-dim truncate px-2 text-[11px]">
 							{session?.user.email}
 						</span>
-						<button
-							type="button"
+						<Button
+							variant="quiet"
 							className="text-fg-2 hover:bg-hover hover:text-fg flex h-[34px] cursor-pointer items-center gap-2.5 rounded-md px-2"
 							onClick={signOut}
 						>
 							<LogOutIcon className="size-4" strokeWidth={1.8} />
 							Sair
-						</button>
+						</Button>
 					</div>
 				</nav>
 

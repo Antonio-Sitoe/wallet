@@ -1,4 +1,5 @@
 import { Link, useRouter } from "@tanstack/react-router";
+import { Button } from "@wallet/ui/components/button";
 import { ArrowLeftIcon, LayoutDashboardIcon } from "lucide-react";
 import { Illustration } from "@/components/feedback/not-found-illustration";
 
@@ -56,14 +57,14 @@ export function NotFound() {
 						/>
 						Ir para o painel
 					</Link>
-					<button
-						type="button"
+					<Button
+						variant="neutral"
 						onClick={() => router.history.back()}
 						className="border-line-strong text-fg-2 hover:bg-hover hover:text-fg focus-visible:ring-info-2 inline-flex h-11 cursor-pointer items-center gap-2 rounded-[10px] border bg-transparent px-[18px] text-sm outline-none focus-visible:ring-2"
 					>
 						<ArrowLeftIcon aria-hidden="true" className="size-4" />
 						Voltar
-					</button>
+					</Button>
 				</div>
 
 				<nav

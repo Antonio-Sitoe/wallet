@@ -1,4 +1,5 @@
 import type { MonthItem } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
 import {
 	Dialog,
 	DialogClose,
@@ -17,6 +18,7 @@ import { useCreateTransaction } from "@/actions/transactions/use-create-transact
 import { useCreateTransfer } from "@/actions/transactions/use-create-transfer";
 import { AccountPick } from "@/components/transactions/account-pick";
 import { CategoryPicker } from "@/components/transactions/category-picker";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
 import {
@@ -626,11 +628,9 @@ export function NewTransactionDialog({
 							{showExtras ? (
 								<div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
 									<Field label="Data">
-										<Input
-											type="date"
-											className="num"
+										<DatePicker
 											value={date}
-											onChange={(e) => setDate(e.target.value || today)}
+											onChange={(value) => setDate(value || today)}
 										/>
 									</Field>
 									<Field label="Mês do orçamento">
@@ -698,17 +698,17 @@ export function NewTransactionDialog({
 					<span className="num text-dim mr-auto hidden text-[11px] sm:inline">
 						escreve o valor no teclado · tab muda de campo
 					</span>
-					<button
-						type="button"
+					<Button
+						variant="neutral"
 						disabled={!valid || pending}
 						onClick={() => void save(true)}
 						className="border-line-strong bg-hover text-fg inline-flex h-9 cursor-pointer items-center gap-2 rounded-[7px] border px-3.5 text-[13px] font-medium hover:bg-[#1c2128] disabled:cursor-not-allowed disabled:opacity-45"
 					>
 						Guardar e nova
 						<span className="num rounded bg-white/8 px-1 text-[11px]">⇧⌘↵</span>
-					</button>
-					<button
-						type="button"
+					</Button>
+					<Button
+						variant="primary"
 						disabled={!valid || pending}
 						onClick={() => void save(false)}
 						className="border-money bg-money text-money-ink hover:bg-money-2 inline-flex h-9 cursor-pointer items-center gap-2 rounded-[7px] border px-3.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
@@ -717,7 +717,7 @@ export function NewTransactionDialog({
 						<span className="num rounded bg-[rgba(4,19,10,.18)] px-1 text-[11px]">
 							⌘↵
 						</span>
-					</button>
+					</Button>
 				</div>
 			</DialogContent>
 		</Dialog>

@@ -1,6 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { CardSize, DashboardCard } from "@wallet/shared";
+import { Button } from "@wallet/ui/components/button";
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,
@@ -78,8 +79,9 @@ export function DashboardCardFrame({
 				</h2>
 				{hasFlow ? (
 					<Hint label={"Alternar entre saídas e entradas"}>
-						<button
-							type="button"
+						<Button
+							variant="neutral"
+							size="xs"
 							className="num border-line-strong text-fg-2 hover:bg-hover cursor-pointer rounded-md border px-2 py-0.5 text-[11px]"
 							onClick={() =>
 								update.mutate({
@@ -92,13 +94,14 @@ export function DashboardCardFrame({
 							}
 						>
 							{card.config.flow === "income" ? "entradas" : "saídas"}
-						</button>
+						</Button>
 					</Hint>
 				) : null}
 				{hasRange ? (
 					<Hint label={"Alternar entre o período escolhido e o ano inteiro"}>
-						<button
-							type="button"
+						<Button
+							variant="neutral"
+							size="xs"
 							className="num border-line-strong text-fg-2 hover:bg-hover cursor-pointer rounded-md border px-2 py-0.5 text-[11px]"
 							onClick={() =>
 								update.mutate({
@@ -111,7 +114,7 @@ export function DashboardCardFrame({
 							}
 						>
 							{card.config.range === "year" ? "ano" : "período"}
-						</button>
+						</Button>
 					</Hint>
 				) : null}
 				<IconButton

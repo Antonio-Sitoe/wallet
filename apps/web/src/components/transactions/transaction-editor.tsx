@@ -8,6 +8,7 @@ import { useUpdateTransaction } from "@/actions/transactions/use-update-transact
 import { DetailDialog } from "@/components/transactions/detail-dialog";
 import { monthChoices } from "@/components/transactions/utils";
 import { categoryItems } from "@/components/ui/category-items";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Pill } from "@/components/ui/pill";
@@ -119,12 +120,7 @@ export function TransactionEditor({
 						/>
 					</Field>
 					<Field label="Data">
-						<Input
-							type="date"
-							className="num"
-							value={date}
-							onChange={(e) => setDate(e.target.value)}
-						/>
+						<DatePicker value={date} onChange={setDate} />
 					</Field>
 					<Field label="Mês do orçamento">
 						<Select

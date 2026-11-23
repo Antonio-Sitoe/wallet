@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { usePayMonthItem } from "@/actions/budgets/use-pay-month-item";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
@@ -114,12 +115,7 @@ export function PayDialog({
 						/>
 					</Field>
 					<Field label="Data">
-						<Input
-							type="date"
-							className="num"
-							value={date}
-							onChange={(e) => setDate(e.target.value)}
-						/>
+						<DatePicker value={date} onChange={setDate} />
 					</Field>
 				</div>
 				<Field label="Nota">

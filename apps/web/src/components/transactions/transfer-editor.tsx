@@ -9,6 +9,7 @@ import { useTransfer } from "@/actions/transactions/use-transfer";
 import { useUpdateTransfer } from "@/actions/transactions/use-update-transfer";
 import { DetailDialog } from "@/components/transactions/detail-dialog";
 import { monthChoices } from "@/components/transactions/utils";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
@@ -125,11 +126,9 @@ export function TransferEditor({
 						/>
 					</Field>
 					<Field label="Data">
-						<Input
-							type="date"
-							className="num"
+						<DatePicker
 							value={form.date}
-							onChange={(e) => setForm({ ...form, date: e.target.value })}
+							onChange={(value) => setForm({ ...form, date: value })}
 							max={todayInput()}
 						/>
 					</Field>

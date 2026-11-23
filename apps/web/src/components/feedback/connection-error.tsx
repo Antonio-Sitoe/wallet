@@ -1,4 +1,5 @@
 import type { ErrorComponentProps } from "@tanstack/react-router";
+import { Button } from "@wallet/ui/components/button";
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -148,8 +149,8 @@ export function ConnectionError({ error }: ErrorComponentProps) {
 					</p>
 				</div>
 
-				<button
-					type="button"
+				<Button
+					variant="primary"
 					onClick={() => void retry()}
 					aria-busy={busy}
 					className="bg-money text-money-ink hover:bg-money-2 focus-visible:ring-offset-canvas focus-visible:ring-money inline-flex h-11 cursor-pointer items-center justify-center gap-2.5 rounded-[10px] px-[22px] text-[15px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
@@ -163,7 +164,7 @@ export function ConnectionError({ error }: ErrorComponentProps) {
 					<span className="num rounded bg-[rgba(4,19,10,.18)] px-[5px] text-[11px]">
 						⌘R
 					</span>
-				</button>
+				</Button>
 
 				<div
 					role="status"
@@ -194,13 +195,14 @@ export function ConnectionError({ error }: ErrorComponentProps) {
 							))}
 						</div>
 						<div className="flex gap-2 px-3.5 pb-3">
-							<button
-								type="button"
+							<Button
+								variant="neutral"
+								size="sm"
 								onClick={copyDetails}
 								className="border-line-strong text-fg-2 hover:bg-hover hover:text-fg inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-[7px] border bg-transparent px-2.5 text-xs"
 							>
 								Copiar detalhes
-							</button>
+							</Button>
 						</div>
 					</CollapsibleContent>
 				</Collapsible>
