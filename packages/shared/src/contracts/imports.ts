@@ -111,6 +111,9 @@ export const commitSheetInput = z.object({
 		.default([]),
 	goalAccountId: id.nullable().default(null),
 	partGoals: z.record(z.string(), z.string().nullable()).default({}),
+	debts: z
+		.array(z.object({ key: z.string(), include: z.boolean() }))
+		.default([]),
 });
 export type CommitSheetInput = z.infer<typeof commitSheetInput>;
 
@@ -140,6 +143,13 @@ export type SheetGoalPart = {
 	paid: number;
 	missing: number;
 	goalKey: string | null;
+};
+
+export type SheetDebt = {
+	key: string;
+	person: string;
+	direction: "owed_to_me" | "i_owe";
+	amount: number;
 };
 
 export type SheetMonthPreview = {
@@ -175,11 +185,13 @@ export type SheetPreview = {
 	goals: SheetGoal[];
 	goalParts: SheetGoalPart[];
 	goalAccountId: string | null;
+	debts: SheetDebt[];
 	result?: {
 		monthItems: number;
 		planItems: number;
 		payments: number;
 		paymentsSkipped: number;
 		goals?: number;
+		debts?: number;
 	};
 };

@@ -118,6 +118,18 @@ export type SheetImportDeps = {
 		): Promise<string>;
 		removeMany(userId: string, ids: string[]): Promise<void>;
 	};
+	debts: {
+		importDebt(
+			userId: string,
+			input: {
+				person: string;
+				direction: "owed_to_me" | "i_owe";
+				amount: number;
+				importBatchId: string;
+			},
+		): Promise<string>;
+		removeMany(userId: string, ids: string[]): Promise<void>;
+	};
 	categories: {
 		idsBySlug(userId: string): Promise<Map<string, string>>;
 		ensureDefaults(userId: string): Promise<void>;
@@ -190,7 +202,11 @@ export type StoredSheetSummary = Omit<
 	SheetPreview,
 	"id" | "status" | "createdAt" | "committedAt" | "source"
 > & {
-	created?: SheetCreated & { paymentIds: string[]; goalIds?: string[] };
+	created?: SheetCreated & {
+		paymentIds: string[];
+		goalIds?: string[];
+		debtIds?: string[];
+	};
 };
 
 export type RemovedCounts = {

@@ -14,6 +14,9 @@ export function refreshMoney(qc: QueryClient) {
 		"imports",
 		"goals",
 		"goal",
+		"debts",
+		"debt",
+		"debt-suggestions",
 	]) {
 		qc.invalidateQueries({ queryKey: [key] });
 	}

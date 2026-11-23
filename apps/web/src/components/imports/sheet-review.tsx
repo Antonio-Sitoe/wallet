@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useCategories } from "@/actions/categories/use-categories";
 import { useCommitSheet } from "@/actions/imports/use-commit-sheet";
+import { SheetDebts } from "@/components/imports/sheet-debts";
 import {
 	goalsForCommit,
 	type SheetGoalChoice,
@@ -54,6 +55,9 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 		),
 	);
 	const [partGoals, setPartGoals] = useState<Record<string, string | null>>({});
+	const [excludedDebts, setExcludedDebts] = useState<Set<string>>(
+		() => new Set(),
+	);
 	const [goalAccountId, setGoalAccountId] = useState(
 		preview.goalAccountId ?? "",
 	);
@@ -64,10 +68,14 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 	const included = preview.months.filter((m) => months[m.month]?.include);
 	const paying = included.filter((m) => months[m.month]?.createPayments);
 	const includedGoals = preview.goals.filter((g) => goals[g.key]?.include);
+	const includedDebts = preview.debts.filter((d) => !excludedDebts.has(d.key));
 	const importLabel = [
 		included.length ? `${included.length} meses` : null,
 		includedGoals.length
 			? `${includedGoals.length} ${includedGoals.length === 1 ? "meta" : "metas"}`
+			: null,
+		includedDebts.length
+			? `${includedDebts.length} ${includedDebts.length === 1 ? "dívida" : "dívidas"}`
 			: null,
 	]
 		.filter(Boolean)
@@ -81,6 +89,7 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 					{preview.result.planItems} no plano · {preview.result.payments}{" "}
 					pagamentos
 					{preview.result.goals ? ` · ${preview.result.goals} metas` : ""}
+					{preview.result.debts ? ` · ${preview.result.debts} dívidas` : ""}
 				</Pill>
 			) : null}
 
@@ -271,6 +280,15 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 				/>
 			) : null}
 
+			{preview.debts.length > 0 ? (
+				<SheetDebts
+					preview={preview}
+					draft={draft}
+					excluded={excludedDebts}
+					onExcludedChange={setExcludedDebts}
+				/>
+			) : null}
+
 			{draft ? (
 				<div className="flex flex-wrap items-end justify-end gap-2">
 					<Field
@@ -306,7 +324,9 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 						<Button
 							variant="primary"
 							disabled={
-								(included.length === 0 && includedGoals.length === 0) ||
+								(included.length === 0 &&
+									includedGoals.length === 0 &&
+									includedDebts.length === 0) ||
 								commit.isPending ||
 								(paying.length > 0 && !accountId) ||
 								(includedGoals.length > 0 && !goalAccountId)
@@ -326,9 +346,13 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 									goals: goalsForCommit(preview, goals),
 									partGoals,
 									goalAccountId: goalAccountId || null,
+									debts: preview.debts.map((d) => ({
+										key: d.key,
+										include: !excludedDebts.has(d.key),
+									})),
 								});
 								toast.success(
-									`Folha importada: ${res.result?.monthItems ?? 0} itens, ${res.result?.payments ?? 0} pagamentos, ${res.result?.goals ?? 0} metas`,
+									`Folha importada: ${res.result?.monthItems ?? 0} itens, ${res.result?.payments ?? 0} pagamentos, ${res.result?.goals ?? 0} metas, ${res.result?.debts ?? 0} dívidas`,
 								);
 							}}
 						>

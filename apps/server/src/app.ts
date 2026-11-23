@@ -8,6 +8,7 @@ import { createAnalyticsModule } from "./modules/analytics";
 import { createBudgetsModule } from "./modules/budgets";
 import { createCategoriesModule, SYSTEM_SLUGS } from "./modules/categories";
 import { createDashboardModule } from "./modules/dashboard";
+import { createDebtsModule } from "./modules/debts";
 import { createGoalsModule } from "./modules/goals";
 import { createImportsModule } from "./modules/imports";
 import { createTransactionsModule } from "./modules/transactions";
@@ -26,6 +27,7 @@ export function buildModules(db: Database) {
 	let budgets: ReturnType<typeof createBudgetsModule> | undefined;
 	let imports: ReturnType<typeof createImportsModule> | undefined;
 	let goals: ReturnType<typeof createGoalsModule> | undefined;
+	let debts: ReturnType<typeof createDebtsModule> | undefined;
 	const tx = () => transactions!.service;
 	const budget = () => budgets!.service;
 
@@ -101,6 +103,10 @@ export function buildModules(db: Database) {
 				importGoal: (userId, input) => goals!.service.importGoal(userId, input),
 				removeMany: (userId, ids) => goals!.service.removeMany(userId, ids),
 			},
+			debts: {
+				importDebt: (userId, input) => debts!.service.importDebt(userId, input),
+				removeMany: (userId, ids) => debts!.service.removeMany(userId, ids),
+			},
 			categories: {
 				idsBySlug: (userId) => categories.service.idsBySlug(userId),
 				ensureDefaults: (userId) => categories.service.ensureDefaults(userId),
@@ -123,6 +129,13 @@ export function buildModules(db: Database) {
 		categories: { list: categories.service.list },
 	});
 	const dashboard = createDashboardModule(db);
+	debts = createDebtsModule(db, {
+		accounts: {
+			assertOwned: (userId, ids) => accounts.service.assertOwned(userId, ids),
+		},
+		categories: { idsBySlug: (userId) => categories.service.idsBySlug(userId) },
+		transactions: transactions.service,
+	});
 	goals = createGoalsModule(db, {
 		accounts: {
 			assertOwned: (userId, ids) => accounts.service.assertOwned(userId, ids),
@@ -139,6 +152,7 @@ export function buildModules(db: Database) {
 		analytics,
 		dashboard,
 		goals,
+		debts,
 	};
 }
 

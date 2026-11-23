@@ -53,7 +53,7 @@ async function signUp(): Promise<Client> {
 	};
 }
 
-describe.runIf(dbUp)("sheet import: goals from the Emergência tab", () => {
+describe.runIf(dbUp)("sheet import: goals and debts", () => {
 	let me: Client;
 	let savings: string;
 	let preview: any;
@@ -87,6 +87,16 @@ describe.runIf(dbUp)("sheet import: goals from the Emergência tab", () => {
 		expect(preview.goalParts).toHaveLength(4);
 		expect(preview.goalAccountId).toBe(savings);
 		expect(preview.otherSheets).not.toContain("Emergencia");
+		expect(preview.otherSheets).not.toContain("Dividas");
+	});
+
+	it("previews the debts tab: six people owe me, I owe Edi", () => {
+		expect(preview.debts).toHaveLength(7);
+		expect(
+			preview.debts.filter(
+				(d: { direction: string }) => d.direction === "i_owe",
+			),
+		).toEqual([expect.objectContaining({ person: "Edi", amount: 200_000 })]);
 	});
 
 	it("imports only the goals, with the parts the user kept", async () => {
@@ -104,9 +114,17 @@ describe.runIf(dbUp)("sheet import: goals from the Emergência tab", () => {
 			})),
 			goals: [{ key: "emergencia", include: true, target: 26_850_000 }],
 			partGoals: { [moto]: null, [casamento]: null },
+			debts: preview.debts.map((d: { key: string; person: string }) => ({
+				key: d.key,
+				include: d.person !== "Roberto",
+			})),
 		});
 		expect(r.status).toBe(200);
 		expect(r.body.result.goals).toBe(2);
+		expect(r.body.result.debts).toBe(6);
+		const debts = (await me("GET", "/debts")).body as { imported: boolean }[];
+		expect(debts).toHaveLength(6);
+		expect(debts.every((d) => d.imported)).toBe(true);
 		expect(r.body.result.monthItems).toBe(0);
 
 		const goals = (await me("GET", "/goals")).body as {
@@ -128,9 +146,10 @@ describe.runIf(dbUp)("sheet import: goals from the Emergência tab", () => {
 		]);
 	});
 
-	it("undoing the import removes the goals", async () => {
+	it("undoing the import removes the goals and the debts", async () => {
 		const r = await me("DELETE", `/imports/${preview.id}`);
 		expect(r.status).toBe(200);
 		expect((await me("GET", "/goals")).body).toHaveLength(0);
+		expect((await me("GET", "/debts")).body).toHaveLength(0);
 	});
 });

@@ -4,6 +4,7 @@ import {
 	ArrowLeftRightIcon,
 	CalendarRangeIcon,
 	DownloadIcon,
+	HandCoinsIcon,
 	LandmarkIcon,
 	LayoutDashboardIcon,
 	ListChecksIcon,
@@ -43,6 +44,7 @@ export const NAV = [
 	{ to: "/categories", label: "Categorias", icon: TagIcon },
 	{ to: "/import", label: "Importar", icon: DownloadIcon },
 	{ to: "/goals", label: "Metas", icon: TargetIcon },
+	{ to: "/debts", label: "Dívidas", icon: HandCoinsIcon },
 ] as const;
 
 export const isMac =

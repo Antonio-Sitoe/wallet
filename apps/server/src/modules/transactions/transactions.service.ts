@@ -127,7 +127,11 @@ export class TransactionsService {
 		return toTransaction(await this.findRow(userId, id));
 	}
 
-	async create(userId: string, input: CreateTransactionInput) {
+	async create(
+		userId: string,
+		input: CreateTransactionInput,
+		options: { debtId?: string } = {},
+	) {
 		await this.deps.accounts.assertOwned(userId, [input.accountId]);
 		if (input.categoryId)
 			await this.deps.categories.assertOwned(userId, [input.categoryId]);
@@ -144,6 +148,7 @@ export class TransactionsService {
 			note: input.note ?? null,
 			payee: input.payee ?? null,
 			monthItemId: input.monthItemId ?? null,
+			debtId: options.debtId ?? null,
 		});
 		return this.get(userId, id);
 	}

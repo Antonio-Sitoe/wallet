@@ -157,3 +157,15 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 ## Fase 6 — Frontend — 2026-11-23
 
 - [x] Modo claro / escuro / seguir o sistema: `next-themes` (sistema por defeito, guardado em `wallet.theme`), selector com três ícones no fundo da barra lateral, botão no topo em telemóvel, atalho ⇧⌘L para alternar
+
+## Fase 4 — Metas e dívidas — 2026-11-23
+
+**Backend**
+
+- [x] Metas com progresso (Obra, Emergência): tabelas `goals` e `goal_parts`, `transfers.goal_id`; o progresso soma o valor inicial, as contribuições (transferências para a conta da meta) e os pagamentos do item do plano ligado; partes com pago / por pagar; importação da aba Emergência da folha (fundo de emergência, Obra e partes), com desfazer
+- [x] Dívidas a receber / a pagar com pagamentos parciais: tabela `debts` e `transactions.debt_id`; cada recebimento é uma entrada em Dívidas › Recebidas e cada pagamento uma saída em Dívidas › Pagas, ligados à dívida; sugestões por pessoa a partir das notas «Pessoa → Eu» / «Eu → Pessoa» do Wallet (ignorar fica guardado); importação da aba Dívidas da folha, com desfazer
+
+**Frontend**
+
+- [x] Ecrã de metas com progresso: indicadores, cartões com ritmo e previsão, detalhe em modal com partes e contribuições, Nova meta (com item opcional no plano anual) e Contribuir; secção Metas na revisão da folha
+- [x] Ecrã de dívidas por pessoa: indicadores (a receber, a pagar, saldo líquido, sugestões), separadores Devem-me / Devo, detalhe em modal com histórico, lembrete e Perdoar / arquivar, Registar recebimento / pagamento (Tudo, Metade), Nova dívida e sugestões do Wallet para converter ou ignorar; secção Dívidas na revisão da folha

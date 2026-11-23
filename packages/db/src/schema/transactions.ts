@@ -16,6 +16,7 @@ import { accounts } from "./accounts";
 import { user } from "./auth";
 import { monthItems } from "./budgets";
 import { categories } from "./categories";
+import { debts } from "./debts";
 import { goals } from "./goals";
 import { importBatches } from "./imports";
 
@@ -91,6 +92,9 @@ export const transactions = pgTable(
 		monthItemId: uuid("month_item_id").references(() => monthItems.id, {
 			onDelete: "set null",
 		}),
+		debtId: uuid("debt_id").references(() => debts.id, {
+			onDelete: "set null",
+		}),
 		importHash: text("import_hash"),
 		importBatchId: uuid("import_batch_id").references(() => importBatches.id, {
 			onDelete: "set null",
@@ -114,6 +118,7 @@ export const transactions = pgTable(
 		index("transactions_transfer_idx").on(t.transferId),
 		index("transactions_batch_idx").on(t.importBatchId),
 		index("transactions_month_item_idx").on(t.monthItemId),
+		index("transactions_debt_idx").on(t.debtId),
 		index("transactions_user_month_idx").on(t.userId, t.referenceMonth),
 		uniqueIndex("transactions_user_import_hash_uq")
 			.on(t.userId, t.importHash)

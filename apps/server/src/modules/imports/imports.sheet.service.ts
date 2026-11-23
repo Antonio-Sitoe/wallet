@@ -3,6 +3,7 @@ import {
 	notFound,
 	unprocessable,
 } from "../../shared/errors/app-error";
+import { parseDebtsSheet } from "./imports.debts-sheet";
 import { parseEmergencySheet } from "./imports.emergency-sheet";
 import {
 	itemKey,
@@ -14,6 +15,7 @@ import {
 } from "./imports.salary-sheet";
 import type {
 	CommitSheetInput,
+	SheetDebt,
 	SheetGoal,
 	SheetGoalPart,
 	SheetImportInput,
@@ -45,6 +47,7 @@ function toPreview(row: BatchRow): SheetPreview {
 		goals: rest.goals ?? [],
 		goalParts: rest.goalParts ?? [],
 		goalAccountId: rest.goalAccountId ?? null,
+		debts: rest.debts ?? [],
 		id: row.id,
 		source: "sheet-xlsx",
 		status: row.status,
@@ -164,6 +167,15 @@ export class SheetImportService {
 		const { goals, goalParts } = emergencySheet
 			? this.sheetGoals(emergencySheet, monthPreviews)
 			: { goals: [], goalParts: [] };
+		const debtsSheet = sheets.find(
+			(s) => s !== salary && /d[ií]vida/i.test(s.name),
+		);
+		const debts: SheetDebt[] = debtsSheet
+			? parseDebtsSheet(debtsSheet).map((d, index) => ({
+					key: `divida:${index}`,
+					...d,
+				}))
+			: [];
 		const savings = (
 			await this.deps.accounts.list(userId, { includeArchived: false })
 		).find((a) => a.type === "savings");
@@ -173,7 +185,7 @@ export class SheetImportService {
 			year: input.year,
 			sheetName: salary.name,
 			otherSheets: sheets
-				.filter((s) => s !== salary && s !== emergencySheet)
+				.filter((s) => s !== salary && s !== emergencySheet && s !== debtsSheet)
 				.map((s) => s.name),
 			planItems,
 			months: monthPreviews,
@@ -181,6 +193,7 @@ export class SheetImportService {
 			goals,
 			goalParts,
 			goalAccountId: savings?.id ?? null,
+			debts,
 		};
 		const row = await this.repository.insert({
 			userId,
@@ -210,10 +223,18 @@ export class SheetImportService {
 		const includedGoals = (stored.goals ?? []).filter(
 			(g) => goalChoice.get(g.key)?.include ?? true,
 		);
-		if (included.length === 0 && includedGoals.length === 0)
+		const debtChoice = new Map(input.debts.map((d) => [d.key, d.include]));
+		const includedDebts = (stored.debts ?? []).filter(
+			(d) => debtChoice.get(d.key) ?? true,
+		);
+		if (
+			included.length === 0 &&
+			includedGoals.length === 0 &&
+			includedDebts.length === 0
+		)
 			throw unprocessable(
 				"NOTHING_TO_IMPORT",
-				"Escolha pelo menos um mês ou uma meta",
+				"Escolha pelo menos um mês, uma meta ou uma dívida",
 			);
 		const goalAccountId = input.goalAccountId ?? stored.goalAccountId ?? null;
 		if (includedGoals.length > 0 && !goalAccountId)
@@ -308,12 +329,24 @@ export class SheetImportService {
 			);
 		}
 
+		const debtIds: string[] = [];
+		for (const debt of includedDebts)
+			debtIds.push(
+				await this.deps.debts.importDebt(userId, {
+					person: debt.person,
+					direction: debt.direction,
+					amount: debt.amount,
+					importBatchId: id,
+				}),
+			);
+
 		const result = {
 			monthItems: created.monthItemIds.length,
 			planItems: created.planItemIds.length,
 			payments: paymentIds.length,
 			paymentsSkipped,
 			goals: goalIds.length,
+			debts: debtIds.length,
 		};
 		await this.repository.update(id, {
 			status: "committed",
@@ -321,7 +354,7 @@ export class SheetImportService {
 			summary: {
 				...stored,
 				result,
-				created: { ...created, paymentIds, goalIds },
+				created: { ...created, paymentIds, goalIds, debtIds },
 			},
 		});
 		return this.get(userId, id);
@@ -386,6 +419,7 @@ export class SheetImportService {
 			}
 			await this.deps.budgets.undoSheet(userId, created);
 			await this.deps.goals.removeMany(userId, created.goalIds ?? []);
+			await this.deps.debts.removeMany(userId, created.debtIds ?? []);
 		}
 		await this.repository.update(id, {
 			status: "reverted",
