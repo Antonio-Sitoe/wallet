@@ -99,6 +99,24 @@ type SheetGroup = SheetPlanItem["group"];
 export type SheetImportDeps = {
 	accounts: {
 		findByNames(userId: string, names: string[]): Promise<Map<string, string>>;
+		list(
+			userId: string,
+			options: { includeArchived: boolean },
+		): Promise<{ id: string; type: string; archived: boolean }[]>;
+	};
+	goals: {
+		importGoal(
+			userId: string,
+			input: {
+				name: string;
+				target: number;
+				startingAmount: number;
+				accountId: string;
+				importBatchId: string;
+				parts: { name: string; amount: number; paid: boolean }[];
+			},
+		): Promise<string>;
+		removeMany(userId: string, ids: string[]): Promise<void>;
 	};
 	categories: {
 		idsBySlug(userId: string): Promise<Map<string, string>>;
@@ -172,7 +190,7 @@ export type StoredSheetSummary = Omit<
 	SheetPreview,
 	"id" | "status" | "createdAt" | "committedAt" | "source"
 > & {
-	created?: SheetCreated & { paymentIds: string[] };
+	created?: SheetCreated & { paymentIds: string[]; goalIds?: string[] };
 };
 
 export type RemovedCounts = {

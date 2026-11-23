@@ -202,6 +202,41 @@ export class GoalsService {
 		return this.get(userId, part.goalId);
 	}
 
+	async importGoal(
+		userId: string,
+		input: {
+			name: string;
+			target: number;
+			startingAmount: number;
+			accountId: string;
+			importBatchId: string;
+			parts: { name: string; amount: number; paid: boolean }[];
+		},
+	) {
+		await this.deps.accounts.assertOwned(userId, [input.accountId]);
+		const goal = await this.repository.insert({
+			userId,
+			name: input.name,
+			target: input.target,
+			startingAmount: input.startingAmount,
+			accountId: input.accountId,
+			importBatchId: input.importBatchId,
+			sortOrder: await this.repository.countGoals(userId),
+		});
+		for (const [index, part] of input.parts.entries())
+			await this.repository.insertPart({
+				userId,
+				goalId: goal.id,
+				...part,
+				sortOrder: index,
+			});
+		return goal.id;
+	}
+
+	async removeMany(userId: string, ids: string[]) {
+		for (const id of ids) await this.repository.delete(userId, id);
+	}
+
 	private async addToPlan(userId: string, input: CreateGoalInput) {
 		const year = Number(yearMonthOf(new Date()).slice(0, 4));
 		try {

@@ -25,6 +25,7 @@ export function buildModules(db: Database) {
 	let transactions: ReturnType<typeof createTransactionsModule> | undefined;
 	let budgets: ReturnType<typeof createBudgetsModule> | undefined;
 	let imports: ReturnType<typeof createImportsModule> | undefined;
+	let goals: ReturnType<typeof createGoalsModule> | undefined;
 	const tx = () => transactions!.service;
 	const budget = () => budgets!.service;
 
@@ -96,6 +97,10 @@ export function buildModules(db: Database) {
 		},
 		{
 			accounts: accounts.service,
+			goals: {
+				importGoal: (userId, input) => goals!.service.importGoal(userId, input),
+				removeMany: (userId, ids) => goals!.service.removeMany(userId, ids),
+			},
 			categories: {
 				idsBySlug: (userId) => categories.service.idsBySlug(userId),
 				ensureDefaults: (userId) => categories.service.ensureDefaults(userId),
@@ -118,7 +123,7 @@ export function buildModules(db: Database) {
 		categories: { list: categories.service.list },
 	});
 	const dashboard = createDashboardModule(db);
-	const goals = createGoalsModule(db, {
+	goals = createGoalsModule(db, {
 		accounts: {
 			assertOwned: (userId, ids) => accounts.service.assertOwned(userId, ids),
 		},

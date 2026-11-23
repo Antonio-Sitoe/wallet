@@ -8,6 +8,8 @@ export {
 	type ImportPreview,
 	idParams,
 	type MonthItem,
+	type SheetGoal,
+	type SheetGoalPart,
 	type SheetImportInput,
 	type SheetMonthPreview,
 	type SheetPlanItem,

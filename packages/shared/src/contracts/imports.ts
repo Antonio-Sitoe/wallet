@@ -15,12 +15,6 @@ export const walletImportInput = z.object({
 });
 export type WalletImportInput = z.infer<typeof walletImportInput>;
 
-/**
- * How to handle a transfer row whose other side is missing:
- * - "ignore": leave it out (default)
- * - "keep": import it as a plain expense/income in Transferência
- * - { transferTo }: create the missing side in that account
- */
 export const reviewResolution = z.union([
 	z.literal("ignore"),
 	z.literal("keep"),
@@ -29,9 +23,7 @@ export const reviewResolution = z.union([
 export type ReviewResolution = z.infer<typeof reviewResolution>;
 
 export const commitImportInput = z.object({
-	/** Wallet category name → app category, for names the saved mapping does not cover. */
 	categoryMap: z.record(z.string(), id).default({}),
-	/** Review row key → decision. */
 	resolutions: z.record(z.string(), reviewResolution).default({}),
 });
 export type CommitImportInput = z.infer<typeof commitImportInput>;
@@ -43,7 +35,6 @@ export type ImportFileSummary = {
 	rows: number;
 	firstDate: string | null;
 	lastDate: string | null;
-	/** Rows not seen in an earlier file of this batch nor in the database. */
 	new: number;
 	duplicate: number;
 };
@@ -70,7 +61,6 @@ export type ImportPreview = {
 		duplicate: number;
 		transactions: number;
 		transferPairs: number;
-		/** "Estique ou xitique" rows turned into transfers to/from the Xitique savings account. */
 		savingsTransfers: number;
 		referenceMonthFromNote: number;
 		debtNotes: number;
@@ -87,23 +77,17 @@ export type ImportBatchSummary = Pick<
 > & {
 	source: "wallet-csv" | "sheet-xlsx";
 	fileNames: string[];
-	/** For spreadsheet imports: months and items read. */
 	sheet?: { year: number; months: number; items: number };
 };
 
-// ---- Spreadsheet ("Calculo Financeiro") import
-
 export const sheetImportInput = z.object({
 	name: z.string().trim().min(1).max(200),
-	/** The .xlsx file, base64-encoded. */
 	contentBase64: z.string().min(1).max(20_000_000),
-	/** The year the sheet's months belong to. */
 	year: z.number().int().min(2000).max(2100),
 });
 export type SheetImportInput = z.infer<typeof sheetImportInput>;
 
 export const commitSheetInput = z.object({
-	/** Account the "already paid" payments leave from; default: each item's last used account. */
 	accountId: id.nullable().default(null),
 	months: z
 		.array(
@@ -114,9 +98,19 @@ export const commitSheetInput = z.object({
 			}),
 		)
 		.default([]),
-	/** Item key → category, overriding the guess. */
 	categories: z.record(z.string(), id.nullable()).default({}),
 	expectedIncome: z.number().int().min(0).optional(),
+	goals: z
+		.array(
+			z.object({
+				key: z.string(),
+				include: z.boolean(),
+				target: z.number().int().positive().optional(),
+			}),
+		)
+		.default([]),
+	goalAccountId: id.nullable().default(null),
+	partGoals: z.record(z.string(), z.string().nullable()).default({}),
 });
 export type CommitSheetInput = z.infer<typeof commitSheetInput>;
 
@@ -132,13 +126,27 @@ export type SheetPlanItem = {
 	toAccountId: string | null;
 };
 
+export type SheetGoal = {
+	key: string;
+	name: string;
+	saved: number;
+	target: number;
+	suggestedTarget: boolean;
+};
+
+export type SheetGoalPart = {
+	key: string;
+	name: string;
+	paid: number;
+	missing: number;
+	goalKey: string | null;
+};
+
 export type SheetMonthPreview = {
 	month: string;
 	label: string;
 	total: number;
-	/** Spending already registered (Wallet import, manual) that matches these items by category. */
 	walletSpent: number;
-	/** Suggest creating payments for what is still unpaid (past months the records barely cover). */
 	suggestPayments: boolean;
 	items: {
 		key: string;
@@ -160,15 +168,18 @@ export type SheetPreview = {
 	fileName: string;
 	year: number;
 	sheetName: string;
-	/** Other sheets in the file (Emergência, Dívidas…), not imported yet. */
 	otherSheets: string[];
 	planItems: SheetPlanItem[];
 	months: SheetMonthPreview[];
 	skipped: { row: number; text: string }[];
+	goals: SheetGoal[];
+	goalParts: SheetGoalPart[];
+	goalAccountId: string | null;
 	result?: {
 		monthItems: number;
 		planItems: number;
 		payments: number;
 		paymentsSkipped: number;
+		goals?: number;
 	};
 };

@@ -3,6 +3,7 @@ import {
 	notFound,
 	unprocessable,
 } from "../../shared/errors/app-error";
+import { parseEmergencySheet } from "./imports.emergency-sheet";
 import {
 	itemKey,
 	monthLabelPt,
@@ -13,6 +14,8 @@ import {
 } from "./imports.salary-sheet";
 import type {
 	CommitSheetInput,
+	SheetGoal,
+	SheetGoalPart,
 	SheetImportInput,
 	SheetMonthPreview,
 	SheetPlanItem,
@@ -26,6 +29,9 @@ import type {
 	StoredSheetSummary,
 } from "./imports.types";
 
+const EMERGENCY_MONTHS = 3;
+const ROUND_TO = 100_00;
+
 function paymentDate(month: string) {
 	const [y, m] = month.split("-").map(Number) as [number, number];
 	const end = new Date(Date.UTC(y, m, 0, 10));
@@ -36,6 +42,9 @@ function toPreview(row: BatchRow): SheetPreview {
 	const { created: _created, ...rest } = row.summary as StoredSheetSummary;
 	return {
 		...rest,
+		goals: rest.goals ?? [],
+		goalParts: rest.goalParts ?? [],
+		goalAccountId: rest.goalAccountId ?? null,
 		id: row.id,
 		source: "sheet-xlsx",
 		status: row.status,
@@ -149,14 +158,29 @@ export class SheetImportService {
 			m.suggestPayments = false;
 		}
 
+		const emergencySheet = sheets.find(
+			(s) => s !== salary && /emerg/i.test(s.name),
+		);
+		const { goals, goalParts } = emergencySheet
+			? this.sheetGoals(emergencySheet, monthPreviews)
+			: { goals: [], goalParts: [] };
+		const savings = (
+			await this.deps.accounts.list(userId, { includeArchived: false })
+		).find((a) => a.type === "savings");
+
 		const stored: StoredSheetSummary = {
 			fileName: input.name,
 			year: input.year,
 			sheetName: salary.name,
-			otherSheets: sheets.filter((s) => s !== salary).map((s) => s.name),
+			otherSheets: sheets
+				.filter((s) => s !== salary && s !== emergencySheet)
+				.map((s) => s.name),
 			planItems,
 			months: monthPreviews,
 			skipped,
+			goals,
+			goalParts,
+			goalAccountId: savings?.id ?? null,
 		};
 		const row = await this.repository.insert({
 			userId,
@@ -182,31 +206,50 @@ export class SheetImportService {
 		const included = stored.months.filter(
 			(m) => choice.get(m.month)?.include ?? true,
 		);
-		if (included.length === 0)
-			throw unprocessable("NOTHING_TO_IMPORT", "Escolha pelo menos um mês");
+		const goalChoice = new Map(input.goals.map((g) => [g.key, g]));
+		const includedGoals = (stored.goals ?? []).filter(
+			(g) => goalChoice.get(g.key)?.include ?? true,
+		);
+		if (included.length === 0 && includedGoals.length === 0)
+			throw unprocessable(
+				"NOTHING_TO_IMPORT",
+				"Escolha pelo menos um mês ou uma meta",
+			);
+		const goalAccountId = input.goalAccountId ?? stored.goalAccountId ?? null;
+		if (includedGoals.length > 0 && !goalAccountId)
+			throw unprocessable(
+				"GOAL_ACCOUNT_REQUIRED",
+				"Escolha a conta onde fica o dinheiro das metas",
+			);
 		const category = (key: string, guess: string | null) =>
 			key in input.categories ? (input.categories[key] ?? null) : guess;
 
 		const usedPlanKeys = new Set(
 			included.flatMap((m) => m.items.map((i) => i.planKey).filter(Boolean)),
 		);
-		const { created, monthItemByKey } = await this.deps.budgets.applySheet(
-			userId,
-			{
-				year: stored.year,
-				expectedIncome: input.expectedIncome,
-				planItems: stored.planItems
-					.filter((p) => usedPlanKeys.has(p.key))
-					.map((p) => ({ ...p, categoryId: category(p.key, p.categoryId) })),
-				months: included.map((m) => ({
-					month: m.month,
-					items: m.items.map((i) => ({
-						...i,
-						categoryId: category(i.key, i.categoryId),
-					})),
-				})),
-			},
-		);
+		const { created, monthItemByKey } =
+			included.length === 0
+				? {
+						created: { planId: null, planItemIds: [], monthItemIds: [] },
+						monthItemByKey: new Map<string, string>(),
+					}
+				: await this.deps.budgets.applySheet(userId, {
+						year: stored.year,
+						expectedIncome: input.expectedIncome,
+						planItems: stored.planItems
+							.filter((p) => usedPlanKeys.has(p.key))
+							.map((p) => ({
+								...p,
+								categoryId: category(p.key, p.categoryId),
+							})),
+						months: included.map((m) => ({
+							month: m.month,
+							items: m.items.map((i) => ({
+								...i,
+								categoryId: category(i.key, i.categoryId),
+							})),
+						})),
+					});
 
 		const paymentIds: string[] = [];
 		let paymentsSkipped = 0;
@@ -240,18 +283,88 @@ export class SheetImportService {
 			}
 		}
 
+		const goalIds: string[] = [];
+		for (const goal of includedGoals) {
+			const parts = (stored.goalParts ?? [])
+				.filter(
+					(p) =>
+						(p.key in input.partGoals ? input.partGoals[p.key] : p.goalKey) ===
+						goal.key,
+				)
+				.map((p) => ({
+					name: p.name,
+					amount: p.paid + p.missing,
+					paid: p.missing === 0,
+				}));
+			goalIds.push(
+				await this.deps.goals.importGoal(userId, {
+					name: goal.name,
+					target: goalChoice.get(goal.key)?.target ?? goal.target,
+					startingAmount: goal.saved,
+					accountId: goalAccountId!,
+					importBatchId: id,
+					parts,
+				}),
+			);
+		}
+
 		const result = {
 			monthItems: created.monthItemIds.length,
 			planItems: created.planItemIds.length,
 			payments: paymentIds.length,
 			paymentsSkipped,
+			goals: goalIds.length,
 		};
 		await this.repository.update(id, {
 			status: "committed",
 			committedAt: new Date(),
-			summary: { ...stored, result, created: { ...created, paymentIds } },
+			summary: {
+				...stored,
+				result,
+				created: { ...created, paymentIds, goalIds },
+			},
 		});
 		return this.get(userId, id);
+	}
+
+	private sheetGoals(
+		sheet: Parameters<typeof parseEmergencySheet>[0],
+		months: SheetMonthPreview[],
+	): { goals: SheetGoal[]; goalParts: SheetGoalPart[] } {
+		const parsed = parseEmergencySheet(sheet);
+		const goals: SheetGoal[] = [];
+		if (parsed.emergencySaved !== null) {
+			const average = months.length
+				? months.reduce((s, m) => s + m.total, 0) / months.length
+				: 0;
+			const suggested =
+				Math.round((EMERGENCY_MONTHS * average) / ROUND_TO) * ROUND_TO;
+			goals.push({
+				key: "emergencia",
+				name: "Fundo de emergência",
+				saved: parsed.emergencySaved,
+				target: Math.max(suggested, parsed.emergencySaved, ROUND_TO),
+				suggestedTarget: true,
+			});
+		}
+		for (const g of parsed.goals)
+			goals.push({
+				key: itemKey(g.name),
+				name: g.name,
+				saved: g.saved,
+				target: g.target,
+				suggestedTarget: false,
+			});
+		const defaultGoal =
+			goals.find((g) => g.key !== "emergencia")?.key ?? goals[0]?.key ?? null;
+		const goalParts: SheetGoalPart[] = parsed.parts.map((p) => ({
+			key: `parte:${itemKey(p.name)}`,
+			name: p.name,
+			paid: p.paid,
+			missing: p.missing,
+			goalKey: defaultGoal,
+		}));
+		return { goals, goalParts };
 	}
 
 	async remove(userId: string, id: string): Promise<RemovedCounts> {
@@ -272,6 +385,7 @@ export class SheetImportService {
 				);
 			}
 			await this.deps.budgets.undoSheet(userId, created);
+			await this.deps.goals.removeMany(userId, created.goalIds ?? []);
 		}
 		await this.repository.update(id, {
 			status: "reverted",

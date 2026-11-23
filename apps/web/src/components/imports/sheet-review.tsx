@@ -18,11 +18,17 @@ import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useCategories } from "@/actions/categories/use-categories";
 import { useCommitSheet } from "@/actions/imports/use-commit-sheet";
+import {
+	goalsForCommit,
+	type SheetGoalChoice,
+	SheetGoals,
+} from "@/components/imports/sheet-goals";
 import { categoryItems } from "@/components/ui/category-items";
+import { Field } from "@/components/ui/field";
 import { Hint } from "@/components/ui/hint";
 import { Pill } from "@/components/ui/pill";
 import { Select } from "@/components/ui/select";
-import { GROUP_LABEL, MONTH_SHORT, money } from "@/utils/format";
+import { GROUP_LABEL, MONTH_SHORT, money, moneyInput } from "@/utils/format";
 
 export function SheetReview({ preview }: { preview: SheetPreview }) {
 	const categories = useCategories().data ?? [];
@@ -39,12 +45,33 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 	);
 	const [overrides, setOverrides] = useState<Record<string, string | null>>({});
 	const [accountId, setAccountId] = useState("");
+	const [goals, setGoals] = useState<Record<string, SheetGoalChoice>>(() =>
+		Object.fromEntries(
+			preview.goals.map((g) => [
+				g.key,
+				{ include: true, target: moneyInput(g.target) },
+			]),
+		),
+	);
+	const [partGoals, setPartGoals] = useState<Record<string, string | null>>({});
+	const [goalAccountId, setGoalAccountId] = useState(
+		preview.goalAccountId ?? "",
+	);
 	const name = (id: string | null) =>
 		categories.find((c) => c.id === id)?.name ?? "sem categoria";
 	const accountName = (id: string | null) =>
 		accounts.find((a) => a.id === id)?.name;
 	const included = preview.months.filter((m) => months[m.month]?.include);
 	const paying = included.filter((m) => months[m.month]?.createPayments);
+	const includedGoals = preview.goals.filter((g) => goals[g.key]?.include);
+	const importLabel = [
+		included.length ? `${included.length} meses` : null,
+		includedGoals.length
+			? `${includedGoals.length} ${includedGoals.length === 1 ? "meta" : "metas"}`
+			: null,
+	]
+		.filter(Boolean)
+		.join(" · ");
 
 	return (
 		<div className="flex flex-col gap-4 p-4">
@@ -53,6 +80,7 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 					aplicada · {preview.result.monthItems} itens nas listas ·{" "}
 					{preview.result.planItems} no plano · {preview.result.payments}{" "}
 					pagamentos
+					{preview.result.goals ? ` · ${preview.result.goals} metas` : ""}
 				</Pill>
 			) : null}
 
@@ -223,20 +251,34 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 				) : null}
 				{preview.otherSheets.length ? (
 					<p className="num text-dim text-[11px]">
-						Outras folhas ({preview.otherSheets.join(", ")}) ficam para a Fase 4
-						(metas e dívidas).
+						Outras folhas ({preview.otherSheets.join(", ")}) ainda não são
+						importadas.
 					</p>
 				) : null}
 			</div>
 
+			{preview.goals.length > 0 ? (
+				<SheetGoals
+					preview={preview}
+					accounts={accounts}
+					draft={draft}
+					goals={goals}
+					onGoalsChange={setGoals}
+					partGoals={partGoals}
+					onPartGoalsChange={setPartGoals}
+					goalAccountId={goalAccountId}
+					onGoalAccountChange={setGoalAccountId}
+				/>
+			) : null}
+
 			{draft ? (
 				<div className="flex flex-wrap items-end justify-end gap-2">
-					{/* biome-ignore lint/a11y/noLabelWithoutControl: the Select below is a native <select> */}
-					<label className="text-fg-2 mr-auto flex flex-col gap-1 text-xs">
-						Conta de onde saíram os pagamentos
+					<Field
+						label="Conta de onde saíram os pagamentos"
+						className="mr-auto w-56"
+					>
 						<Select
 							size="md"
-							className="w-56"
 							value={accountId}
 							onValueChange={(value) => setAccountId(value)}
 							items={[
@@ -250,21 +292,24 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 								})),
 							]}
 						/>
-					</label>
+					</Field>
 					<Hint
 						label={
 							paying.length > 0 && !accountId
 								? "Escolha a conta dos pagamentos"
-								: undefined
+								: includedGoals.length > 0 && !goalAccountId
+									? "Escolha a conta das metas"
+									: undefined
 						}
 						wrap
 					>
 						<Button
 							variant="primary"
 							disabled={
-								included.length === 0 ||
+								(included.length === 0 && includedGoals.length === 0) ||
 								commit.isPending ||
-								(paying.length > 0 && !accountId)
+								(paying.length > 0 && !accountId) ||
+								(includedGoals.length > 0 && !goalAccountId)
 							}
 							onClick={async () => {
 								const res = await commit.mutateAsync({
@@ -278,15 +323,18 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 										}),
 									})),
 									categories: overrides,
+									goals: goalsForCommit(preview, goals),
+									partGoals,
+									goalAccountId: goalAccountId || null,
 								});
 								toast.success(
-									`Folha importada: ${res.result?.monthItems ?? 0} itens, ${res.result?.payments ?? 0} pagamentos`,
+									`Folha importada: ${res.result?.monthItems ?? 0} itens, ${res.result?.payments ?? 0} pagamentos, ${res.result?.goals ?? 0} metas`,
 								);
 							}}
 						>
 							{commit.isPending
 								? "A importar…"
-								: `Importar ${included.length} meses${paying.length ? ` · pagar ${paying.length}` : ""}`}
+								: `Importar ${importLabel || "nada"}${paying.length ? ` · pagar ${paying.length}` : ""}`}
 						</Button>
 					</Hint>
 				</div>
