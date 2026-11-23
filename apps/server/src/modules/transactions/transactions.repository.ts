@@ -315,6 +315,25 @@ export class TransactionsRepository implements ITransactionsRepository {
 			.groupBy(transactions.categoryId);
 	}
 
+	accountTotals(userId: string, from: Date, to: Date) {
+		return this.db
+			.select({
+				accountId: transactions.accountId,
+				income: sql<string>`coalesce(sum(${transactions.amount}) filter (where ${transactions.amount} > 0), 0)`,
+				expense: sql<string>`coalesce(-sum(${transactions.amount}) filter (where ${transactions.amount} < 0), 0)`,
+			})
+			.from(transactions)
+			.where(
+				and(
+					eq(transactions.userId, userId),
+					incomeOrExpense,
+					gte(transactions.occurredAt, from),
+					lt(transactions.occurredAt, to),
+				),
+			)
+			.groupBy(transactions.accountId);
+	}
+
 	countByCategory(userId: string) {
 		return this.db
 			.select({ categoryId: transactions.categoryId, count: count() })

@@ -13,8 +13,18 @@ export type AnalyticsDeps = {
 		): Promise<
 			{ categoryId: string | null; income: number; expense: number }[]
 		>;
+		accountTotals(
+			userId: string,
+			from: Date,
+			to: Date,
+		): Promise<{ accountId: string; income: number; expense: number }[]>;
 	};
-	accounts: { initialTotal(userId: string): Promise<number> };
+	accounts: {
+		initialTotal(userId: string): Promise<number>;
+		list(
+			userId: string,
+		): Promise<{ id: string; name: string; color: string | null }[]>;
+	};
 	categories: {
 		list(userId: string): Promise<
 			{

@@ -2,12 +2,10 @@ import { z } from "zod";
 
 import { id } from "./common";
 
-/** A calendar day in Mozambique time: "2026-11-23". */
 export const dateOnly = z
 	.string()
 	.regex(/^\d{4}-\d{2}-\d{2}$/, "Use AAAA-MM-DD");
 
-/** Both ends inclusive, as days in Mozambique time. */
 export const periodQuery = z
 	.object({ from: dateOnly, to: dateOnly })
 	.refine((v) => v.from <= v.to, {
@@ -29,7 +27,6 @@ export type Bucket = (typeof BUCKETS)[number];
 export const trendQuery = z.object({
 	from: dateOnly,
 	to: dateOnly,
-	/** Defaults to day up to 45 days, week up to ~6 months, month beyond. */
 	bucket: z.enum(BUCKETS).optional(),
 });
 
@@ -39,16 +36,45 @@ export const categoriesQuery = z.object({
 	limit: z.coerce.number().int().min(1).max(50).default(8),
 });
 
+export const BREAKDOWN_DIMENSIONS = ["category", "account"] as const;
+export type BreakdownDimension = (typeof BREAKDOWN_DIMENSIONS)[number];
+export const MONEY_FLOWS = ["expense", "income"] as const;
+export type MoneyFlow = (typeof MONEY_FLOWS)[number];
+
+export const breakdownQuery = z.object({
+	from: dateOnly,
+	to: dateOnly,
+	by: z.enum(BREAKDOWN_DIMENSIONS),
+	flow: z.enum(MONEY_FLOWS).default("expense"),
+	limit: z.coerce.number().int().min(1).max(20).default(7),
+});
+export type BreakdownQuery = z.infer<typeof breakdownQuery>;
+
+export type BreakdownSlice = {
+	id: string | null;
+	name: string;
+	color: string | null;
+	value: number;
+	previousValue: number;
+	share: number;
+};
+export type Breakdown = {
+	by: BreakdownDimension;
+	flow: MoneyFlow;
+	total: number;
+	previousTotal: number;
+	items: BreakdownSlice[];
+	others: number;
+};
+
 export type PeriodRange = { from: string; to: string; days: number };
 
 export type Overview = {
 	period: PeriodRange;
 	previous: PeriodRange;
-	/** Total balance of every account at the start and at the end of the period. */
 	balance: { start: number; end: number };
 	income: number;
 	expense: number;
-	/** income − expense. Transfers are neither. */
 	net: number;
 	previousTotals: { income: number; expense: number; net: number };
 };
@@ -65,13 +91,11 @@ export type CashflowTrend = { bucket: Bucket; points: CashflowPoint[] };
 export type BalancePoint = { date: string; balance: number };
 
 export type CategorySpending = {
-	/** Top-level category; null for expenses without a category. */
 	categoryId: string | null;
 	name: string;
 	color: string | null;
 	expense: number;
 	previousExpense: number;
-	/** Share of the period's total expense, 0–1. */
 	share: number;
 };
 export type CategoryBreakdown = {
@@ -81,7 +105,6 @@ export type CategoryBreakdown = {
 	others: number;
 };
 
-/** Cumulative income − expense, day by day from the start of each period. */
 export type ComparisonPoint = {
 	day: number;
 	date: string;
@@ -90,7 +113,6 @@ export type ComparisonPoint = {
 	yearAgo: number;
 };
 
-// ---- Dashboard layout
 
 export const DASHBOARD_CARD_TYPES = [
 	"summary",
@@ -102,6 +124,9 @@ export const DASHBOARD_CARD_TYPES = [
 	"accounts",
 	"upcoming",
 	"last-records",
+	"pie-categories",
+	"pie-accounts",
+	"pie-cash-flow",
 ] as const;
 export type DashboardCardType = (typeof DASHBOARD_CARD_TYPES)[number];
 

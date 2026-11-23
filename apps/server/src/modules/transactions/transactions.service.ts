@@ -371,6 +371,15 @@ export class TransactionsService {
 		}));
 	}
 
+	async accountTotals(userId: string, from: Date, to: Date) {
+		const rows = await this.repository.accountTotals(userId, from, to);
+		return rows.map((r) => ({
+			accountId: r.accountId,
+			income: Number(r.income),
+			expense: Number(r.expense),
+		}));
+	}
+
 	async countByCategory(userId: string) {
 		const rows = await this.repository.countByCategory(userId);
 		return new Map(rows.map((r) => [r.categoryId!, r.count]));

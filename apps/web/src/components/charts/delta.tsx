@@ -1,3 +1,5 @@
+const MAX_SHOWN_PCT = 999;
+
 export function Delta({
 	now,
 	before,
@@ -24,8 +26,9 @@ export function Delta({
 			}`}
 		>
 			<span aria-hidden="true">{pct > 0 ? "↑" : pct < 0 ? "↓" : "="}</span>
+			{Math.abs(pct) > MAX_SHOWN_PCT ? "> " : ""}
 			{pct > 0 ? "+" : pct < 0 ? "−" : ""}
-			{Math.abs(pct)}% vs anterior
+			{Math.min(Math.abs(pct), MAX_SHOWN_PCT)}% vs anterior
 		</span>
 	);
 }

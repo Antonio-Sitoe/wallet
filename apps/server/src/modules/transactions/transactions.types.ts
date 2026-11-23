@@ -159,6 +159,11 @@ export interface ITransactionsRepository {
 		from: Date,
 		to: Date,
 	): Promise<{ categoryId: string | null; income: string; expense: string }[]>;
+	accountTotals(
+		userId: string,
+		from: Date,
+		to: Date,
+	): Promise<{ accountId: string; income: string; expense: string }[]>;
 	countByCategory(
 		userId: string,
 	): Promise<{ categoryId: string | null; count: number }[]>;

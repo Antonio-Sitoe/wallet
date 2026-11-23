@@ -13,6 +13,8 @@ import {
 } from "./analytics.periods";
 import type {
 	BalancePoint,
+	Breakdown,
+	BreakdownQuery,
 	Bucket,
 	CashflowTrend,
 	CategoryBreakdown,
@@ -168,6 +170,93 @@ export class AnalyticsService {
 			items,
 			others: all.slice(limit).reduce((s, i) => s + i.expense, 0),
 		};
+	}
+
+	async breakdown(userId: string, query: BreakdownQuery): Promise<Breakdown> {
+		const { from, to, by, flow, limit } = query;
+		const previous = previousRange(from, to);
+		const [labels, current, before] = await Promise.all([
+			this.breakdownLabels(userId, by),
+			this.flowTotals(userId, by, from, to),
+			this.flowTotals(userId, by, previous.from, previous.to),
+		]);
+		const sumBy = (
+			rows: { key: string | null; income: number; expense: number }[],
+		) => {
+			const totals = new Map<string | null, number>();
+			for (const row of rows) {
+				const value = row[flow];
+				if (value <= 0) continue;
+				const key = labels.groupOf(row.key);
+				totals.set(key, (totals.get(key) ?? 0) + value);
+			}
+			return totals;
+		};
+		const now = sumBy(current);
+		const then = sumBy(before);
+		const total = [...now.values()].reduce((s, v) => s + v, 0);
+		const slices = [...now]
+			.map(([id, value]) => {
+				const label = id ? labels.byId.get(id) : undefined;
+				return {
+					id,
+					name: label?.name ?? labels.fallbackName,
+					color: label?.color ?? null,
+					value,
+					previousValue: then.get(id) ?? 0,
+					share: total ? value / total : 0,
+				};
+			})
+			.sort((a, b) => b.value - a.value);
+		return {
+			by,
+			flow,
+			total,
+			previousTotal: [...then.values()].reduce((s, v) => s + v, 0),
+			items: slices.slice(0, limit),
+			others: slices.slice(limit).reduce((s, i) => s + i.value, 0),
+		};
+	}
+
+	private async breakdownLabels(userId: string, by: BreakdownQuery["by"]) {
+		if (by === "account") {
+			const accounts = await this.deps.accounts.list(userId);
+			return {
+				byId: new Map(accounts.map((a) => [a.id, a])),
+				groupOf: (id: string | null) => id,
+				fallbackName: "Sem conta",
+			};
+		}
+		const categories = await this.deps.categories.list(userId);
+		const byId = new Map(categories.map((c) => [c.id, c]));
+		return {
+			byId,
+			groupOf: (id: string | null) =>
+				id ? (byId.get(id)?.parentId ?? id) : null,
+			fallbackName: "Sem categoria",
+		};
+	}
+
+	private async flowTotals(
+		userId: string,
+		by: BreakdownQuery["by"],
+		from: string,
+		to: string,
+	) {
+		if (by === "account") {
+			const rows = await this.deps.transactions.accountTotals(
+				userId,
+				startOf(from),
+				endOf(to),
+			);
+			return rows.map((r) => ({ ...r, key: r.accountId as string | null }));
+		}
+		const rows = await this.deps.transactions.categoryTotals(
+			userId,
+			startOf(from),
+			endOf(to),
+		);
+		return rows.map((r) => ({ ...r, key: r.categoryId }));
 	}
 
 	async comparison(

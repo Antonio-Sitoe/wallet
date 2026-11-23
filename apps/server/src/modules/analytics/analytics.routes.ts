@@ -11,5 +11,6 @@ export function analyticsRoutes(
 		app.get("/analytics/balance", controller.balance);
 		app.get("/analytics/categories", controller.categories);
 		app.get("/analytics/comparison", controller.comparison);
+		app.get("/analytics/breakdown", controller.breakdown);
 	};
 }

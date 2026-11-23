@@ -15,7 +15,12 @@ import { useRemoveCard } from "@/actions/dashboard/use-remove-card";
 import { useUpdateCard } from "@/actions/dashboard/use-update-card";
 import { CardBody } from "@/components/dashboard/card-body";
 import { IconButton } from "@/components/dashboard/icon-button";
-import { CARD_CATALOG, cardTitle } from "@/components/dashboard/utils";
+import {
+	CARD_CATALOG,
+	cardTitle,
+	HAS_FLOW_TOGGLE,
+	HAS_RANGE_TOGGLE,
+} from "@/components/dashboard/utils";
 import { Card } from "@/components/ui/card";
 
 export function DashboardCardFrame({
@@ -42,8 +47,8 @@ export function DashboardCardFrame({
 		transition,
 		isDragging,
 	} = useSortable({ id: card.id });
-	const hasRange =
-		card.type === "cash-flow-trend" || card.type === "spending-by-category";
+	const hasRange = HAS_RANGE_TOGGLE.includes(card.type);
+	const hasFlow = HAS_FLOW_TOGGLE.includes(card.type);
 	const nextSize: CardSize = card.size === "full" ? "half" : "full";
 	return (
 		<Card
@@ -69,6 +74,24 @@ export function DashboardCardFrame({
 				<h2 className="min-w-0 flex-1 truncate text-sm font-semibold">
 					{cardTitle(card.type, period, card.config)}
 				</h2>
+				{hasFlow ? (
+					<button
+						type="button"
+						className="num border-line-strong text-fg-2 hover:bg-hover cursor-pointer rounded-md border px-2 py-0.5 text-[11px]"
+						onClick={() =>
+							update.mutate({
+								id: card.id,
+								config: {
+									...card.config,
+									flow: card.config.flow === "income" ? "expense" : "income",
+								},
+							})
+						}
+						title="Alternar entre saídas e entradas"
+					>
+						{card.config.flow === "income" ? "entradas" : "saídas"}
+					</button>
+				) : null}
 				{hasRange ? (
 					<button
 						type="button"

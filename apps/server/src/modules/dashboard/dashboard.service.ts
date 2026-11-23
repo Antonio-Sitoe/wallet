@@ -21,6 +21,9 @@ const DEFAULT_SIZE: Record<DashboardCardType, CardSize> = {
 	accounts: "half",
 	upcoming: "half",
 	"last-records": "half",
+	"pie-categories": "half",
+	"pie-accounts": "half",
+	"pie-cash-flow": "half",
 };
 
 const DEFAULT_LAYOUT: {
@@ -31,7 +34,9 @@ const DEFAULT_LAYOUT: {
 	{ type: "cash-flow-trend", config: { range: "year" } },
 	{ type: "accounts" },
 	{ type: "spending-by-category" },
+	{ type: "pie-categories" },
 	{ type: "upcoming" },
+	{ type: "pie-accounts" },
 	{ type: "period-comparison" },
 	{ type: "last-records" },
 ];

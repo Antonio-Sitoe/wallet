@@ -51,14 +51,49 @@ export const CARD_CATALOG: Record<
 		description: "Os registos mais recentes",
 		section: "Geral",
 	},
+	"pie-categories": {
+		title: "Gastos por categoria",
+		description: "Donut das saídas (ou entradas) por categoria principal",
+		section: "Gráficos circulares",
+	},
+	"pie-accounts": {
+		title: "Gastos por conta",
+		description: "Donut das saídas (ou entradas) por conta",
+		section: "Gráficos circulares",
+	},
+	"pie-cash-flow": {
+		title: "Entradas e saídas",
+		description: "Donut com entradas contra saídas e o que sobrou",
+		section: "Gráficos circulares",
+	},
 };
+
+const INCOME_TITLE: Partial<Record<DashboardCardType, string>> = {
+	"pie-categories": "Entradas por categoria",
+	"pie-accounts": "Entradas por conta",
+};
+
+export const HAS_RANGE_TOGGLE: DashboardCardType[] = [
+	"cash-flow-trend",
+	"spending-by-category",
+	"pie-categories",
+	"pie-accounts",
+	"pie-cash-flow",
+];
+
+export const HAS_FLOW_TOGGLE: DashboardCardType[] = [
+	"pie-categories",
+	"pie-accounts",
+];
 
 export function cardTitle(
 	type: DashboardCardType,
 	period: Period,
 	config: Record<string, unknown>,
 ) {
-	const base = CARD_CATALOG[type].title;
+	const base =
+		(config.flow === "income" ? INCOME_TITLE[type] : undefined) ??
+		CARD_CATALOG[type].title;
 	return config.range === "year" ? `${base} · ${period.to.slice(0, 4)}` : base;
 }
 

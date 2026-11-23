@@ -111,6 +111,8 @@ export function buildModules(db: Database) {
 					(s, a) => s + a.initialBalance,
 					0,
 				),
+			list: (userId) =>
+				accounts.service.list(userId, { includeArchived: true }),
 		},
 		categories: { list: categories.service.list },
 	});

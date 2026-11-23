@@ -1,7 +1,12 @@
 import type { FastifyRequest } from "fastify";
 
 import { parse } from "../../shared/utils/validate";
-import { categoriesQuery, periodQuery, trendQuery } from "./analytics.schema";
+import {
+	breakdownQuery,
+	categoriesQuery,
+	periodQuery,
+	trendQuery,
+} from "./analytics.schema";
 import type { AnalyticsService } from "./analytics.service";
 
 export class AnalyticsController {
@@ -28,6 +33,12 @@ export class AnalyticsController {
 		const { from, to, limit } = parse(categoriesQuery, req.query);
 		parse(periodQuery, { from, to });
 		return this.service.categories(req.userId, from, to, limit);
+	};
+
+	breakdown = async (req: FastifyRequest) => {
+		const query = parse(breakdownQuery, req.query);
+		parse(periodQuery, { from: query.from, to: query.to });
+		return this.service.breakdown(req.userId, query);
 	};
 
 	comparison = async (req: FastifyRequest) => {
