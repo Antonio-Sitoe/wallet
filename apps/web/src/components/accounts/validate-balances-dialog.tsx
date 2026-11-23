@@ -1,5 +1,13 @@
 import type { Account } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@wallet/ui/components/table";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useReconcileAccount } from "@/actions/accounts/use-reconcile-account";
@@ -73,30 +81,32 @@ export function ValidateBalancesDialog({
 				</>
 			}
 		>
-			<table className="w-full border-collapse">
-				<thead>
-					<tr>
+			<Table className="w-full border-collapse text-[13px]">
+				<TableHeader>
+					<TableRow className="border-0 hover:bg-transparent">
 						{["Conta", "Na app", "Saldo real hoje", "Diferença"].map((h, i) => (
-							<th
+							<TableHead
 								key={h}
 								scope="col"
-								className={`num border-line text-dim border-b pb-2 text-[11px] font-medium tracking-[.06em] uppercase ${i === 0 ? "text-left" : "text-right"}`}
+								className={`num border-line text-dim border-b pb-2 text-[11px] font-medium tracking-[.06em] uppercase ${i === 0 ? "text-left" : "text-right"} h-auto px-0 whitespace-normal`}
 							>
 								{h}
-							</th>
+							</TableHead>
 						))}
-					</tr>
-				</thead>
-				<tbody>
+					</TableRow>
+				</TableHeader>
+				<TableBody>
 					{rows.map((r) => (
-						<tr key={r.account.id} className="border-hover border-b">
-							<td className="py-2">{r.account.name}</td>
-							<td
-								className={`num py-2 text-right ${r.account.balance < 0 ? "text-warn" : ""}`}
+						<TableRow key={r.account.id} className="border-hover border-b">
+							<TableCell className="px-0 py-2 whitespace-normal">
+								{r.account.name}
+							</TableCell>
+							<TableCell
+								className={`num py-2 text-right ${r.account.balance < 0 ? "text-warn" : ""} px-0 whitespace-normal`}
 							>
 								{money(r.account.balance)}
-							</td>
-							<td className="py-2 pl-3">
+							</TableCell>
+							<TableCell className="py-2 pl-3 whitespace-normal">
 								<MoneyInput
 									aria-label={`Saldo real de ${r.account.name}`}
 									className="h-8 text-right"
@@ -106,20 +116,20 @@ export function ValidateBalancesDialog({
 										setValues((v) => ({ ...v, [r.account.id]: e.target.value }))
 									}
 								/>
-							</td>
-							<td
-								className={`num py-2 text-right ${r.diff ? "text-warn" : "text-dim"}`}
+							</TableCell>
+							<TableCell
+								className={`num py-2 text-right ${r.diff ? "text-warn" : "text-dim"} px-0 whitespace-normal`}
 							>
 								{r.real === null
 									? "—"
 									: r.diff === 0
 										? "certo"
 										: signedMoney(r.diff ?? 0)}
-							</td>
-						</tr>
+							</TableCell>
+						</TableRow>
 					))}
-				</tbody>
-			</table>
+				</TableBody>
+			</Table>
 			<p className="text-dim text-xs">
 				O acerto muda só o saldo inicial de cada conta. Se a diferença vem de
 				transacções que faltam (ex.: o salário deste mês), prefira registá-las.

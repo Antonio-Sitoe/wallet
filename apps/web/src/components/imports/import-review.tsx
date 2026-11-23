@@ -1,5 +1,11 @@
 import type { ImportPreview, ReviewResolution } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableRow,
+} from "@wallet/ui/components/table";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
@@ -157,8 +163,8 @@ export function ImportReview({
 						title={`Rever ${preview.review.length} linhas`}
 						meta="transferências do Wallet sem o outro lado na mesma data"
 					/>
-					<table className="w-full min-w-[640px] border-collapse">
-						<tbody>
+					<Table className="w-full min-w-[640px] border-collapse text-[13px]">
+						<TableBody>
 							{preview.review.map((r) => {
 								const decision = resolutions[r.key] ?? "ignore";
 								const value =
@@ -166,16 +172,18 @@ export function ImportReview({
 										? `to:${decision.transferTo}`
 										: decision;
 								return (
-									<tr key={r.key} className="border-hover border-b">
-										<td className="num text-dim px-3.5 py-2 text-xs">
+									<TableRow key={r.key} className="border-hover border-b">
+										<TableCell className="num text-dim px-3.5 py-2 text-xs whitespace-normal">
 											{dayLabel(dayKey(r.occurredAt))}
-										</td>
-										<td className="px-3.5 py-2 text-xs">{r.account}</td>
-										<td className="num px-3.5 py-2 text-right text-xs">
+										</TableCell>
+										<TableCell className="px-3.5 py-2 text-xs whitespace-normal">
+											{r.account}
+										</TableCell>
+										<TableCell className="num px-3.5 py-2 text-right text-xs whitespace-normal">
 											{r.type === "expense" ? "−" : "+"}
 											{money(r.amount)}
-										</td>
-										<td className="px-3.5 py-2">
+										</TableCell>
+										<TableCell className="px-3.5 py-2 whitespace-normal">
 											<Select
 												size="sm"
 												aria-label="Resolver"
@@ -204,12 +212,12 @@ export function ImportReview({
 														})),
 												]}
 											/>
-										</td>
-									</tr>
+										</TableCell>
+									</TableRow>
 								);
 							})}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</Card>
 			) : null}
 

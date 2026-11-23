@@ -2,6 +2,15 @@ import { getRouteApi } from "@tanstack/react-router";
 import { BUDGET_GROUPS, type PlanItemYear } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableFooter,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@wallet/ui/components/table";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -198,36 +207,36 @@ export function PlanPage() {
 							</EmptyState>
 						) : (
 							<Card className="overflow-x-auto">
-								<table className="w-full min-w-[980px] border-collapse">
-									<thead>
-										<tr className="bg-panel-2">
+								<Table className="w-full min-w-[980px] border-collapse text-[13px]">
+									<TableHeader>
+										<TableRow className="bg-panel-2 border-0 hover:bg-transparent">
 											<Th>Item</Th>
 											<Th>Frequência</Th>
 											<Th right>Valor</Th>
 											{MONTH_INITIALS.map((m, i) => (
-												<th
+												<TableHead
 													key={MONTH_SHORT[i]}
 													scope="col"
-													className={`num border-line border-b px-0.5 py-2 text-center text-[11px] font-medium ${`${year}-${String(i + 1).padStart(2, "0")}` === nowMonth ? "text-money" : "text-dim"}`}
+													className={`num border-line border-b px-0.5 py-2 text-center text-[11px] font-medium ${`${year}-${String(i + 1).padStart(2, "0")}` === nowMonth ? "text-money" : "text-dim"} h-auto whitespace-normal`}
 												>
 													{m}
-												</th>
+												</TableHead>
 											))}
 											<Th right>Ano</Th>
 											<Th right>Gasto</Th>
 											<Th>Ritmo</Th>
-										</tr>
-									</thead>
-									<tbody>
+										</TableRow>
+									</TableHeader>
+									<TableBody>
 										{BUDGET_GROUPS.flatMap((group) =>
 											data.items.filter((i) => i.group === group),
 										).map((item) => (
-											<tr
+											<TableRow
 												key={item.id}
 												className="border-hover hover:bg-hover cursor-pointer border-b"
 												onClick={() => setEditing(item)}
 											>
-												<td className="px-3 py-2">
+												<TableCell className="px-3 py-2 whitespace-normal">
 													<button
 														type="button"
 														className="cursor-pointer text-left font-medium"
@@ -238,13 +247,13 @@ export function PlanPage() {
 														{categoryName(item.categoryId)} ·{" "}
 														{GROUP_LABEL[item.group].toLowerCase()}
 													</div>
-												</td>
-												<td className="num text-fg-2 px-3 py-2 text-xs">
+												</TableCell>
+												<TableCell className="num text-fg-2 px-3 py-2 text-xs whitespace-normal">
 													{describeFrequency(item)}
-												</td>
-												<td className="num px-3 py-2 text-right">
+												</TableCell>
+												<TableCell className="num px-3 py-2 text-right whitespace-normal">
 													{money(item.amount)}
-												</td>
+												</TableCell>
 												{Array.from({ length: 12 }, (_, i) => {
 													const month = `${year}-${String(i + 1).padStart(2, "0")}`;
 													const cell = item.byMonth.find(
@@ -262,7 +271,10 @@ export function PlanPage() {
 																		? "#5A3416"
 																		: "#1F5F33";
 													return (
-														<td key={month} className="px-0.5 py-2">
+														<TableCell
+															key={month}
+															className="px-0.5 py-2 whitespace-normal"
+														>
 															<Hint
 																label={
 																	cell
@@ -275,16 +287,16 @@ export function PlanPage() {
 																	style={{ background: color }}
 																/>
 															</Hint>
-														</td>
+														</TableCell>
 													);
 												})}
-												<td className="num text-fg-2 px-3 py-2 text-right">
+												<TableCell className="num text-fg-2 px-3 py-2 text-right whitespace-normal">
 													{money(item.projected)}
-												</td>
-												<td className="num px-3 py-2 text-right">
+												</TableCell>
+												<TableCell className="num px-3 py-2 text-right whitespace-normal">
 													{item.spentToDate ? money(item.spentToDate) : "—"}
-												</td>
-												<td className="px-3 py-2">
+												</TableCell>
+												<TableCell className="px-3 py-2 whitespace-normal">
 													{item.pace === "no_data" ? (
 														<Pill>sem dados</Pill>
 													) : item.pace === "over" ? (
@@ -294,34 +306,37 @@ export function PlanPage() {
 													) : (
 														<Pill tone="ok">dentro</Pill>
 													)}
-												</td>
-											</tr>
+												</TableCell>
+											</TableRow>
 										))}
-									</tbody>
-									<tfoot>
-										<tr className="bg-panel-2">
-											<td
-												className="num text-dim px-3 py-2 text-[11px] uppercase"
+									</TableBody>
+									<TableFooter>
+										<TableRow className="bg-panel-2 border-0 hover:bg-transparent">
+											<TableCell
+												className="num text-dim px-3 py-2 text-[11px] whitespace-normal uppercase"
 												colSpan={3}
 											>
 												por mês
-											</td>
+											</TableCell>
 											{data.months.map((m) => (
 												<Hint key={m.month} label={money(m.planned)}>
-													<td
-														className={`num px-0.5 py-2 text-center text-[10px] ${m.overIncome ? "text-warn" : "text-dim"}`}
+													<TableCell
+														className={`num px-0.5 py-2 text-center text-[10px] ${m.overIncome ? "text-warn" : "text-dim"} whitespace-normal`}
 													>
 														{Math.round(m.planned / 100_000)}k
-													</td>
+													</TableCell>
 												</Hint>
 											))}
-											<td className="num px-3 py-2 text-right">
+											<TableCell className="num px-3 py-2 text-right whitespace-normal">
 												{money(data.totals.year)}
-											</td>
-											<td colSpan={2} />
-										</tr>
-									</tfoot>
-								</table>
+											</TableCell>
+											<TableCell
+												className="px-0 py-0 whitespace-normal"
+												colSpan={2}
+											/>
+										</TableRow>
+									</TableFooter>
+								</Table>
 								<div className="num border-line text-dim flex flex-wrap gap-4 border-t px-3 py-2 text-[11px]">
 									<Legend color="#1F5F33">planeado</Legend>
 									<Legend color="#58A6FF">parcial</Legend>

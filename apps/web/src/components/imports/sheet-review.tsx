@@ -6,6 +6,12 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "@wallet/ui/components/collapsible";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableRow,
+} from "@wallet/ui/components/table";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -56,25 +62,30 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 					repetem
 				</h3>
 				<div className="border-line overflow-x-auto rounded-lg border">
-					<table className="w-full min-w-[640px] border-collapse">
-						<tbody>
+					<Table className="w-full min-w-[640px] border-collapse text-[13px]">
+						<TableBody>
 							{preview.planItems.map((p) => (
-								<tr key={p.key} className="border-hover border-b last:border-0">
-									<td className="px-3 py-1.5">{p.name}</td>
-									<td className="num px-3 py-1.5 text-right">
+								<TableRow
+									key={p.key}
+									className="border-hover border-b last:border-0"
+								>
+									<TableCell className="px-3 py-1.5 whitespace-normal">
+										{p.name}
+									</TableCell>
+									<TableCell className="num px-3 py-1.5 text-right whitespace-normal">
 										{money(p.amount)}
-									</td>
-									<td className="num text-dim px-3 py-1.5 text-[11px]">
+									</TableCell>
+									<TableCell className="num text-dim px-3 py-1.5 text-[11px] whitespace-normal">
 										{p.months.length === 12
 											? "todos os meses"
 											: p.months.map((m) => MONTH_SHORT[m - 1]).join(", ")}
-									</td>
-									<td className="num text-dim px-3 py-1.5 text-[11px]">
+									</TableCell>
+									<TableCell className="num text-dim px-3 py-1.5 text-[11px] whitespace-normal">
 										{GROUP_LABEL[p.group].toLowerCase()}
 										{p.partial ? " · aos poucos" : ""}
 										{p.toAccountId ? ` · → ${accountName(p.toAccountId)}` : ""}
-									</td>
-									<td className="px-3 py-1.5">
+									</TableCell>
+									<TableCell className="px-3 py-1.5 whitespace-normal">
 										<Select
 											size="sm"
 											aria-label={`Categoria de ${p.name}`}
@@ -96,11 +107,11 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 												...categoryItems(categories, "expense"),
 											]}
 										/>
-									</td>
-								</tr>
+									</TableCell>
+								</TableRow>
 							))}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</div>
 			</div>
 

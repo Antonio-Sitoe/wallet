@@ -2,6 +2,14 @@ import { getRouteApi } from "@tanstack/react-router";
 import type { Category } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@wallet/ui/components/table";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useCategories } from "@/actions/categories/use-categories";
@@ -70,23 +78,23 @@ export function CategoriesPage() {
 						{categories.isPending ? (
 							<Skeleton className="m-3 h-64" />
 						) : (
-							<table className="w-full border-collapse">
-								<thead>
-									<tr className="bg-panel-2">
+							<Table className="w-full border-collapse text-[13px]">
+								<TableHeader>
+									<TableRow className="bg-panel-2 border-0 hover:bg-transparent">
 										{["Categoria", "Tipo", "No Wallet", "Registos"].map(
 											(h, i) => (
-												<th
+												<TableHead
 													key={h}
 													scope="col"
-													className={`num border-line text-dim border-b px-3.5 py-2 text-[11px] font-medium tracking-[.06em] uppercase ${i === 3 ? "text-right" : "text-left"}`}
+													className={`num border-line text-dim border-b px-3.5 py-2 text-[11px] font-medium tracking-[.06em] uppercase ${i === 3 ? "text-right" : "text-left"} h-auto whitespace-normal`}
 												>
 													{h}
-												</th>
+												</TableHead>
 											),
 										)}
-									</tr>
-								</thead>
-								<tbody>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
 									{tops
 										.filter(keep)
 										.flatMap((top) => [
@@ -96,12 +104,12 @@ export function CategoriesPage() {
 											),
 										])
 										.map((c) => (
-											<tr
+											<TableRow
 												key={c.id}
 												onClick={() => navigate({ search: { id: c.id } })}
 												className={`border-hover hover:bg-hover cursor-pointer border-b ${c.id === id ? "bg-hover" : ""} ${c.archived ? "opacity-50" : ""}`}
 											>
-												<td className="px-3.5 py-2">
+												<TableCell className="px-3.5 py-2 whitespace-normal">
 													<span
 														className={`flex items-center gap-2 ${c.parentId ? "text-fg-2 pl-4" : "font-medium"}`}
 													>
@@ -116,20 +124,20 @@ export function CategoriesPage() {
 															{c.name}
 														</button>
 													</span>
-												</td>
-												<td className="num text-fg-2 px-3.5 py-2 text-xs">
+												</TableCell>
+												<TableCell className="num text-fg-2 px-3.5 py-2 text-xs whitespace-normal">
 													{KIND_LABEL[c.kind]}
-												</td>
-												<td className="num text-dim max-w-[260px] truncate px-3.5 py-2 text-xs">
+												</TableCell>
+												<TableCell className="num text-dim max-w-[260px] truncate px-3.5 py-2 text-xs">
 													{c.walletNames.join(", ") || "—"}
-												</td>
-												<td className="num px-3.5 py-2 text-right text-xs">
+												</TableCell>
+												<TableCell className="num px-3.5 py-2 text-right text-xs whitespace-normal">
 													{c.transactionCount || "—"}
-												</td>
-											</tr>
+												</TableCell>
+											</TableRow>
 										))}
-								</tbody>
-							</table>
+								</TableBody>
+							</Table>
 						)}
 					</Card>
 					{selected ? (
