@@ -3,6 +3,7 @@ export * from "./contracts/analytics";
 export * from "./contracts/budgets";
 export * from "./contracts/categories";
 export * from "./contracts/common";
+export * from "./contracts/goals";
 export * from "./contracts/imports";
 export * from "./contracts/transactions";
 export * from "./money";

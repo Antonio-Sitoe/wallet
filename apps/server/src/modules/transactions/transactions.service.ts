@@ -196,7 +196,11 @@ export class TransactionsService {
 		else await this.repository.delete(userId, id);
 	}
 
-	async createTransfer(userId: string, input: CreateTransferInput) {
+	async createTransfer(
+		userId: string,
+		input: CreateTransferInput,
+		options: { goalId?: string } = {},
+	) {
 		await this.deps.accounts.assertOwned(userId, [
 			input.fromAccountId,
 			input.toAccountId,
@@ -219,6 +223,7 @@ export class TransactionsService {
 				toAccountId: input.toAccountId,
 				amount: input.amount,
 				occurredAt: input.occurredAt,
+				goalId: options.goalId ?? null,
 			},
 			[
 				{

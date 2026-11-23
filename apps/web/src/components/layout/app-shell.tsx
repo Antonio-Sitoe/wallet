@@ -10,6 +10,7 @@ import {
 	LogOutIcon,
 	PlusIcon,
 	TagIcon,
+	TargetIcon,
 } from "lucide-react";
 import {
 	type ReactNode,
@@ -41,6 +42,7 @@ export const NAV = [
 	{ to: "/accounts", label: "Contas", icon: LandmarkIcon },
 	{ to: "/categories", label: "Categorias", icon: TagIcon },
 	{ to: "/import", label: "Importar", icon: DownloadIcon },
+	{ to: "/goals", label: "Metas", icon: TargetIcon },
 ] as const;
 
 export const isMac =

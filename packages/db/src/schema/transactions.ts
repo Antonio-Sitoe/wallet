@@ -16,17 +16,16 @@ import { accounts } from "./accounts";
 import { user } from "./auth";
 import { monthItems } from "./budgets";
 import { categories } from "./categories";
+import { goals } from "./goals";
 import { importBatches } from "./imports";
 
 export const transactionType = pgEnum("transaction_type", [
 	"expense",
 	"income",
 	"transfer",
-	/** "Acerto": moves a balance to what the account really holds. Never income or expense. */
 	"adjustment",
 ]);
 
-/** One transfer = one row here + two transactions (out and in) pointing at it. */
 export const transfers = pgTable(
 	"transfers",
 	{
@@ -40,10 +39,12 @@ export const transfers = pgTable(
 		toAccountId: uuid("to_account_id")
 			.notNull()
 			.references(() => accounts.id, { onDelete: "restrict" }),
-		/** Positive centavos. */
 		amount: bigint("amount", { mode: "number" }).notNull(),
 		occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
 		importBatchId: uuid("import_batch_id").references(() => importBatches.id, {
+			onDelete: "set null",
+		}),
+		goalId: uuid("goal_id").references(() => goals.id, {
 			onDelete: "set null",
 		}),
 		createdAt: timestamp("created_at", { withTimezone: true })
@@ -52,6 +53,7 @@ export const transfers = pgTable(
 	},
 	(t) => [
 		index("transfers_user_idx").on(t.userId),
+		index("transfers_goal_idx").on(t.goalId),
 		check("transfers_amount_positive", sql`${t.amount} > 0`),
 		check(
 			"transfers_distinct_accounts",
@@ -74,22 +76,18 @@ export const transactions = pgTable(
 			onDelete: "set null",
 		}),
 		type: transactionType("type").notNull(),
-		/** Signed centavos: negative leaves the account. */
 		amount: bigint("amount", { mode: "number" }).notNull(),
 		occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
-		/** Budget month (YYYY-MM) the money belongs to; may differ from occurredAt ("Transporte de Abril" paid in May). */
 		referenceMonth: varchar("reference_month", { length: 7 }).notNull(),
 		note: text("note"),
 		payee: text("payee"),
 		labels: text("labels").array().notNull().default(sql`'{}'::text[]`),
 		paymentType: text("payment_type"),
 		currency: varchar("currency", { length: 3 }).notNull().default("MZN"),
-		/** Amount in the account currency at the time, as Wallet exports it. */
 		refAmount: bigint("ref_amount", { mode: "number" }),
 		transferId: uuid("transfer_id").references(() => transfers.id, {
 			onDelete: "cascade",
 		}),
-		/** Set when the money pays an item of a month's budget list. */
 		monthItemId: uuid("month_item_id").references(() => monthItems.id, {
 			onDelete: "set null",
 		}),

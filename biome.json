@@ -18,6 +18,7 @@
       "!**/.vscode",
       "!**/routeTree.gen.ts",
       "!apps/*/src/**/env.ts",
+      "!packages/db/src/migrations",
       "!**/src-tauri",
       "!**/.nuxt",
       "!bts.jsonc",

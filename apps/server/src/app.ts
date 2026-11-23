@@ -8,6 +8,7 @@ import { createAnalyticsModule } from "./modules/analytics";
 import { createBudgetsModule } from "./modules/budgets";
 import { createCategoriesModule, SYSTEM_SLUGS } from "./modules/categories";
 import { createDashboardModule } from "./modules/dashboard";
+import { createGoalsModule } from "./modules/goals";
 import { createImportsModule } from "./modules/imports";
 import { createTransactionsModule } from "./modules/transactions";
 import { errorHandler } from "./shared/errors/error-handler";
@@ -117,6 +118,13 @@ export function buildModules(db: Database) {
 		categories: { list: categories.service.list },
 	});
 	const dashboard = createDashboardModule(db);
+	const goals = createGoalsModule(db, {
+		accounts: {
+			assertOwned: (userId, ids) => accounts.service.assertOwned(userId, ids),
+		},
+		transactions: transactions.service,
+		budgets: budgets.service,
+	});
 	return {
 		accounts,
 		categories,
@@ -125,6 +133,7 @@ export function buildModules(db: Database) {
 		imports,
 		analytics,
 		dashboard,
+		goals,
 	};
 }
 
