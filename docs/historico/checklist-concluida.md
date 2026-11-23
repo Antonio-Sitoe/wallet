@@ -169,3 +169,13 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 
 - [x] Ecrã de metas com progresso: indicadores, cartões com ritmo e previsão, detalhe em modal com partes e contribuições, Nova meta (com item opcional no plano anual) e Contribuir; secção Metas na revisão da folha
 - [x] Ecrã de dívidas por pessoa: indicadores (a receber, a pagar, saldo líquido, sugestões), separadores Devem-me / Devo, detalhe em modal com histórico, lembrete e Perdoar / arquivar, Registar recebimento / pagamento (Tudo, Metade), Nova dívida e sugestões do Wallet para converter ou ignorar; secção Dívidas na revisão da folha
+
+## Fase 6 — Lista de compras — 2026-11-23
+
+**Backend**
+
+- [x] Listas com itens (nome, quantidade, preço estimado por unidade): tabelas `shopping_lists` (conta, categoria e item do orçamento opcionais) e `shopping_items` (`transaction_id`); marcar comprado cria a despesa com o preço real (nota «Item × qtd · Lista»), ligada ao item do orçamento da lista; desmarcar apaga a despesa; apagar a despesa nas transacções desmarca o item; apagar o item ou a lista mantém as despesas; totais estimado / real / por comprar
+
+**Frontend**
+
+- [x] Ecrã Lista de compras (`/shopping`, «Compras» no menu, ⌘0): listas em separadores, indicadores (estimado, real, diferença, por comprar), adicionar rápido numa linha («Arroz 2x 350», «2 Arroz 350», «Leite 85»), marcar comprado com preço real e conta, comprados em secção própria com diferença face ao estimado, editar item, nova / editar lista com conta, item do orçamento do mês e categoria, arquivar e apagar

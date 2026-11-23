@@ -11,6 +11,7 @@ import { createDashboardModule } from "./modules/dashboard";
 import { createDebtsModule } from "./modules/debts";
 import { createGoalsModule } from "./modules/goals";
 import { createImportsModule } from "./modules/imports";
+import { createShoppingModule } from "./modules/shopping";
 import { createTransactionsModule } from "./modules/transactions";
 import { errorHandler } from "./shared/errors/error-handler";
 import { createAuthGuard, toHeaders } from "./shared/middleware/auth-guard";
@@ -143,10 +144,24 @@ export function buildModules(db: Database) {
 		transactions: transactions.service,
 		budgets: budgets.service,
 	});
+	const shopping = createShoppingModule(db, {
+		accounts: {
+			assertOwned: (userId, ids) => accounts.service.assertOwned(userId, ids),
+		},
+		categories: {
+			assertOwned: (userId, ids) => categories.service.assertOwned(userId, ids),
+		},
+		budgets: {
+			assertMonthItemOwned: (userId, id) =>
+				budgets!.service.assertMonthItemOwned(userId, id),
+		},
+		transactions: transactions.service,
+	});
 	return {
 		accounts,
 		categories,
 		transactions,
+		shopping,
 		budgets,
 		imports,
 		analytics,

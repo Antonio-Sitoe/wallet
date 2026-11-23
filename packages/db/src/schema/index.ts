@@ -7,3 +7,4 @@ export * from "./debts";
 export * from "./goals";
 export * from "./imports";
 export * from "./transactions";
+export * from "./shopping";

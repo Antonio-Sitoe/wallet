@@ -10,6 +10,7 @@ import {
 	ListChecksIcon,
 	LogOutIcon,
 	PlusIcon,
+	ShoppingCartIcon,
 	TagIcon,
 	TargetIcon,
 } from "lucide-react";
@@ -44,6 +45,7 @@ export const NAV = [
 	{ to: "/import", label: "Importar", icon: DownloadIcon },
 	{ to: "/goals", label: "Metas", icon: TargetIcon },
 	{ to: "/debts", label: "Dívidas", icon: HandCoinsIcon },
+	{ to: "/shopping", label: "Compras", icon: ShoppingCartIcon },
 ] as const;
 
 export const isMac =
@@ -83,7 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 				openNew();
 				return;
 			}
-			const index = Number(e.key) - 1;
+			const index = e.key === "0" ? 9 : Number(e.key) - 1;
 			const target = NAV[index];
 			if (target) {
 				e.preventDefault();
@@ -169,7 +171,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 									<span className="flex-1">{item.label}</span>
 									<span className="num text-dim hidden text-[11px] md:inline">
 										{MOD}
-										{i + 1}
+										{(i + 1) % 10}
 									</span>
 								</Link>
 							);
