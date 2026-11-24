@@ -292,7 +292,7 @@ function pairTransfers(rows: WalletRow[]) {
 		const ins = group.filter((r) => r.type === "income");
 		const usedIn = new Set<WalletRow>();
 		let pendingOuts = outs;
-		for (let progress = true; progress; ) {
+		for (let progress = true; progress;) {
 			progress = false;
 			const stillPending: WalletRow[] = [];
 			for (const out of pendingOuts) {

@@ -10,6 +10,7 @@
     "includes": [
       "**",
       "!**/.next",
+      "!**/.output",
       "!**/dist",
       "!**/.turbo",
       "!**/.nx",
@@ -28,14 +29,22 @@
       "!**/.svelte-kit",
       "!**/wrangler.jsonc",
       "!**/.source",
-      "!**/convex/_generated"
+      "!**/convex/_generated",
+      "!**/*.md",
+      "!apps/server/postman",
+      "!apps/web/public"
     ]
   },
   "formatter": {
-    "enabled": true,
-    "indentStyle": "tab"
+    "enabled": false
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -47,7 +56,12 @@
         "noLabelWithoutControl": {
           "level": "error",
           "options": {
-            "inputComponents": ["Input", "MoneyInput", "Select", "Checkbox"]
+            "inputComponents": [
+              "Input",
+              "MoneyInput",
+              "Select",
+              "Checkbox"
+            ]
           }
         }
       },
@@ -69,11 +83,6 @@
         "noInferrableTypes": "error",
         "noUselessElse": "error"
       }
-    }
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "double"
     }
   },
   "css": {

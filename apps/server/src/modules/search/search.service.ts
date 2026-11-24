@@ -51,8 +51,12 @@ export class SearchService {
 				? this.deps.transactions.search(userId, q, limit)
 				: null,
 		]);
-		const accountName = new Map(accounts.map((a) => [a.id, a.name]));
-		const category = new Map(categories.map((c) => [c.id, c]));
+		const accountName = new Map<string, string>(
+			accounts.map((a) => [a.id, a.name]),
+		);
+		const category = new Map<string, Category>(
+			categories.map((c) => [c.id, c]),
+		);
 
 		const accountHits: SearchHit[] = wants("accounts")
 			? accounts

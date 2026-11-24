@@ -42,7 +42,9 @@ export async function listenDesktopNotificationClicks(
 ): Promise<() => void> {
 	if (!isDesktop) return () => {};
 	try {
-		const listener = await (await desktopPlugin()).onAction((event) => {
+		const listener = await (
+			await desktopPlugin()
+		).onAction((event) => {
 			if (event.actionId !== "tap") return;
 			const notification = event.notification;
 			const extraHref = notification?.extra?.href;
