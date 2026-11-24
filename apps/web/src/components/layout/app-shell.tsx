@@ -20,6 +20,7 @@ import {
 	TargetIcon,
 } from "lucide-react";
 import {
+	Fragment,
 	type ReactNode,
 	useCallback,
 	useEffect,
@@ -51,19 +52,59 @@ import { authClient, clearDesktopToken } from "@/lib/auth-client";
 import { formatCombo, useShortcutMap, useShortcuts } from "@/lib/shortcuts";
 
 export const NAV = [
-	{ to: "/dashboard", label: "Painel", icon: LayoutDashboardIcon },
-	{ to: "/budget", label: "Orçamento", icon: ListChecksIcon },
-	{ to: "/payments", label: "Pagamentos", icon: CalendarCheckIcon },
-	{ to: "/plan", label: "Plano anual", icon: CalendarRangeIcon },
-	{ to: "/transactions", label: "Transacções", icon: ArrowLeftRightIcon },
-	{ to: "/accounts", label: "Contas", icon: LandmarkIcon },
-	{ to: "/categories", label: "Categorias", icon: TagIcon },
-	{ to: "/import", label: "Importar", icon: DownloadIcon },
-	{ to: "/goals", label: "Metas", icon: TargetIcon },
-	{ to: "/debts", label: "Dívidas", icon: HandCoinsIcon },
-	{ to: "/shopping", label: "Compras", icon: ShoppingCartIcon },
-	{ to: "/stats", label: "Estatísticas", icon: ChartColumnIcon },
-	{ to: "/assistant", label: "Assistente", icon: SparklesIcon },
+	{
+		to: "/dashboard",
+		label: "Painel",
+		icon: LayoutDashboardIcon,
+		group: "Dia a dia",
+	},
+	{
+		to: "/transactions",
+		label: "Transacções",
+		icon: ArrowLeftRightIcon,
+		group: "Dia a dia",
+	},
+	{
+		to: "/payments",
+		label: "Pagamentos",
+		icon: CalendarCheckIcon,
+		group: "Dia a dia",
+	},
+	{
+		to: "/shopping",
+		label: "Compras",
+		icon: ShoppingCartIcon,
+		group: "Dia a dia",
+	},
+	{ to: "/budget", label: "Orçamento", icon: ListChecksIcon, group: "Planear" },
+	{
+		to: "/plan",
+		label: "Plano anual",
+		icon: CalendarRangeIcon,
+		group: "Planear",
+	},
+	{ to: "/goals", label: "Metas", icon: TargetIcon, group: "Planear" },
+	{ to: "/debts", label: "Dívidas", icon: HandCoinsIcon, group: "Planear" },
+	{
+		to: "/stats",
+		label: "Estatísticas",
+		icon: ChartColumnIcon,
+		group: "Analisar",
+	},
+	{
+		to: "/assistant",
+		label: "Assistente",
+		icon: SparklesIcon,
+		group: "Analisar",
+	},
+	{ to: "/accounts", label: "Contas", icon: LandmarkIcon, group: "Configurar" },
+	{
+		to: "/categories",
+		label: "Categorias",
+		icon: TagIcon,
+		group: "Configurar",
+	},
+	{ to: "/import", label: "Importar", icon: DownloadIcon, group: "Configurar" },
 ] as const;
 
 export const isMac =
@@ -146,7 +187,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 		<NewTransactionContext.Provider value={value}>
 			<a
 				href="#conteudo"
-				className="bg-fg text-canvas rounded-control sr-only z-50 text-[13px] font-medium shadow-lg focus:not-sr-only focus:px-3 focus:py-2 focus:fixed focus:top-3 focus:left-3"
+				className="bg-fg text-canvas rounded-control sr-only z-50 text-[13px] font-medium shadow-lg focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:px-3 focus:py-2"
 			>
 				Saltar para o conteúdo
 			</a>
@@ -210,34 +251,40 @@ export function AppShell({ children }: { children: ReactNode }) {
 					</Button>
 
 					<div className="flex gap-0.5 overflow-x-auto md:flex-col">
-						<div className="num text-dim hidden px-2 pb-1.5 text-[11px] tracking-[.06em] uppercase md:block">
-							Workspace
-						</div>
 						{NAV.map((item, i) => {
 							const active = pathname.startsWith(item.to);
 							const Icon = item.icon;
+							const startsGroup = i === 0 || NAV[i - 1]?.group !== item.group;
 							return (
-								<Link
-									key={item.to}
-									to={item.to}
-									aria-current={active ? "page" : undefined}
-									className={
-										active
-											? "bg-selected text-fg h-input flex shrink-0 items-center gap-2.5 rounded-md px-2 font-medium whitespace-nowrap"
-											: "text-fg-2 hover:bg-hover hover:text-fg h-input flex shrink-0 items-center gap-2.5 rounded-md px-2 whitespace-nowrap"
-									}
-								>
-									<Icon
-										className={active ? "text-money size-4" : "size-4"}
-										strokeWidth={1.8}
-									/>
-									<span className="flex-1">{item.label}</span>
-									{i < 10 ? (
-										<span className="num text-dim hidden text-[11px] md:inline">
-											{formatCombo(keys[`nav${i + 1}` as keyof typeof keys])}
-										</span>
+								<Fragment key={item.to}>
+									{startsGroup ? (
+										<div
+											className={`num text-dim hidden px-2 pb-1.5 text-[11px] tracking-[.06em] uppercase md:block ${i === 0 ? "" : "pt-3"}`}
+										>
+											{item.group}
+										</div>
 									) : null}
-								</Link>
+									<Link
+										to={item.to}
+										aria-current={active ? "page" : undefined}
+										className={
+											active
+												? "bg-selected text-fg h-input flex shrink-0 items-center gap-2.5 rounded-md px-2 font-medium whitespace-nowrap"
+												: "text-fg-2 hover:bg-hover hover:text-fg h-input flex shrink-0 items-center gap-2.5 rounded-md px-2 whitespace-nowrap"
+										}
+									>
+										<Icon
+											className={active ? "text-money size-4" : "size-4"}
+											strokeWidth={1.8}
+										/>
+										<span className="flex-1">{item.label}</span>
+										{i < 10 ? (
+											<span className="num text-dim hidden text-[11px] md:inline">
+												{formatCombo(keys[`nav${i + 1}` as keyof typeof keys])}
+											</span>
+										) : null}
+									</Link>
+								</Fragment>
 							);
 						})}
 					</div>
