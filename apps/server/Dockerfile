@@ -2,19 +2,21 @@ FROM node:26-slim AS builder
 WORKDIR /app
 
 COPY . .
-RUN --mount=type=secret,id=web_env,target=/app/apps/web/.env.local --mount=type=secret,id=server_env,target=/app/apps/server/.env.local --mount=type=cache,target=/root/.npm npm install
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 ENV NODE_ENV=production
-RUN --mount=type=secret,id=web_env,target=/app/apps/web/.env.local --mount=type=secret,id=server_env,target=/app/apps/server/.env.local cd apps/server && npm run build
+RUN cd apps/server && npm run build
 
 FROM node:26-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV TZ=Africa/Maputo
 COPY --from=builder /app /app
 
 EXPOSE 3000
-
-WORKDIR /app/apps/server
-# Run as the image's unprivileged user
 USER node
-CMD ["node", "dist/index.mjs"]
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=10 \
+  CMD node -e "fetch('http://localhost:3000/').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+
+CMD ["sh", "-c", "cd /app/packages/db && npx --no-install drizzle-kit migrate && cd /app/apps/server && exec node dist/index.mjs"]
