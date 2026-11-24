@@ -1,4 +1,4 @@
-# finance
+# wallet
 
 This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Start, Fastify, and more.
 
@@ -66,7 +66,7 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 Import shared components like this:
 
 ```tsx
-import { Button } from "@finance/ui/components/button";
+import { Button } from "@wallet/ui/components/button";
 ```
 
 ### Add app-specific blocks
@@ -107,7 +107,7 @@ For more details, see the guide on [Deploying with Docker Compose](https://www.b
 ## Project Structure
 
 ```
-finance/
+wallet/
 ├── apps/
 │   ├── web/         # Frontend application (React + TanStack Start)
 │   └── server/      # Backend API (Fastify)
@@ -133,9 +133,9 @@ finance/
 - `npm run format`: Run Vite+ formatting
 - `npm run staged`: Run Vite+ checks against staged files
 - `npm run hooks:setup`: Install Vite+ native Git hooks with `vp config`
-- `cd apps/web && npm run desktop:dev`: Start Tauri desktop app in development
-- `cd apps/web && npm run desktop:build`: Build Tauri desktop app
-- Note: Desktop builds package static web assets. TanStack Start needs a static/export build configuration before desktop packaging will work.
+- `npm run desktop:dev`: Start the Tauri desktop app in development (start `npm run dev:server` first)
+- `npm run desktop:build`: Build the desktop app (`.app` + `.dmg` in `apps/web/src-tauri/target/release/bundle/`)
+- Desktop builds package the prerendered static output of `apps/web` (`.output/public`). The desktop app authenticates with a bearer token (Better-Auth `bearer` plugin) because WKWebView blocks cross-site cookies from `tauri://localhost`.
 - `npm run docker:build`: Build the Docker Compose images
 - `npm run docker:up`: Build and start the Docker Compose stack
 - `npm run docker:logs`: Tail logs from the Docker Compose stack

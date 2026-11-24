@@ -1,0 +1,664 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "cb80899a-b09a-4188-b9ba-0eed26453fe0",
+  "prevIds": [
+    "2022c5a9-127b-4751-a3c7-d0fefdb91ab4"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "debt_direction"
+      ],
+      "writes": [
+        "s|enum|public.debt_direction",
+        "n|enum|public.debt_direction",
+        "e|enum|public.debt_direction",
+        "n|type|public.debt_direction"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "debt_ignored_people"
+      ],
+      "writes": [
+        "s|tbl|public.debt_ignored_people",
+        "n|tbl|public.debt_ignored_people",
+        "e|tbl|public.debt_ignored_people",
+        "n|rel|public.debt_ignored_people",
+        "n|type|public.debt_ignored_people",
+        "n|rel|public.debt_ignored_people_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "debts"
+      ],
+      "writes": [
+        "s|tbl|public.debts",
+        "n|tbl|public.debts",
+        "e|tbl|public.debts",
+        "n|rel|public.debts",
+        "n|type|public.debts",
+        "n|rel|public.debts_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.debt_direction"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "transactions",
+        "debt_id"
+      ],
+      "writes": [
+        "s|col|public.transactions.debt_id",
+        "n|col|public.transactions.debt_id",
+        "e|col|public.transactions.debt_id"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "debts",
+        "debts_user_idx"
+      ],
+      "writes": [
+        "s|idx|public.debts_user_idx",
+        "n|idx|public.debts_user_idx",
+        "e|idx|public.debts_user_idx",
+        "n|rel|public.debts_user_idx"
+      ],
+      "reads": [
+        "n|tbl|public.debts",
+        "n|sch|public",
+        "n|col|public.debts.user_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transactions",
+        "transactions_debt_idx"
+      ],
+      "writes": [
+        "s|idx|public.transactions_debt_idx",
+        "n|idx|public.transactions_debt_idx",
+        "e|idx|public.transactions_debt_idx",
+        "n|rel|public.transactions_debt_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|col|public.transactions.debt_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "debt_ignored_people"
+      ],
+      "writes": [
+        "s|fk|public.debt_ignored_people.debt_ignored_people_user_id_user_id_fkey",
+        "n|fk|public.debt_ignored_people.debt_ignored_people_user_id_user_id_fkey",
+        "e|fk|public.debt_ignored_people.debt_ignored_people_user_id_user_id_fkey",
+        "n|con|public.debt_ignored_people.debt_ignored_people_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.debt_ignored_people",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.debt_ignored_people.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "debts"
+      ],
+      "writes": [
+        "s|fk|public.debts.debts_user_id_user_id_fkey",
+        "n|fk|public.debts.debts_user_id_user_id_fkey",
+        "e|fk|public.debts.debts_user_id_user_id_fkey",
+        "n|con|public.debts.debts_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.debts",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.debts.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "debts"
+      ],
+      "writes": [
+        "s|fk|public.debts.debts_import_batch_id_import_batches_id_fkey",
+        "n|fk|public.debts.debts_import_batch_id_import_batches_id_fkey",
+        "e|fk|public.debts.debts_import_batch_id_import_batches_id_fkey",
+        "n|con|public.debts.debts_import_batch_id_import_batches_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.debts",
+        "n|sch|public",
+        "n|tbl|public.import_batches",
+        "n|sch|public",
+        "n|col|public.debts.import_batch_id",
+        "n|col|public.import_batches.id",
+        "e|uniqueness|public.import_batches.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transactions"
+      ],
+      "writes": [
+        "s|fk|public.transactions.transactions_debt_id_debts_id_fkey",
+        "n|fk|public.transactions.transactions_debt_id_debts_id_fkey",
+        "e|fk|public.transactions.transactions_debt_id_debts_id_fkey",
+        "n|con|public.transactions.transactions_debt_id_debts_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|tbl|public.debts",
+        "n|sch|public",
+        "n|col|public.transactions.debt_id",
+        "n|col|public.debts.id",
+        "e|uniqueness|public.debts.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "debt_ignored_people",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "debts",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "debt_direction",
+        "values": [
+          "owed_to_me",
+          "i_owe"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debt_ignored_people",
+        "name": "user_id",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debt_ignored_people",
+        "name": "person_key",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debt_ignored_people",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "user_id",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "person",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "direction",
+        "type": "debt_direction",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "amount",
+        "type": "bigint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "note",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "remind_on",
+        "type": "varchar(10)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "archived",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "false",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "import_batch_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transactions",
+        "name": "debt_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "debts_user_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transactions",
+        "name": "transactions_debt_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "debt_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debt_ignored_people",
+        "name": "debt_ignored_people_user_id_user_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "user",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "debts_user_id_user_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "user",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "debts_import_batch_id_import_batches_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "import_batch_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "import_batches",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transactions",
+        "name": "transactions_debt_id_debts_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "debt_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "debts",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debt_ignored_people",
+        "name": "debt_ignored_people_pkey",
+        "columns": [
+          "user_id",
+          "person_key"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "debts_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "debts_amount_positive",
+        "value": "\"amount\" > 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "debts",
+        "name": "debts_remind_on_format",
+        "value": "\"remind_on\" is null or \"remind_on\" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'",
+        "entityType": "checks"
+      }
+    }
+  ]
+}

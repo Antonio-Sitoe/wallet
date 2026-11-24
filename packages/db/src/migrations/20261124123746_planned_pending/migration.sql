@@ -1,0 +1,1 @@
+ALTER TYPE "planned_event_status" ADD VALUE 'pending';

@@ -1,0 +1,16 @@
+export {
+	type CreateDebtInput,
+	createDebtInput,
+	type Debt,
+	type DebtDirection,
+	type DebtPayment,
+	type DebtSuggestion,
+	debtPaymentParams,
+	debtSuggestionParams,
+	idParams,
+	listDebtsQuery,
+	type PayDebtInput,
+	payDebtInput,
+	type UpdateDebtInput,
+	updateDebtInput,
+} from "@wallet/shared";

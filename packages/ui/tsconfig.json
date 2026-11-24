@@ -1,11 +1,11 @@
 {
-  "extends": "@finance/config/tsconfig.base.json",
+  "extends": "@wallet/config/tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": [],
     "paths": {
-      "@finance/ui/*": ["./src/*"]
+      "@wallet/ui/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],

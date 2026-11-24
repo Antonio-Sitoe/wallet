@@ -21,7 +21,7 @@
     "noUncheckedSideEffectImports": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@finance/ui/*": ["../../packages/ui/src/*"]
+      "@wallet/ui/*": ["../../packages/ui/src/*"]
     }
   }
 }

@@ -13,8 +13,8 @@
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
-    "utils": "@finance/ui/lib/utils",
-    "ui": "@finance/ui/components",
+    "utils": "@wallet/ui/lib/utils",
+    "ui": "@wallet/ui/components",
     "lib": "@/lib",
     "hooks": "@/hooks"
   },

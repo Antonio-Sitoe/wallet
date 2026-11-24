@@ -12,11 +12,11 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@finance/ui/components",
-    "utils": "@finance/ui/lib/utils",
-    "hooks": "@finance/ui/hooks",
-    "lib": "@finance/ui/lib",
-    "ui": "@finance/ui/components"
+    "components": "@wallet/ui/components",
+    "utils": "@wallet/ui/lib/utils",
+    "hooks": "@wallet/ui/hooks",
+    "lib": "@wallet/ui/lib",
+    "ui": "@wallet/ui/components"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

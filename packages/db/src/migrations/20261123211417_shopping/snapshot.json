@@ -1,0 +1,836 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "765c9e61-8cf1-478f-8592-bbdf521a7a42",
+  "prevIds": [
+    "cb80899a-b09a-4188-b9ba-0eed26453fe0"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "shopping_items"
+      ],
+      "writes": [
+        "s|tbl|public.shopping_items",
+        "n|tbl|public.shopping_items",
+        "e|tbl|public.shopping_items",
+        "n|rel|public.shopping_items",
+        "n|type|public.shopping_items",
+        "n|rel|public.shopping_items_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "shopping_lists"
+      ],
+      "writes": [
+        "s|tbl|public.shopping_lists",
+        "n|tbl|public.shopping_lists",
+        "e|tbl|public.shopping_lists",
+        "n|rel|public.shopping_lists",
+        "n|type|public.shopping_lists",
+        "n|rel|public.shopping_lists_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "shopping_items",
+        "shopping_items_list_idx"
+      ],
+      "writes": [
+        "s|idx|public.shopping_items_list_idx",
+        "n|idx|public.shopping_items_list_idx",
+        "e|idx|public.shopping_items_list_idx",
+        "n|rel|public.shopping_items_list_idx"
+      ],
+      "reads": [
+        "n|tbl|public.shopping_items",
+        "n|sch|public",
+        "n|col|public.shopping_items.list_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "shopping_items",
+        "shopping_items_transaction_idx"
+      ],
+      "writes": [
+        "s|idx|public.shopping_items_transaction_idx",
+        "n|idx|public.shopping_items_transaction_idx",
+        "e|idx|public.shopping_items_transaction_idx",
+        "n|rel|public.shopping_items_transaction_idx"
+      ],
+      "reads": [
+        "n|tbl|public.shopping_items",
+        "n|sch|public",
+        "n|col|public.shopping_items.transaction_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "shopping_lists",
+        "shopping_lists_user_idx"
+      ],
+      "writes": [
+        "s|idx|public.shopping_lists_user_idx",
+        "n|idx|public.shopping_lists_user_idx",
+        "e|idx|public.shopping_lists_user_idx",
+        "n|rel|public.shopping_lists_user_idx"
+      ],
+      "reads": [
+        "n|tbl|public.shopping_lists",
+        "n|sch|public",
+        "n|col|public.shopping_lists.user_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "shopping_items"
+      ],
+      "writes": [
+        "s|fk|public.shopping_items.shopping_items_user_id_user_id_fkey",
+        "n|fk|public.shopping_items.shopping_items_user_id_user_id_fkey",
+        "e|fk|public.shopping_items.shopping_items_user_id_user_id_fkey",
+        "n|con|public.shopping_items.shopping_items_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.shopping_items",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.shopping_items.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "shopping_items"
+      ],
+      "writes": [
+        "s|fk|public.shopping_items.shopping_items_list_id_shopping_lists_id_fkey",
+        "n|fk|public.shopping_items.shopping_items_list_id_shopping_lists_id_fkey",
+        "e|fk|public.shopping_items.shopping_items_list_id_shopping_lists_id_fkey",
+        "n|con|public.shopping_items.shopping_items_list_id_shopping_lists_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.shopping_items",
+        "n|sch|public",
+        "n|tbl|public.shopping_lists",
+        "n|sch|public",
+        "n|col|public.shopping_items.list_id",
+        "n|col|public.shopping_lists.id",
+        "e|uniqueness|public.shopping_lists.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "shopping_items"
+      ],
+      "writes": [
+        "s|fk|public.shopping_items.shopping_items_transaction_id_transactions_id_fkey",
+        "n|fk|public.shopping_items.shopping_items_transaction_id_transactions_id_fkey",
+        "e|fk|public.shopping_items.shopping_items_transaction_id_transactions_id_fkey",
+        "n|con|public.shopping_items.shopping_items_transaction_id_transactions_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.shopping_items",
+        "n|sch|public",
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|col|public.shopping_items.transaction_id",
+        "n|col|public.transactions.id",
+        "e|uniqueness|public.transactions.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "shopping_lists"
+      ],
+      "writes": [
+        "s|fk|public.shopping_lists.shopping_lists_user_id_user_id_fkey",
+        "n|fk|public.shopping_lists.shopping_lists_user_id_user_id_fkey",
+        "e|fk|public.shopping_lists.shopping_lists_user_id_user_id_fkey",
+        "n|con|public.shopping_lists.shopping_lists_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.shopping_lists",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.shopping_lists.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "shopping_lists"
+      ],
+      "writes": [
+        "s|fk|public.shopping_lists.shopping_lists_account_id_accounts_id_fkey",
+        "n|fk|public.shopping_lists.shopping_lists_account_id_accounts_id_fkey",
+        "e|fk|public.shopping_lists.shopping_lists_account_id_accounts_id_fkey",
+        "n|con|public.shopping_lists.shopping_lists_account_id_accounts_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.shopping_lists",
+        "n|sch|public",
+        "n|tbl|public.accounts",
+        "n|sch|public",
+        "n|col|public.shopping_lists.account_id",
+        "n|col|public.accounts.id",
+        "e|uniqueness|public.accounts.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "shopping_lists"
+      ],
+      "writes": [
+        "s|fk|public.shopping_lists.shopping_lists_category_id_categories_id_fkey",
+        "n|fk|public.shopping_lists.shopping_lists_category_id_categories_id_fkey",
+        "e|fk|public.shopping_lists.shopping_lists_category_id_categories_id_fkey",
+        "n|con|public.shopping_lists.shopping_lists_category_id_categories_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.shopping_lists",
+        "n|sch|public",
+        "n|tbl|public.categories",
+        "n|sch|public",
+        "n|col|public.shopping_lists.category_id",
+        "n|col|public.categories.id",
+        "e|uniqueness|public.categories.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "shopping_lists"
+      ],
+      "writes": [
+        "s|fk|public.shopping_lists.shopping_lists_month_item_id_month_items_id_fkey",
+        "n|fk|public.shopping_lists.shopping_lists_month_item_id_month_items_id_fkey",
+        "e|fk|public.shopping_lists.shopping_lists_month_item_id_month_items_id_fkey",
+        "n|con|public.shopping_lists.shopping_lists_month_item_id_month_items_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.shopping_lists",
+        "n|sch|public",
+        "n|tbl|public.month_items",
+        "n|sch|public",
+        "n|col|public.shopping_lists.month_item_id",
+        "n|col|public.month_items.id",
+        "e|uniqueness|public.month_items.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "shopping_items",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "shopping_lists",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "user_id",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "list_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "name",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "quantity",
+        "type": "double precision",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "1",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "unit_price",
+        "type": "bigint",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "position",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "transaction_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "user_id",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "name",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "account_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "category_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "month_item_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "archived",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "false",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "shopping_items_list_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "list_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "shopping_items_transaction_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "transaction_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "shopping_lists_user_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "shopping_items_user_id_user_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "user",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "shopping_items_list_id_shopping_lists_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "list_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "shopping_lists",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "shopping_items_transaction_id_transactions_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "transaction_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "transactions",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "shopping_lists_user_id_user_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "user",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "shopping_lists_account_id_accounts_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "account_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "accounts",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "shopping_lists_category_id_categories_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "category_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "categories",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "shopping_lists_month_item_id_month_items_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "month_item_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "month_items",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "shopping_items_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_lists",
+        "name": "shopping_lists_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "shopping_items_quantity_positive",
+        "value": "\"quantity\" > 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "shopping_items",
+        "name": "shopping_items_unit_price_positive",
+        "value": "\"unit_price\" is null or \"unit_price\" > 0",
+        "entityType": "checks"
+      }
+    }
+  ]
+}
