@@ -17,11 +17,10 @@ export function DebtSuggestions({
 	onConvert: (suggestion: DebtSuggestion) => void;
 }) {
 	const ignore = useIgnoreDebtSuggestion();
-	if (suggestions.length === 0) return null;
 	return (
-		<Card>
+		<Card className="overflow-hidden">
 			<CardHeader
-				title="Sugestões do Wallet"
+				title="Histórico do Wallet"
 				meta="notas «pessoa → eu» e «eu → pessoa» · empréstimos"
 			/>
 			<ul>

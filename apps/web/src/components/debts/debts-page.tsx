@@ -29,6 +29,8 @@ import { money } from "@/utils/format";
 
 const route = getRouteApi("/_private/debts");
 
+type DebtTab = DebtDirection | "history";
+
 const people = (n: number) => `${n} ${n === 1 ? "pessoa" : "pessoas"}`;
 
 export function DebtsPage() {
@@ -50,9 +52,10 @@ export function DebtsPage() {
 		active.filter((d) => d.direction === direction && debtLeft(d) > 0).length;
 	const receivable = sumLeft("owed_to_me");
 	const payable = sumLeft("i_owe");
+	const direction: DebtDirection = tab === "history" ? "owed_to_me" : tab;
 	const shown = list.filter((d) => d.direction === tab);
 	const selected = list.find((d) => d.id === id);
-	const go = (search: { id?: string; tab?: DebtDirection }) =>
+	const go = (search: { id?: string; tab?: DebtTab }) =>
 		navigate({ search: { tab, archived, ...search } });
 
 	return (
@@ -65,10 +68,7 @@ export function DebtsPage() {
 				>
 					{archived ? "Esconder arquivadas" : "Mostrar arquivadas"}
 				</Link>
-				<Button
-					variant="primary"
-					onClick={() => setCreating({ direction: tab })}
-				>
+				<Button variant="primary" onClick={() => setCreating({ direction })}>
 					<PlusIcon className="size-3.5" strokeWidth={2.6} /> Nova dívida
 				</Button>
 			</PageHeader>
@@ -97,24 +97,46 @@ export function DebtsPage() {
 						note="a receber − a pagar"
 					/>
 					<Stat
-						label="Sugestões"
-						value={String(suggestions.length)}
-						note="pessoas com empréstimos no Wallet"
+						label="Histórico"
+						value={people(suggestions.length)}
+						note="com empréstimos nas notas do Wallet"
 						tone={suggestions.length ? undefined : "dim"}
 					/>
 				</StatRow>
 
 				<Segmented
-					className="w-72"
+					className="w-[26rem] max-w-full"
 					value={tab}
 					onChange={(next) => go({ tab: next, id: undefined })}
-					options={(["owed_to_me", "i_owe"] as const).map((d) => ({
-						value: d,
-						label: `${DIRECTION_LABEL[d]} · ${list.filter((x) => x.direction === d).length}`,
-					}))}
+					options={[
+						...(["owed_to_me", "i_owe"] as const).map((d) => ({
+							value: d as DebtTab,
+							label: `${DIRECTION_LABEL[d]} · ${list.filter((x) => x.direction === d).length}`,
+						})),
+						{ value: "history", label: `Histórico · ${suggestions.length}` },
+					]}
 				/>
 
-				{debts.isPending ? (
+				{tab === "history" ? (
+					suggestions.length === 0 ? (
+						<EmptyState title="Nada no histórico">
+							Quando uma nota do Wallet tiver «pessoa → eu» ou «eu → pessoa», a
+							pessoa aparece aqui para converter em dívida.
+						</EmptyState>
+					) : (
+						<DebtSuggestions
+							suggestions={suggestions}
+							onConvert={(s) =>
+								setCreating({
+									person: s.person,
+									direction: s.direction,
+									amount: s.net,
+									note: `A partir de ${s.outCount + s.inCount} notas do Wallet`,
+								})
+							}
+						/>
+					)
+				) : debts.isPending ? (
 					<Skeleton className="h-48" />
 				) : shown.length === 0 ? (
 					<EmptyState
@@ -124,14 +146,14 @@ export function DebtsPage() {
 						actions={
 							<Button
 								variant="primary"
-								onClick={() => setCreating({ direction: tab })}
+								onClick={() => setCreating({ direction })}
 							>
 								<PlusIcon className="size-3.5" strokeWidth={2.6} /> Nova dívida
 							</Button>
 						}
 					>
 						Registe empréstimos por pessoa, importe-os da aba Dívidas da folha
-						ou converta as sugestões tiradas das notas do Wallet.
+						ou converta as pessoas do separador Histórico.
 					</EmptyState>
 				) : (
 					<Card className="overflow-hidden">
@@ -145,18 +167,6 @@ export function DebtsPage() {
 						))}
 					</Card>
 				)}
-
-				<DebtSuggestions
-					suggestions={suggestions}
-					onConvert={(s) =>
-						setCreating({
-							person: s.person,
-							direction: s.direction,
-							amount: s.net,
-							note: `A partir de ${s.outCount + s.inCount} notas do Wallet`,
-						})
-					}
-				/>
 			</Page>
 
 			{creating ? (
@@ -164,9 +174,9 @@ export function DebtsPage() {
 					defaults={creating}
 					onClose={() => setCreating(null)}
 					onCreated={(debtId) => {
-						const direction = creating.direction ?? tab;
+						const next = creating.direction ?? direction;
 						setCreating(null);
-						go({ id: debtId, tab: direction });
+						go({ id: debtId, tab: next });
 					}}
 				/>
 			) : null}
