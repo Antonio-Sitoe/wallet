@@ -54,9 +54,8 @@ export class CategoriesRepository implements ICategoriesRepository {
 		options: { ignoreConflict?: boolean } = {},
 	) {
 		const query = exec.insert(categories).values(row);
-		const [created] = await (options.ignoreConflict
-			? query.onConflictDoNothing()
-			: query
+		const [created] = await (
+			options.ignoreConflict ? query.onConflictDoNothing() : query
 		).returning({ id: categories.id });
 		return created?.id;
 	}

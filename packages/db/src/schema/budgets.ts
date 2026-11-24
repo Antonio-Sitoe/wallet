@@ -72,7 +72,10 @@ export const planItems = pgTable(
 		amount: bigint("amount", { mode: "number" }).notNull(),
 		frequency: budgetFrequency("frequency").notNull().default("monthly"),
 		/** For "months" and "once": the months (1–12). Empty for "monthly". */
-		months: integer("months").array().notNull().default(sql`'{}'::integer[]`),
+		months: integer("months")
+			.array()
+			.notNull()
+			.default(sql`'{}'::integer[]`),
 		accountId: uuid("account_id").references(() => accounts.id, {
 			onDelete: "set null",
 		}),

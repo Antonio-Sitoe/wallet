@@ -82,7 +82,10 @@ export const transactions = pgTable(
 		referenceMonth: varchar("reference_month", { length: 7 }).notNull(),
 		note: text("note"),
 		payee: text("payee"),
-		labels: text("labels").array().notNull().default(sql`'{}'::text[]`),
+		labels: text("labels")
+			.array()
+			.notNull()
+			.default(sql`'{}'::text[]`),
 		paymentType: text("payment_type"),
 		currency: varchar("currency", { length: 3 }).notNull().default("MZN"),
 		refAmount: bigint("ref_amount", { mode: "number" }),
