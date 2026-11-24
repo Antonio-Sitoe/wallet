@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
 import {
@@ -115,6 +116,7 @@ export const MOD = isMac ? "⌘" : "Ctrl+";
 
 export function AppShell({ children }: { children: ReactNode }) {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	useThemeShortcut();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const { data: session } = authClient.useSession();
@@ -178,6 +180,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 			fetchOptions: {
 				onSuccess: () => {
 					clearDesktopToken();
+					queryClient.clear();
 					navigate({ to: "/login" });
 				},
 			},

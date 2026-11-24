@@ -4,7 +4,12 @@ import type { AppNotice } from "@wallet/shared";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { markSeen, readSeen, showNotification } from "@/lib/notify";
+import {
+	listenDesktopNotificationClicks,
+	markSeen,
+	readSeen,
+	showNotification,
+} from "@/lib/notify";
 import { todayInput } from "@/utils/format";
 
 const CHECK_EVERY = 15 * 60_000;
@@ -26,6 +31,21 @@ export function NotificationsRunner() {
 	const notices = useNotices().data;
 
 	useEffect(() => {
+		let stop: (() => void) | undefined;
+		let cancelled = false;
+		void listenDesktopNotificationClicks((href) => navigate({ href })).then(
+			(unlisten) => {
+				if (cancelled) unlisten();
+				else stop = unlisten;
+			},
+		);
+		return () => {
+			cancelled = true;
+			stop?.();
+		};
+	}, [navigate]);
+
+	useEffect(() => {
 		if (!notices?.length) return;
 		const seen = new Set(readSeen());
 		const fresh = notices.filter((n) => !seen.has(n.key));
@@ -37,6 +57,7 @@ export function NotificationsRunner() {
 				const sent = await showNotification(
 					notice.title,
 					notice.body,
+					notice.href,
 					open(notice.href),
 				);
 				if (!sent)

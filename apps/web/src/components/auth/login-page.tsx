@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
 import { Input } from "@wallet/ui/components/input";
@@ -11,6 +12,7 @@ import { authClient } from "@/lib/auth-client";
 
 export function LoginPage() {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const [mode, setMode] = useState<"in" | "up">("in");
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
@@ -24,6 +26,7 @@ export function LoginPage() {
 		setBusy(true);
 		const options = {
 			onSuccess: () => {
+				queryClient.clear();
 				navigate({ to: "/" });
 			},
 			onError: (ctx: { error: { message?: string; statusText?: string } }) => {
