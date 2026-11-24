@@ -1,5 +1,6 @@
 export * from "./contracts/accounts";
 export * from "./contracts/analytics";
+export * from "./contracts/assistant";
 export * from "./contracts/budgets";
 export * from "./contracts/categories";
 export * from "./contracts/common";
@@ -7,6 +8,7 @@ export * from "./contracts/debts";
 export * from "./contracts/goals";
 export * from "./contracts/imports";
 export * from "./contracts/planned";
+export * from "./contracts/search";
 export * from "./contracts/settings";
 export * from "./contracts/shopping";
 export * from "./contracts/transactions";

@@ -5,6 +5,7 @@ import Fastify, { type FastifyServerOptions } from "fastify";
 
 import { createAccountsModule } from "./modules/accounts";
 import { createAnalyticsModule } from "./modules/analytics";
+import { createAssistantModule } from "./modules/assistant";
 import { createBudgetsModule } from "./modules/budgets";
 import { createCategoriesModule, SYSTEM_SLUGS } from "./modules/categories";
 import { createDashboardModule } from "./modules/dashboard";
@@ -12,6 +13,7 @@ import { createDebtsModule } from "./modules/debts";
 import { createGoalsModule } from "./modules/goals";
 import { createImportsModule } from "./modules/imports";
 import { createPlannedModule } from "./modules/planned";
+import { createSearchModule } from "./modules/search";
 import { createSettingsModule } from "./modules/settings";
 import { createShoppingModule } from "./modules/shopping";
 import { createTransactionsModule } from "./modules/transactions";
@@ -176,6 +178,18 @@ export function buildModules(db: Database) {
 		},
 		transactions: transactions.service,
 	});
+	const search = createSearchModule({
+		accounts: {
+			list: (userId) =>
+				accounts.service.list(userId, { includeArchived: false }),
+		},
+		categories: { list: (userId) => categories.service.list(userId) },
+		transactions: {
+			search: (userId, q, limit) =>
+				transactions.service.list(userId, { q, limit }),
+		},
+	});
+	const assistant = createAssistantModule(db);
 	return {
 		accounts,
 		categories,
@@ -189,6 +203,8 @@ export function buildModules(db: Database) {
 		goals,
 		debts,
 		settings,
+		search,
+		assistant,
 	};
 }
 

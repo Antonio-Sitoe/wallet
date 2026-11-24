@@ -217,6 +217,19 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 
 - Definições › Segurança: impressão digital / Touch ID ao abrir o app — decidido não fazer; o bloqueio fica só com PIN
 
+## Fase 8 — Pesquisa ⌘K e Assistente IA (base, sem integração) — 2026-11-24
+
+**Backend**
+
+- [x] Pesquisa global: `GET /search?q=&scope=all|accounts|categories|transactions` (contas e categorias sem diferença de acentos; transacções por nota e pessoa); ecrãs e acções resolvidos no cliente, com os prefixos @ # >
+- [x] Conversas guardadas no servidor: tabelas `assistant_conversations` e `assistant_messages`; `/assistant/conversations` para listar (com pesquisa no título e nas mensagens), criar, ler, fixar / renomear, apagar e exportar em Markdown; `POST /assistant/conversations/:id/messages` guarda a pergunta e a resposta; `GET /assistant/status`
+- [x] Interface `AssistantProvider` para ligar um modelo; por agora responde um placeholder que diz que a IA ainda não está ligada
+
+**Frontend**
+
+- [x] Paleta ⌘K com os modos Pesquisar e Perguntar (tab alterna): acções, ecrãs, contas, categorias e transacções, navegação com ↑↓ e ↵, «Perguntar à IA» quando não há resultados, e «abrir em conversa ⌘J»; botão «Procurar ou perguntar» na barra lateral
+- [x] Ecrã Assistente (⌘J e na barra lateral): histórico agrupado (Fixadas, Hoje, Ontem, Esta semana), pesquisa, nova conversa, Fixar / Exportar / Apagar, respostas com linhas, acções e fonte, sugestões e menu de anexos (por agora desactivado)
+
 ## Fase 5 — Pagamentos planeados — 2026-11-24
 
 **Design (UI)**
