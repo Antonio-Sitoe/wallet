@@ -13,6 +13,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { usePreferencesContext } from "@/contexts/preferences-context";
 import { ApiError, errorMessage } from "@/lib/api";
+import { isDesktop } from "@/lib/auth-client";
 
 type PinMode = "set" | "change" | "remove";
 
@@ -21,6 +22,24 @@ export function SecuritySection({ onLock }: { onLock: () => void }) {
 	const [mode, setMode] = useState<PinMode | null>(null);
 	if (!preferences) return null;
 	const hasPin = preferences.hasPin;
+
+	if (!isDesktop) {
+		return (
+			<SettingsSection
+				title="Segurança"
+				description="O PIN só está disponível no app de desktop."
+			>
+				<SettingsRow
+					title="PIN ao abrir o app"
+					description="Instale o Wallet no computador para proteger o app com um PIN."
+				>
+					<Button variant="primary" disabled>
+						Definir PIN
+					</Button>
+				</SettingsRow>
+			</SettingsSection>
+		);
+	}
 
 	return (
 		<SettingsSection

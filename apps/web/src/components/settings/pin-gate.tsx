@@ -6,7 +6,7 @@ import { usePreferences } from "@/actions/settings/use-preferences";
 import { BrandMark } from "@/components/ui/brand-mark";
 import { usePreferencesContext } from "@/contexts/preferences-context";
 import { errorMessage } from "@/lib/api";
-import { authClient } from "@/lib/auth-client";
+import { authClient, isDesktop } from "@/lib/auth-client";
 
 const UNLOCKED_KEY = "wallet.unlocked";
 const LOCK_EVENT = "wallet:lock";
@@ -43,6 +43,7 @@ export function PinGate({ children }: { children: ReactNode }) {
 		return () => window.removeEventListener(LOCK_EVENT, onLock);
 	}, []);
 
+	if (!isDesktop) return children;
 	if (isPending && !unlocked) return null;
 	if (!preferences?.hasPin || unlocked) return children;
 	return (
