@@ -1,3 +1,4 @@
+import { MOZAMBIQUE_OFFSET_MS } from "./months";
 export const PLANNED_FREQUENCIES = ["once", "monthly", "yearly"] as const;
 export type PlannedFrequency = (typeof PLANNED_FREQUENCIES)[number];
 
@@ -29,7 +30,9 @@ export function daysBetween(from: IsoDay, to: IsoDay): number {
 }
 
 export function todayIso(now = new Date()): IsoDay {
-	return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+	return new Date(now.getTime() + MOZAMBIQUE_OFFSET_MS)
+		.toISOString()
+		.slice(0, 10);
 }
 
 export function dueDates(

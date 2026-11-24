@@ -31,6 +31,7 @@ export const plannedFrequency = pgEnum("planned_frequency", [
 export const plannedEventStatus = pgEnum("planned_event_status", [
 	"paid",
 	"skipped",
+	"pending",
 ]);
 
 export const plannedEventSource = pgEnum("planned_event_source", [

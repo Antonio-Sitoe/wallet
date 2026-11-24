@@ -5,7 +5,7 @@
 
 export type YearMonth = string;
 
-const MOZAMBIQUE_OFFSET_MS = 2 * 60 * 60 * 1000;
+export const MOZAMBIQUE_OFFSET_MS = 2 * 60 * 60 * 1000;
 
 export const MONTH_NAMES_PT = [
 	"janeiro",

@@ -299,6 +299,66 @@ describe.runIf(dbUp)("planned payments", () => {
 		expect(ours(await planned.autoConfirmDue("2030-03-06"))).toEqual([]);
 	});
 
+	it("an auto payment deleted from Transacções is not paid again", async () => {
+		const auto = (
+			await me("POST", "/planned-payments", {
+				name: "Seguro",
+				kind: "expense",
+				amount: 90_000,
+				accountId: bank,
+				startDate: "2031-01-07",
+				autoConfirm: true,
+			})
+		).body;
+		const planned = buildModules(db).planned.service;
+		const ours = (r: { confirmed: { paymentId: string }[] }) =>
+			r.confirmed.filter((c) => c.paymentId === auto.id).length;
+		expect(ours(await planned.autoConfirmDue("2031-01-08"))).toBe(1);
+		const window = "from=2031-01-01&to=2031-01-31&today=2031-01-08";
+		const [paid] = (
+			await me("GET", `/planned-payments/occurrences?${window}`)
+		).body.filter((o: { paymentId: string }) => o.paymentId === auto.id);
+		await me("DELETE", `/transactions/${paid.transactionId}`);
+		expect(ours(await planned.autoConfirmDue("2031-01-08"))).toBe(0);
+		const [after] = (
+			await me("GET", `/planned-payments/occurrences?${window}`)
+		).body.filter((o: { paymentId: string }) => o.paymentId === auto.id);
+		expect(after.status).toBe("skipped");
+	});
+
+	it("two confirms at the same time create one transaction", async () => {
+		const p = (
+			await me("POST", "/planned-payments", {
+				name: "Água",
+				kind: "expense",
+				amount: 80_000,
+				accountId: bank,
+				startDate: "2026-12-15",
+			})
+		).body;
+		const results = await Promise.all(
+			[1, 2, 3].map(() =>
+				me("POST", `/planned-payments/${p.id}/confirm`, {
+					dueDate: "2026-12-15",
+				}),
+			),
+		);
+		expect(results.map((r) => r.status).sort()).toEqual([201, 409, 409]);
+		const txs = (await me("GET", "/transactions?limit=200")).body;
+		const items = (Array.isArray(txs) ? txs : txs.items) as {
+			note: string | null;
+		}[];
+		expect(items.filter((t) => t.note === "Água")).toHaveLength(1);
+	});
+
+	it("a planned transfer cannot be paid from its destination account", async () => {
+		const r = await me("POST", `/planned-payments/${saving}/confirm`, {
+			dueDate: "2027-01-12",
+			accountId: xitique,
+		});
+		expect(r.status).toBe(422);
+	});
+
 	it("deleting a payment keeps its transactions", async () => {
 		const paid = (
 			await me("POST", `/planned-payments/${rent}/confirm`, {

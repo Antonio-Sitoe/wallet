@@ -1,0 +1,38 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "796557df-33ef-4702-915d-bdefb979f1ea",
+  "prevIds": [
+    "d4932acc-044c-47fb-9533-da8f8ac8c882"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "planned_event_status"
+      ],
+      "writes": [
+        "s|enum|public.planned_event_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "enums\u0000[\"public\",\"planned_event_status\"]",
+      "set": {
+        "values": [
+          "paid",
+          "skipped",
+          "pending"
+        ]
+      }
+    }
+  ]
+}

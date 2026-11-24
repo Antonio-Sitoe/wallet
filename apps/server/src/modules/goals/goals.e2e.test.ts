@@ -189,4 +189,18 @@ describe.runIf(dbUp)("goals", () => {
 			.length;
 		expect(after).toBe(before);
 	});
+
+	it("an empty account used by a goal cannot be deleted", async () => {
+		const empty = (
+			await me("POST", "/accounts", { name: "Carteira meta", type: "cash" })
+		).body.id;
+		await me("POST", "/goals", {
+			name: "Meta na carteira",
+			target: 100_000,
+			accountId: empty,
+		});
+		const r = await me("DELETE", `/accounts/${empty}`);
+		expect(r.status).toBe(409);
+		expect(r.body.code ?? r.body.error?.code).toBe("ACCOUNT_IN_USE");
+	});
 });

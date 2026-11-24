@@ -54,8 +54,17 @@ const toPayment = (row: PlannedPaymentWithPlan): PlannedPayment => ({
 	createdAt: row.createdAt.toISOString(),
 });
 
+const PENDING_TTL_MS = 5 * 60_000;
+
 const isPaid = (event: PlannedEventWithPayment | undefined) =>
 	event?.status === "paid" && (event.transactionId || event.transferId);
+
+const isClaimed = (event: PlannedEventWithPayment | undefined) =>
+	event?.status === "pending" &&
+	Date.now() - event.createdAt.getTime() < PENDING_TTL_MS;
+
+const isRemovedAuto = (event: PlannedEventWithPayment | undefined) =>
+	event?.status === "paid" && event.source === "auto" && !isPaid(event);
 
 export function statusOf(
 	dueDate: string,
@@ -63,7 +72,7 @@ export function statusOf(
 	event: PlannedEventWithPayment | undefined,
 ): OccurrenceStatus {
 	if (isPaid(event)) return "paid";
-	if (event?.status === "skipped") return "skipped";
+	if (event?.status === "skipped" || isRemovedAuto(event)) return "skipped";
 	if (dueDate < today) return "overdue";
 	if (daysBetween(today, dueDate) <= DUE_SOON_DAYS) return "due";
 	return "scheduled";
@@ -217,67 +226,93 @@ export class PlannedService {
 		if (payment.archived)
 			throw conflict("PAYMENT_ARCHIVED", "Este pagamento está arquivado");
 		this.assertDue(payment, input.dueDate);
-		const [event] = await this.repository.events(
-			userId,
-			[id],
-			input.dueDate,
-			input.dueDate,
-		);
-		if (isPaid(event))
-			throw conflict("ALREADY_PAID", "Este pagamento já foi confirmado");
-		if (event) await this.repository.deleteEvent(userId, id, input.dueDate);
-
 		const accountId = input.accountId ?? payment.accountId;
 		if (!accountId)
 			throw unprocessable("ACCOUNT_REQUIRED", "Escolha a conta que paga");
-		const month = input.dueDate.slice(0, 7);
-		const [monthItem] = payment.planItemId
-			? await this.repository.monthItems(userId, [payment.planItemId], [month])
-			: [];
-		const common = {
-			amount: input.amount ?? payment.amount,
-			occurredAt: input.occurredAt ?? new Date(),
-			referenceMonth: month,
-			note: payment.name,
-			monthItemId: monthItem?.id ?? null,
-		};
-
 		if (payment.kind === "transfer") {
 			if (!payment.toAccountId)
 				throw unprocessable(
 					"TO_ACCOUNT_REQUIRED",
 					"Escolha a conta de destino",
 				);
-			const transfer = await this.deps.transactions.createTransfer(userId, {
-				...common,
-				fromAccountId: accountId,
-				toAccountId: payment.toAccountId,
-			});
-			await this.repository.insertEvent({
-				userId,
-				paymentId: id,
-				dueDate: input.dueDate,
-				status: "paid",
-				source,
-				transferId: transfer.id,
-			});
-		} else {
-			const tx = await this.deps.transactions.create(userId, {
-				...common,
-				type: "expense",
-				accountId,
-				categoryId: payment.categoryId,
-			});
-			await this.repository.insertEvent({
-				userId,
-				paymentId: id,
-				dueDate: input.dueDate,
-				status: "paid",
-				source,
-				transactionId: tx.id,
-			});
+			if (payment.toAccountId === accountId)
+				throw unprocessable(
+					"SAME_ACCOUNT",
+					"A conta de origem e a de destino têm de ser diferentes",
+				);
+		}
+
+		const claim = await this.claim(userId, id, input.dueDate, source);
+		const month = input.dueDate.slice(0, 7);
+		try {
+			const [monthItem] = payment.planItemId
+				? await this.repository.monthItems(
+						userId,
+						[payment.planItemId],
+						[month],
+					)
+				: [];
+			const common = {
+				amount: input.amount ?? payment.amount,
+				occurredAt: input.occurredAt ?? new Date(),
+				referenceMonth: month,
+				note: payment.name,
+				monthItemId: monthItem?.id ?? null,
+			};
+			if (payment.kind === "transfer") {
+				const transfer = await this.deps.transactions.createTransfer(userId, {
+					...common,
+					fromAccountId: accountId,
+					toAccountId: payment.toAccountId!,
+				});
+				await this.repository.markPaid(claim, { transferId: transfer.id });
+			} else {
+				const tx = await this.deps.transactions.create(userId, {
+					...common,
+					type: "expense",
+					accountId,
+					categoryId: payment.categoryId,
+				});
+				await this.repository.markPaid(claim, { transactionId: tx.id });
+			}
+		} catch (error) {
+			await this.repository.deleteEventById(claim);
+			throw error;
 		}
 		return this.occurrence(userId, payment, input.dueDate);
+	}
+
+	private async claim(
+		userId: string,
+		paymentId: string,
+		dueDate: string,
+		source: PlannedEventSource,
+	) {
+		const [event] = await this.repository.events(
+			userId,
+			[paymentId],
+			dueDate,
+			dueDate,
+		);
+		this.assertNotBusy(event);
+		if (event) await this.repository.deleteEventById(event.id);
+		const claimed = await this.repository.claimEvent({
+			userId,
+			paymentId,
+			dueDate,
+			status: "pending",
+			source,
+		});
+		if (!claimed)
+			throw conflict("CONFIRMING", "Este pagamento já está a ser confirmado");
+		return claimed;
+	}
+
+	private assertNotBusy(event: PlannedEventWithPayment | undefined) {
+		if (isPaid(event))
+			throw conflict("ALREADY_PAID", "Este pagamento já foi confirmado");
+		if (isClaimed(event))
+			throw conflict("CONFIRMING", "Este pagamento já está a ser confirmado");
 	}
 
 	async autoConfirmDue(today = todayIso()): Promise<AutoConfirmResult> {
@@ -287,17 +322,23 @@ export class PlannedService {
 		const result: AutoConfirmResult = { confirmed: [], failed: [] };
 		for (const [userId, payments] of byUser) {
 			const from = new Map(payments.map((p) => [p.id, p.autoConfirmFrom!]));
+			const since = addDays(today, -OVERDUE_LOOKBACK_DAYS);
+			const touched = new Set(
+				(
+					await this.repository.events(
+						userId,
+						payments.map((p) => p.id),
+						since,
+						today,
+					)
+				).map((e) => `${e.paymentId}|${e.dueDate}`),
+			);
 			const open = (
-				await this.build(
-					userId,
-					payments,
-					addDays(today, -OVERDUE_LOOKBACK_DAYS),
-					today,
-					today,
-				)
+				await this.build(userId, payments, since, today, today)
 			).filter(
 				(o) =>
 					(o.status === "overdue" || o.status === "due") &&
+					!touched.has(`${o.paymentId}|${o.dueDate}`) &&
 					o.dueDate >= (from.get(o.paymentId) ?? today),
 			);
 			for (const o of open) {
@@ -336,7 +377,8 @@ export class PlannedService {
 				"ALREADY_PAID",
 				"Este pagamento já foi confirmado; desfaça-o primeiro",
 			);
-		if (event) await this.repository.deleteEvent(userId, id, dueDate);
+		this.assertNotBusy(event);
+		if (event) await this.repository.deleteEventById(event.id);
 		await this.repository.insertEvent({
 			userId,
 			paymentId: id,
@@ -359,7 +401,9 @@ export class PlannedService {
 			dueDate,
 		);
 		if (!event) throw notFound("Pagamento confirmado");
-		await this.repository.deleteEvent(userId, id, dueDate);
+		if (isClaimed(event))
+			throw conflict("CONFIRMING", "Este pagamento já está a ser confirmado");
+		await this.repository.deleteEventById(event.id);
 		if (event.transactionId)
 			await this.deps.transactions.remove(userId, event.transactionId);
 		if (event.transferId)

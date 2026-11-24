@@ -1,6 +1,9 @@
 import type { DbExecutor } from "@wallet/db";
 
-import { isUniqueViolation } from "../../shared/database/pg-errors";
+import {
+	isForeignKeyViolation,
+	isUniqueViolation,
+} from "../../shared/database/pg-errors";
 import {
 	conflict,
 	notFound,
@@ -135,7 +138,16 @@ export class AccountsService {
 				`A conta tem ${stats.count} transacções. Arquive-a em vez de a apagar.`,
 			);
 		}
-		await this.repository.delete(userId, id);
+		try {
+			await this.repository.delete(userId, id);
+		} catch (error) {
+			if (isForeignKeyViolation(error))
+				throw conflict(
+					"ACCOUNT_IN_USE",
+					"A conta está ligada a uma meta. Mude a meta para outra conta ou apague-a primeiro.",
+				);
+			throw error;
+		}
 	}
 
 	async assertOwned(userId: string, ids: string[], exec?: DbExecutor) {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { addDays, daysBetween, dueDates } from "./schedule";
+import { addDays, daysBetween, dueDates, todayIso } from "./schedule";
 
 describe("dueDates", () => {
 	it("repeats monthly on the same day", () => {
@@ -54,6 +54,11 @@ describe("day arithmetic", () => {
 	it("adds days across months", () => {
 		expect(addDays("2026-12-30", 3)).toBe("2027-01-02");
 		expect(addDays("2026-12-03", -5)).toBe("2026-11-28");
+	});
+
+	it("today is the day in Maputo", () => {
+		expect(todayIso(new Date("2026-12-05T22:30:00Z"))).toBe("2026-12-06");
+		expect(todayIso(new Date("2026-12-05T21:59:00Z"))).toBe("2026-12-05");
 	});
 
 	it("counts days between", () => {

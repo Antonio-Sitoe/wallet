@@ -5,7 +5,7 @@ import {
 	plannedPayments,
 } from "@wallet/db/schema/planned";
 import { transactions, transfers } from "@wallet/db/schema/transactions";
-import { and, asc, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, isNotNull, lte, or } from "drizzle-orm";
 
 import type { UpdatePlannedPaymentInput } from "./planned.schema";
 import type {
@@ -51,6 +51,11 @@ export class PlannedRepository {
 				and(
 					isNotNull(plannedPayments.autoConfirmFrom),
 					eq(plannedPayments.archived, false),
+					isNotNull(plannedPayments.accountId),
+					or(
+						eq(plannedPayments.kind, "expense"),
+						isNotNull(plannedPayments.toAccountId),
+					),
 				),
 			);
 		return rows.map((r) => ({ ...r.payment, planItemName: r.planItemName }));
@@ -128,16 +133,31 @@ export class PlannedRepository {
 		await this.db.insert(plannedPaymentEvents).values(row);
 	}
 
-	async deleteEvent(userId: string, paymentId: string, dueDate: string) {
+	async claimEvent(row: typeof plannedPaymentEvents.$inferInsert) {
+		const [claimed] = await this.db
+			.insert(plannedPaymentEvents)
+			.values(row)
+			.onConflictDoNothing({
+				target: [plannedPaymentEvents.paymentId, plannedPaymentEvents.dueDate],
+			})
+			.returning({ id: plannedPaymentEvents.id });
+		return claimed?.id;
+	}
+
+	async markPaid(
+		id: string,
+		link: { transactionId?: string; transferId?: string },
+	) {
+		await this.db
+			.update(plannedPaymentEvents)
+			.set({ status: "paid", ...link })
+			.where(eq(plannedPaymentEvents.id, id));
+	}
+
+	async deleteEventById(id: string) {
 		await this.db
 			.delete(plannedPaymentEvents)
-			.where(
-				and(
-					eq(plannedPaymentEvents.userId, userId),
-					eq(plannedPaymentEvents.paymentId, paymentId),
-					eq(plannedPaymentEvents.dueDate, dueDate),
-				),
-			);
+			.where(eq(plannedPaymentEvents.id, id));
 	}
 
 	async monthItems(userId: string, planItemIds: string[], months: string[]) {
