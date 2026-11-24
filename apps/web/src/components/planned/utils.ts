@@ -44,12 +44,14 @@ export function dateLabel(iso: string, withYear = true) {
 	return withYear ? `${day} ${mon} ${y}` : `${day} ${mon}`;
 }
 
-export function statusMeta(o: Pick<PlannedOccurrence, "status" | "daysLate">): {
+export function statusMeta(
+	o: Pick<PlannedOccurrence, "status" | "daysLate"> & { auto?: boolean },
+): {
 	label: string;
 	tone: PillTone;
 } {
 	const map: Record<OccurrenceStatus, { label: string; tone: PillTone }> = {
-		paid: { label: "pago", tone: "ok" },
+		paid: { label: o.auto ? "pago · auto" : "pago", tone: "ok" },
 		skipped: { label: "saltado", tone: "neutral" },
 		overdue: {
 			label: `atrasado ${o.daysLate} ${o.daysLate === 1 ? "dia" : "dias"}`,

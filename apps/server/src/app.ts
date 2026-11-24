@@ -14,6 +14,7 @@ import { createGoalsModule } from "./modules/goals";
 import { createImportsModule } from "./modules/imports";
 import { createNotificationsModule } from "./modules/notifications";
 import { createPlannedModule } from "./modules/planned";
+import { startPlannedJobs } from "./modules/planned/planned.jobs";
 import { createSearchModule } from "./modules/search";
 import { createSettingsModule } from "./modules/settings";
 import { createShoppingModule } from "./modules/shopping";
@@ -26,6 +27,7 @@ export type AppOptions = {
 	auth: Auth;
 	corsOrigins: string[];
 	logger?: FastifyServerOptions["logger"];
+	jobs?: { connectionString: string };
 };
 
 export function buildModules(db: Database) {
@@ -224,7 +226,13 @@ export function buildModules(db: Database) {
 	};
 }
 
-export function buildApp({ db, auth, corsOrigins, logger = true }: AppOptions) {
+export function buildApp({
+	db,
+	auth,
+	corsOrigins,
+	logger = true,
+	jobs,
+}: AppOptions) {
 	const app = Fastify({ logger });
 
 	app.register(fastifyCors, {
@@ -273,6 +281,20 @@ export function buildApp({ db, auth, corsOrigins, logger = true }: AppOptions) {
 		},
 		{ prefix: "/api" },
 	);
+
+	if (jobs) {
+		let stop: (() => Promise<void>) | undefined;
+		app.addHook("onReady", async () => {
+			stop = await startPlannedJobs(
+				jobs.connectionString,
+				modules.planned.service,
+				app.log,
+			);
+		});
+		app.addHook("onClose", async () => {
+			await stop?.();
+		});
+	}
 
 	return app;
 }

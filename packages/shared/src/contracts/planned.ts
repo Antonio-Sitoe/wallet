@@ -23,6 +23,7 @@ const fields = {
 	startDate: isoDay,
 	endDate: isoDay.nullable(),
 	remindDays: z.number().int().min(0).max(30).nullable(),
+	autoConfirm: z.boolean(),
 	planItemId: id.nullable(),
 	note: z.string().trim().max(500).nullable(),
 };
@@ -53,6 +54,7 @@ export const createPlannedPaymentInput = z
 		frequency: fields.frequency.default("monthly"),
 		endDate: fields.endDate.default(null),
 		remindDays: fields.remindDays.default(1),
+		autoConfirm: fields.autoConfirm.default(false),
 		planItemId: fields.planItemId.default(null),
 		note: fields.note.default(null),
 	})
@@ -107,6 +109,8 @@ export type PlannedPayment = {
 	startDate: string;
 	endDate: string | null;
 	remindDays: number | null;
+	autoConfirm: boolean;
+	autoConfirmFrom: string | null;
 	planItemId: string | null;
 	planItemName: string | null;
 	note: string | null;
@@ -140,6 +144,7 @@ export type PlannedOccurrence = {
 	paidAmount: number | null;
 	paidAt: string | null;
 	paidAccountId: string | null;
+	auto: boolean;
 	monthItemId: string | null;
 };
 

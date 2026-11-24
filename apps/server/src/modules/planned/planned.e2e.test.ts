@@ -2,7 +2,7 @@ import { user } from "@wallet/db/schema/auth";
 import { like, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { buildApp } from "../../app";
+import { buildApp, buildModules } from "../../app";
 import { auth, db } from "../../infrastructure/services";
 
 const app = buildApp({
@@ -246,6 +246,57 @@ describe.runIf(dbUp)("planned payments", () => {
 			await me("GET", "/planned-payments/reminders?today=2026-12-07")
 		).body;
 		expect(earlier).toEqual([]);
+	});
+
+	it("auto-confirm pays due dates once, and undo does not bring them back", async () => {
+		const auto = (
+			await me("POST", "/planned-payments", {
+				name: "Internet",
+				kind: "expense",
+				amount: 250_000,
+				accountId: bank,
+				startDate: "2030-01-05",
+				autoConfirm: true,
+			})
+		).body;
+		expect(auto.autoConfirm).toBe(true);
+		const planned = buildModules(db).planned.service;
+		const ours = (r: { confirmed: { paymentId: string; dueDate: string }[] }) =>
+			r.confirmed.filter((c) => c.paymentId === auto.id).map((c) => c.dueDate);
+
+		expect(ours(await planned.autoConfirmDue("2030-02-06"))).toEqual([
+			"2030-01-05",
+			"2030-02-05",
+		]);
+		expect(ours(await planned.autoConfirmDue("2030-02-06"))).toEqual([]);
+
+		const window = "from=2030-01-01&to=2030-02-28&today=2030-02-06";
+		const list = (
+			await me("GET", `/planned-payments/occurrences?${window}`)
+		).body.filter((o: { paymentId: string }) => o.paymentId === auto.id);
+		expect(list).toEqual([
+			expect.objectContaining({ status: "paid", auto: true }),
+			expect.objectContaining({ status: "paid", auto: true }),
+		]);
+
+		await me("DELETE", `/planned-payments/${auto.id}/occurrences/2030-02-05`);
+		expect(ours(await planned.autoConfirmDue("2030-02-06"))).toEqual([]);
+		const after = (
+			await me("GET", `/planned-payments/occurrences?${window}`)
+		).body.filter((o: { paymentId: string }) => o.paymentId === auto.id);
+		expect(after[1]).toMatchObject({
+			dueDate: "2030-02-05",
+			status: "skipped",
+		});
+
+		const off = await me("PATCH", `/planned-payments/${auto.id}`, {
+			autoConfirm: false,
+		});
+		expect(off.body).toMatchObject({
+			autoConfirm: false,
+			autoConfirmFrom: null,
+		});
+		expect(ours(await planned.autoConfirmDue("2030-03-06"))).toEqual([]);
 	});
 
 	it("deleting a payment keeps its transactions", async () => {

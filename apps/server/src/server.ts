@@ -6,6 +6,7 @@ const app = buildApp({
 	db,
 	auth,
 	corsOrigins: [ENV.CORS_ORIGIN, ...desktopOrigins],
+	jobs: { connectionString: ENV.DATABASE_URL },
 });
 
 app.listen({ port: 3000, host: "0.0.0.0" }, (err) => {

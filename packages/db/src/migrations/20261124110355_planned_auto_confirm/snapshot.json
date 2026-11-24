@@ -1,0 +1,155 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "d4932acc-044c-47fb-9533-da8f8ac8c882",
+  "prevIds": [
+    "096bab23-2b80-489f-bd21-190b9f8d36b3"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "planned_event_source"
+      ],
+      "writes": [
+        "s|enum|public.planned_event_source",
+        "n|enum|public.planned_event_source",
+        "e|enum|public.planned_event_source",
+        "n|type|public.planned_event_source"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "planned_payment_events",
+        "source"
+      ],
+      "writes": [
+        "s|col|public.planned_payment_events.source",
+        "n|col|public.planned_payment_events.source",
+        "e|col|public.planned_payment_events.source"
+      ],
+      "reads": [
+        "n|tbl|public.planned_payment_events",
+        "n|sch|public",
+        "n|enum|public.planned_event_source"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "planned_payments",
+        "auto_confirm_from"
+      ],
+      "writes": [
+        "s|col|public.planned_payments.auto_confirm_from",
+        "n|col|public.planned_payments.auto_confirm_from",
+        "e|col|public.planned_payments.auto_confirm_from"
+      ],
+      "reads": [
+        "n|tbl|public.planned_payments",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "planned_payments",
+        "planned_payments_auto_idx"
+      ],
+      "writes": [
+        "s|idx|public.planned_payments_auto_idx",
+        "n|idx|public.planned_payments_auto_idx",
+        "e|idx|public.planned_payments_auto_idx",
+        "n|rel|public.planned_payments_auto_idx"
+      ],
+      "reads": [
+        "n|tbl|public.planned_payments",
+        "n|sch|public",
+        "n|col|public.planned_payments.auto_confirm_from"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "planned_event_source",
+        "values": [
+          "manual",
+          "auto"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "planned_payment_events",
+        "name": "source",
+        "type": "planned_event_source",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'manual'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "planned_payments",
+        "name": "auto_confirm_from",
+        "type": "varchar(10)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "planned_payments",
+        "name": "planned_payments_auto_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "auto_confirm_from",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"auto_confirm_from\" is not null",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    }
+  ]
+}

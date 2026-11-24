@@ -126,6 +126,11 @@ export function PaymentDetail({
 					<Info label="frequência">{frequency}</Info>
 					<Info label="item do plano">{payment.planItemName ?? "nenhum"}</Info>
 					<Info label="lembrete">{REMIND_LABEL(payment.remindDays)}</Info>
+					<Info label="confirmação">
+						{payment.autoConfirmFrom
+							? `automática desde ${dateLabel(payment.autoConfirmFrom)}`
+							: "manual"}
+					</Info>
 				</div>
 				{payment.kind === "transfer" ? (
 					<p className="bg-info-bg border-info-line text-info-fg rounded-control border px-3 py-2.5 text-xs leading-relaxed">
@@ -226,7 +231,7 @@ export function PaymentDetail({
 						</span>
 						<span className="flex-1">
 							{o.status === "paid"
-								? `Pago em ${o.paidAt ? dateLabel(o.paidAt.slice(0, 10), false) : "—"}`
+								? `${o.auto ? "Pago automaticamente" : "Pago"} em ${o.paidAt ? dateLabel(o.paidAt.slice(0, 10), false) : "—"}`
 								: "Saltado"}
 						</span>
 						<span className="num text-dim">

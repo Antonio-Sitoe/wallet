@@ -25,6 +25,7 @@ import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Segmented } from "@/components/ui/segmented";
 import { Select } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { money, moneyInput, parseMoney } from "@/utils/format";
 
 const FORM_ID = "planned-payment-form";
@@ -72,6 +73,7 @@ export function PaymentDialog({
 				: String(payment.remindDays)
 			: "1",
 	);
+	const [autoConfirm, setAutoConfirm] = useState(payment?.autoConfirm ?? false);
 	const [planItemId, setPlanItemId] = useState(payment?.planItemId ?? "");
 	const year = Number(startDate.slice(0, 4));
 	const planItems = usePlan(year).data?.items ?? [];
@@ -168,6 +170,7 @@ export function PaymentDialog({
 						frequency,
 						startDate,
 						remindDays: remind === "none" ? null : Number(remind),
+						autoConfirm,
 						planItemId: planItemId || null,
 					};
 					const saved = payment
@@ -279,6 +282,29 @@ export function PaymentDialog({
 						options={REMINDERS.map((r) => ({ value: r.value, label: r.label }))}
 					/>
 				</Field>
+
+				<label
+					htmlFor="planned-auto-confirm"
+					className="bg-panel-2 border-line rounded-control flex cursor-pointer items-center justify-between gap-3 border px-3 py-2.5"
+				>
+					<span className="flex flex-col gap-0.5">
+						<span className="text-sm font-medium">
+							Confirmar automaticamente no dia
+						</span>
+						<span className="text-dim text-xs">
+							{autoConfirm
+								? payment?.autoConfirmFrom
+									? `regista sozinho cada vencimento desde ${dateLabel(payment.autoConfirmFrom)}`
+									: "regista sozinho cada vencimento a partir de hoje"
+								: "para débitos directos e valores fixos · podes desfazer"}
+						</span>
+					</span>
+					<Switch
+						id="planned-auto-confirm"
+						checked={autoConfirm}
+						onCheckedChange={setAutoConfirm}
+					/>
+				</label>
 
 				<Field
 					label={`Item do plano anual ${year}`}

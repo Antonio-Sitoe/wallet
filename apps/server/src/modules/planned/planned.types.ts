@@ -10,6 +10,13 @@ import type {
 export type PlannedPaymentRow = typeof plannedPayments.$inferSelect;
 export type NewPlannedPaymentRow = typeof plannedPayments.$inferInsert;
 export type PlannedEventRow = typeof plannedPaymentEvents.$inferSelect;
+export type PlannedEventSource = PlannedEventRow["source"];
+
+type AutoConfirmRef = { userId: string; paymentId: string; dueDate: string };
+export type AutoConfirmResult = {
+	confirmed: AutoConfirmRef[];
+	failed: (AutoConfirmRef & { error: unknown })[];
+};
 
 export type PlannedPaymentWithPlan = PlannedPaymentRow & {
 	planItemName: string | null;

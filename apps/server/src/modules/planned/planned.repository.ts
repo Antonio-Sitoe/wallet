@@ -5,7 +5,7 @@ import {
 	plannedPayments,
 } from "@wallet/db/schema/planned";
 import { transactions, transfers } from "@wallet/db/schema/transactions";
-import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
 
 import type { UpdatePlannedPaymentInput } from "./planned.schema";
 import type {
@@ -42,6 +42,20 @@ export class PlannedRepository {
 		return rows.map((r) => ({ ...r.payment, planItemName: r.planItemName }));
 	}
 
+	async listAutoConfirm(): Promise<PlannedPaymentWithPlan[]> {
+		const rows = await this.db
+			.select({ payment: plannedPayments, planItemName: planItems.name })
+			.from(plannedPayments)
+			.leftJoin(planItems, eq(planItems.id, plannedPayments.planItemId))
+			.where(
+				and(
+					isNotNull(plannedPayments.autoConfirmFrom),
+					eq(plannedPayments.archived, false),
+				),
+			);
+		return rows.map((r) => ({ ...r.payment, planItemName: r.planItemName }));
+	}
+
 	async insert(row: NewPlannedPaymentRow): Promise<PlannedPaymentRow> {
 		const [created] = await this.db
 			.insert(plannedPayments)
@@ -50,7 +64,13 @@ export class PlannedRepository {
 		return created!;
 	}
 
-	async update(userId: string, id: string, input: UpdatePlannedPaymentInput) {
+	async update(
+		userId: string,
+		id: string,
+		input: Omit<UpdatePlannedPaymentInput, "autoConfirm"> & {
+			autoConfirmFrom?: string | null;
+		},
+	) {
 		await this.db.update(plannedPayments).set(input).where(owned(userId, id));
 	}
 

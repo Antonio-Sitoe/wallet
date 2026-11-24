@@ -22,7 +22,9 @@ import type {
 	UpdatePlannedPaymentInput,
 } from "./planned.schema";
 import type {
+	AutoConfirmResult,
 	PlannedDeps,
+	PlannedEventSource,
 	PlannedEventWithPayment,
 	PlannedPaymentWithPlan,
 } from "./planned.types";
@@ -43,6 +45,8 @@ const toPayment = (row: PlannedPaymentWithPlan): PlannedPayment => ({
 	startDate: row.startDate,
 	endDate: row.endDate,
 	remindDays: row.remindDays,
+	autoConfirm: row.autoConfirmFrom !== null,
+	autoConfirmFrom: row.autoConfirmFrom,
 	planItemId: row.planItemId,
 	planItemName: row.planItemName,
 	note: row.note,
@@ -64,6 +68,9 @@ export function statusOf(
 	if (daysBetween(today, dueDate) <= DUE_SOON_DAYS) return "due";
 	return "scheduled";
 }
+
+const autoDate = (dueDate: string) =>
+	new Date(Math.min(Date.now(), Date.parse(`${dueDate}T10:00:00.000Z`)));
 
 const plural = (n: number, one: string, many: string) =>
 	`${n} ${n === 1 ? one : many}`;
@@ -111,6 +118,7 @@ export class PlannedService {
 			startDate: input.startDate,
 			endDate: input.endDate ?? null,
 			remindDays: input.remindDays === undefined ? 1 : input.remindDays,
+			autoConfirmFrom: input.autoConfirm ? todayIso() : null,
 			planItemId: input.planItemId ?? null,
 			note: input.note ?? null,
 		});
@@ -135,8 +143,16 @@ export class PlannedService {
 				"A conta de origem e a de destino têm de ser diferentes",
 			);
 		await this.assertRefs(userId, input);
+		const { autoConfirm, ...rest } = input;
 		await this.repository.update(userId, id, {
-			...input,
+			...rest,
+			...(autoConfirm === undefined
+				? {}
+				: {
+						autoConfirmFrom: autoConfirm
+							? (current.autoConfirmFrom ?? todayIso())
+							: null,
+					}),
 			...(kind === "expense" ? { toAccountId: null } : { categoryId: null }),
 		});
 		return this.get(userId, id);
@@ -195,6 +211,7 @@ export class PlannedService {
 		userId: string,
 		id: string,
 		input: ConfirmPlannedPaymentInput,
+		source: PlannedEventSource = "manual",
 	): Promise<PlannedOccurrence> {
 		const payment = await this.find(userId, id);
 		if (payment.archived)
@@ -241,6 +258,7 @@ export class PlannedService {
 				paymentId: id,
 				dueDate: input.dueDate,
 				status: "paid",
+				source,
 				transferId: transfer.id,
 			});
 		} else {
@@ -255,10 +273,49 @@ export class PlannedService {
 				paymentId: id,
 				dueDate: input.dueDate,
 				status: "paid",
+				source,
 				transactionId: tx.id,
 			});
 		}
 		return this.occurrence(userId, payment, input.dueDate);
+	}
+
+	async autoConfirmDue(today = todayIso()): Promise<AutoConfirmResult> {
+		const byUser = new Map<string, PlannedPaymentWithPlan[]>();
+		for (const p of await this.repository.listAutoConfirm())
+			byUser.set(p.userId, [...(byUser.get(p.userId) ?? []), p]);
+		const result: AutoConfirmResult = { confirmed: [], failed: [] };
+		for (const [userId, payments] of byUser) {
+			const from = new Map(payments.map((p) => [p.id, p.autoConfirmFrom!]));
+			const open = (
+				await this.build(
+					userId,
+					payments,
+					addDays(today, -OVERDUE_LOOKBACK_DAYS),
+					today,
+					today,
+				)
+			).filter(
+				(o) =>
+					(o.status === "overdue" || o.status === "due") &&
+					o.dueDate >= (from.get(o.paymentId) ?? today),
+			);
+			for (const o of open) {
+				const ref = { userId, paymentId: o.paymentId, dueDate: o.dueDate };
+				try {
+					await this.confirm(
+						userId,
+						o.paymentId,
+						{ dueDate: o.dueDate, occurredAt: autoDate(o.dueDate) },
+						"auto",
+					);
+					result.confirmed.push(ref);
+				} catch (error) {
+					result.failed.push({ ...ref, error });
+				}
+			}
+		}
+		return result;
 	}
 
 	async skip(
@@ -307,6 +364,14 @@ export class PlannedService {
 			await this.deps.transactions.remove(userId, event.transactionId);
 		if (event.transferId)
 			await this.deps.transactions.removeTransfer(userId, event.transferId);
+		if (event.source === "auto" && isPaid(event))
+			await this.repository.insertEvent({
+				userId,
+				paymentId: id,
+				dueDate,
+				status: "skipped",
+				source: "auto",
+			});
 		return this.occurrence(userId, payment, dueDate);
 	}
 
@@ -376,6 +441,7 @@ export class PlannedService {
 					paidAmount: paid?.amount ?? null,
 					paidAt: paid?.occurredAt.toISOString() ?? null,
 					paidAccountId: paid?.accountId ?? null,
+					auto: status === "paid" && event?.source === "auto",
 					monthItemId: payment.planItemId
 						? (itemOf.get(`${payment.planItemId}|${dueDate.slice(0, 7)}`) ??
 							null)

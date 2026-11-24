@@ -33,6 +33,11 @@ export const plannedEventStatus = pgEnum("planned_event_status", [
 	"skipped",
 ]);
 
+export const plannedEventSource = pgEnum("planned_event_source", [
+	"manual",
+	"auto",
+]);
+
 export const plannedPayments = pgTable(
 	"planned_payments",
 	{
@@ -56,6 +61,7 @@ export const plannedPayments = pgTable(
 		startDate: varchar("start_date", { length: 10 }).notNull(),
 		endDate: varchar("end_date", { length: 10 }),
 		remindDays: integer("remind_days"),
+		autoConfirmFrom: varchar("auto_confirm_from", { length: 10 }),
 		planItemId: uuid("plan_item_id").references(() => planItems.id, {
 			onDelete: "set null",
 		}),
@@ -71,6 +77,9 @@ export const plannedPayments = pgTable(
 	},
 	(t) => [
 		index("planned_payments_user_idx").on(t.userId),
+		index("planned_payments_auto_idx")
+			.on(t.autoConfirmFrom)
+			.where(sql`${t.autoConfirmFrom} is not null`),
 		check("planned_payments_amount_positive", sql`${t.amount} > 0`),
 		check(
 			"planned_payments_dates_format",
@@ -91,6 +100,7 @@ export const plannedPaymentEvents = pgTable(
 			.references(() => plannedPayments.id, { onDelete: "cascade" }),
 		dueDate: varchar("due_date", { length: 10 }).notNull(),
 		status: plannedEventStatus("status").notNull(),
+		source: plannedEventSource("source").notNull().default("manual"),
 		transactionId: uuid("transaction_id").references(() => transactions.id, {
 			onDelete: "set null",
 		}),
