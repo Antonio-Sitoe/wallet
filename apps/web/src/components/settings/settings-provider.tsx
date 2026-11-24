@@ -1,9 +1,10 @@
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
 import {
 	SettingsContext,
 	type SettingsSection,
 } from "@/contexts/settings-context";
+import { useShortcuts } from "@/lib/shortcuts";
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
 	const [open, setOpen] = useState(false);
@@ -14,16 +15,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		setOpen(true);
 	}, []);
 
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey) return;
-			if (e.key !== ",") return;
-			e.preventDefault();
-			setOpen((current) => !current);
-		};
-		window.addEventListener("keydown", onKey);
-		return () => window.removeEventListener("keydown", onKey);
-	}, []);
+	useShortcuts({ settings: () => setOpen((current) => !current) });
 
 	return (
 		<SettingsContext.Provider value={openSettings}>

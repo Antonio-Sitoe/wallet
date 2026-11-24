@@ -2,6 +2,7 @@ import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useState } from "react";
 import { usePreferencesContext } from "@/contexts/preferences-context";
+import { useShortcuts } from "@/lib/shortcuts";
 
 export const THEMES = [
 	{ value: "system", label: "Seguir o sistema", icon: MonitorIcon },
@@ -36,16 +37,7 @@ function useMounted() {
 
 export function useThemeShortcut() {
 	const { theme, setTheme } = useThemeSetter();
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			if (!(e.metaKey || e.ctrlKey) || !e.shiftKey || e.altKey) return;
-			if (e.key.toLowerCase() !== "l") return;
-			e.preventDefault();
-			setTheme(nextTheme(theme));
-		};
-		window.addEventListener("keydown", onKey);
-		return () => window.removeEventListener("keydown", onKey);
-	}, [theme, setTheme]);
+	useShortcuts({ theme: () => setTheme(nextTheme(theme)) });
 }
 
 export function ThemeSwitch() {

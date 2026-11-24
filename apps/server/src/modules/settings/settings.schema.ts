@@ -16,6 +16,7 @@ export {
 	type Profile,
 	reorderTemplatesInput,
 	type SetPinInput,
+	type ShortcutOverrides,
 	setPinInput,
 	type Theme,
 	type TransactionTemplate,

@@ -231,4 +231,34 @@ describe.runIf(dbUp)("settings", () => {
 			.where(eq(user.email, `${EMAIL_PREFIX}-main@example.test`));
 		expect(gone).toHaveLength(0);
 	});
+
+	it("saves custom shortcuts and refuses clashes", async () => {
+		const me = await signUp("shortcuts");
+		const saved = await me("PATCH", "/settings/preferences", {
+			shortcuts: { palette: "mod+p", assistant: "alt+j" },
+		});
+		expect(saved.status).toBe(200);
+		expect(saved.body.shortcuts).toEqual({
+			palette: "mod+p",
+			assistant: "alt+j",
+		});
+
+		const clash = await me("PATCH", "/settings/preferences", {
+			shortcuts: { palette: "mod+p", assistant: "mod+p" },
+		});
+		expect(clash.status).toBe(400);
+
+		const withDefault = await me("PATCH", "/settings/preferences", {
+			shortcuts: { palette: "mod+n" },
+		});
+		expect(withDefault.status).toBe(400);
+
+		const bare = await me("PATCH", "/settings/preferences", {
+			shortcuts: { palette: "p" },
+		});
+		expect(bare.status).toBe(400);
+
+		const reset = await me("PATCH", "/settings/preferences", { shortcuts: {} });
+		expect(reset.body.shortcuts).toEqual({});
+	});
 });

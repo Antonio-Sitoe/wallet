@@ -1,0 +1,47 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "096bab23-2b80-489f-bd21-190b9f8d36b3",
+  "prevIds": [
+    "bd47ec66-88a3-4e3b-817c-354f3ee72247"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "user_preferences",
+        "shortcuts"
+      ],
+      "writes": [
+        "s|col|public.user_preferences.shortcuts",
+        "n|col|public.user_preferences.shortcuts",
+        "e|col|public.user_preferences.shortcuts"
+      ],
+      "reads": [
+        "n|tbl|public.user_preferences",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "user_preferences",
+        "name": "shortcuts",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'{}'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    }
+  ]
+}

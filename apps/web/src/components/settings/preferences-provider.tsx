@@ -8,7 +8,6 @@ import {
 	useMemo,
 	useRef,
 } from "react";
-import { toast } from "sonner";
 import { usePreferences } from "@/actions/settings/use-preferences";
 import { useUpdatePreferences } from "@/actions/settings/use-update-preferences";
 import {
@@ -43,19 +42,6 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
 		},
 		[mutation.mutate, setTheme],
 	);
-
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			if (!(e.metaKey || e.ctrlKey) || !e.shiftKey || e.altKey) return;
-			if (e.key.toLowerCase() !== "h" || !preferences) return;
-			e.preventDefault();
-			const hideMoney = !preferences.hideMoney;
-			update({ hideMoney });
-			toast(hideMoney ? "Valores ocultos" : "Valores visíveis");
-		};
-		window.addEventListener("keydown", onKey);
-		return () => window.removeEventListener("keydown", onKey);
-	}, [preferences, update]);
 
 	const value = useMemo(() => ({ preferences, update }), [preferences, update]);
 

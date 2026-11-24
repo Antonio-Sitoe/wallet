@@ -1,0 +1,1 @@
+ALTER TABLE "user_preferences" ADD COLUMN "shortcuts" jsonb DEFAULT '{}' NOT NULL;

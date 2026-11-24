@@ -12,8 +12,10 @@ import {
 	ListChecksIcon,
 	LogOutIcon,
 	PlusIcon,
+	SearchIcon,
 	SettingsIcon,
 	ShoppingCartIcon,
+	SparklesIcon,
 	TagIcon,
 	TargetIcon,
 } from "lucide-react";
@@ -24,21 +26,29 @@ import {
 	useMemo,
 	useState,
 } from "react";
+import { toast } from "sonner";
+import {
+	CommandPalette,
+	type PaletteMode,
+} from "@/components/assistant/command-palette";
 import {
 	ThemeCycleButton,
 	useThemeShortcut,
 } from "@/components/layout/theme-switch";
 import { UserMenu } from "@/components/layout/user-menu";
 import { HideMoneyButton } from "@/components/settings/hide-money-button";
+import { NotificationsRunner } from "@/components/settings/notifications-runner";
 import {
 	type NewTransactionDefaults,
 	NewTransactionDialog,
 } from "@/components/transactions/new-transaction-dialog";
 import { BrandMark } from "@/components/ui/brand-mark";
 import { NewTransactionContext } from "@/contexts/new-transaction-context";
+import { usePreferencesContext } from "@/contexts/preferences-context";
 import { useOpenSettings } from "@/contexts/settings-context";
 import { ApiError } from "@/lib/api";
 import { authClient, clearDesktopToken } from "@/lib/auth-client";
+import { formatCombo, useShortcutMap, useShortcuts } from "@/lib/shortcuts";
 
 export const NAV = [
 	{ to: "/dashboard", label: "Painel", icon: LayoutDashboardIcon },
@@ -53,6 +63,7 @@ export const NAV = [
 	{ to: "/debts", label: "Dívidas", icon: HandCoinsIcon },
 	{ to: "/shopping", label: "Compras", icon: ShoppingCartIcon },
 	{ to: "/stats", label: "Estatísticas", icon: ChartColumnIcon },
+	{ to: "/assistant", label: "Assistente", icon: SparklesIcon },
 ] as const;
 
 export const isMac =
@@ -71,6 +82,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 		open: boolean;
 		defaults?: NewTransactionDefaults;
 	}>({ open: false });
+	const [palette, setPalette] = useState<{ open: boolean; mode: PaletteMode }>({
+		open: false,
+		mode: "search",
+	});
 
 	const openNew = useCallback(
 		(defaults?: NewTransactionDefaults) => setDialog({ open: true, defaults }),
@@ -85,24 +100,36 @@ export function AppShell({ children }: { children: ReactNode }) {
 		return () => window.removeEventListener("unhandledrejection", onRejection);
 	}, []);
 
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
-			if (e.key.toLowerCase() === "n") {
-				e.preventDefault();
-				openNew();
-				return;
-			}
-			const index = e.key === "0" ? 9 : Number(e.key) - 1;
-			const target = NAV[index];
-			if (target) {
-				e.preventDefault();
-				navigate({ to: target.to });
-			}
-		};
-		window.addEventListener("keydown", onKey);
-		return () => window.removeEventListener("keydown", onKey);
-	}, [navigate, openNew]);
+	const { preferences, update } = usePreferencesContext();
+	const keys = useShortcutMap();
+	const go = (index: number) => () => {
+		const target = NAV[index];
+		if (target) navigate({ to: target.to });
+	};
+	useShortcuts({
+		newTransaction: () => openNew(),
+		palette: () => setPalette((p) => ({ open: !p.open, mode: "search" })),
+		assistant: () => {
+			setPalette((p) => ({ ...p, open: false }));
+			navigate({ to: "/assistant" });
+		},
+		hideMoney: () => {
+			if (!preferences) return;
+			const hideMoney = !preferences.hideMoney;
+			update({ hideMoney });
+			toast(hideMoney ? "Valores ocultos" : "Valores visíveis");
+		},
+		nav1: go(0),
+		nav2: go(1),
+		nav3: go(2),
+		nav4: go(3),
+		nav5: go(4),
+		nav6: go(5),
+		nav7: go(6),
+		nav8: go(7),
+		nav9: go(8),
+		nav10: go(9),
+	});
 
 	const value = useMemo(() => openNew, [openNew]);
 	const signOut = () =>
@@ -117,6 +144,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 	return (
 		<NewTransactionContext.Provider value={value}>
+			<a
+				href="#conteudo"
+				className="bg-fg text-canvas rounded-control sr-only z-50 text-[13px] font-medium shadow-lg focus:not-sr-only focus:px-3 focus:py-2 focus:fixed focus:top-3 focus:left-3"
+			>
+				Saltar para o conteúdo
+			</a>
 			<div className="bg-canvas flex min-h-svh flex-col md:flex-row">
 				<nav
 					aria-label="Menu principal"
@@ -163,8 +196,17 @@ export function AppShell({ children }: { children: ReactNode }) {
 						<PlusIcon className="size-[15px]" strokeWidth={2.6} />
 						<span className="flex-1 text-left">Nova transacção</span>
 						<span className="num bg-money-ink/18 rounded px-1 text-[11px]">
-							{MOD}N
+							{formatCombo(keys.newTransaction)}
 						</span>
+					</Button>
+					<Button
+						variant="neutral"
+						onClick={() => setPalette({ open: true, mode: "search" })}
+						className="text-dim hover:text-fg h-input rounded-control hidden cursor-pointer items-center gap-2 pr-2 pl-2.5 font-normal md:flex"
+					>
+						<SearchIcon className="size-[15px]" strokeWidth={2} />
+						<span className="flex-1 text-left">Procurar ou perguntar</span>
+						<span className="num text-[11px]">{formatCombo(keys.palette)}</span>
 					</Button>
 
 					<div className="flex gap-0.5 overflow-x-auto md:flex-col">
@@ -192,8 +234,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 									<span className="flex-1">{item.label}</span>
 									{i < 10 ? (
 										<span className="num text-dim hidden text-[11px] md:inline">
-											{MOD}
-											{(i + 1) % 10}
+											{formatCombo(keys[`nav${i + 1}` as keyof typeof keys])}
 										</span>
 									) : null}
 								</Link>
@@ -206,7 +247,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 					</div>
 				</nav>
 
-				<div className="flex min-h-svh min-w-0 flex-1 flex-col">
+				<div
+					id="conteudo"
+					tabIndex={-1}
+					className="flex min-h-svh min-w-0 flex-1 flex-col outline-none"
+				>
 					{children}
 					<footer className="num border-line bg-panel text-dim mt-auto flex min-h-7 flex-wrap items-center gap-4 border-t px-4 text-[11px]">
 						<span className="inline-flex items-center gap-1.5">
@@ -221,6 +266,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 				open={dialog.open}
 				defaults={dialog.defaults}
 				onOpenChange={(open) => setDialog((d) => ({ ...d, open }))}
+			/>
+			<NotificationsRunner />
+			<CommandPalette
+				open={palette.open}
+				mode={palette.mode}
+				onOpenChange={(open) => setPalette((p) => ({ ...p, open }))}
 			/>
 		</NewTransactionContext.Provider>
 	);

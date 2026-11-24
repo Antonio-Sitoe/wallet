@@ -245,3 +245,16 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 **Frontend**
 
 - [x] Ecrã Pagamentos planeados (`/payments`, «Pagamentos» no menu depois de Orçamento): indicadores (atrasados, próximos 7 dias, falta este mês, pagos este mês), separadores Próximos / Atrasados / Pagos / Todos, grupos por data, Confirmar num clique com Desfazer no aviso, detalhe com saltar, editar, arquivar, apagar, próximas datas e histórico; novo / editar pagamento com pré-visualização das próximas datas e do total por ano
+
+## Fase 7 — Termos, notificações e acessibilidade — 2026-11-24
+
+**Backend**
+
+- [x] Notificações: `GET /notifications?today=` junta os avisos ligados nas Definições: pagamentos planeados (lembretes do módulo planned), dívidas na data de lembrete e seguintes até ficarem pagas, itens da lista por pagar a partir do dia 20 e resumo do mês anterior nos 3 primeiros dias; cada aviso tem uma `key` estável e um link para o ecrã
+- [x] Atalhos configuráveis guardados na conta: coluna `user_preferences.shortcuts`, validação de teclas (com ⌘/Ctrl ou ⌥/Alt) e de choques com os outros atalhos
+
+**Frontend**
+
+- [x] Definições › Sobre: termos de uso escritos (conta, dados, números e sugestões, uso aceitável, garantias, alterações), abertos num diálogo
+- [x] Notificações enviadas: plugin de notificações do Tauri no desktop e Notification do browser na web, verificadas ao abrir e a cada 15 min, sem repetir; sem permissão aparecem como aviso dentro do app com «Abrir»; Definições › Notificações com estado da permissão, Permitir e Testar
+- [x] Acessibilidade: atalhos num registo único (Nova transacção, ⌘K, ⌘J, Definições, ocultar dinheiro, tema, ecrãs 1–10), editáveis em Definições › Atalhos (gravar, repor, repor todos) e mostrados com as teclas escolhidas na barra lateral e na paleta; «Saltar para o conteúdo» e anel de foco visível em todos os controlos

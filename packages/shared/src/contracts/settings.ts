@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { type ShortcutOverrides, shortcutOverrides } from "../shortcuts";
 import { cents, id, positiveCents } from "./common";
 
 export const THEMES = ["system", "light", "dark"] as const;
@@ -38,6 +39,7 @@ export type Preferences = {
 	expectedIncome: number | null;
 	salaryAccountId: string | null;
 	notifications: NotificationPreferences;
+	shortcuts: ShortcutOverrides;
 	hasPin: boolean;
 };
 
@@ -51,6 +53,7 @@ export const updatePreferencesInput = z
 		expectedIncome: cents.min(0).nullable(),
 		salaryAccountId: id.nullable(),
 		notifications: notificationPreferences.partial(),
+		shortcuts: shortcutOverrides,
 	})
 	.partial();
 export type UpdatePreferencesInput = z.infer<typeof updatePreferencesInput>;

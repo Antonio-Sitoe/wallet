@@ -1,18 +1,32 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import type { ExportFormat } from "@wallet/shared";
+import {
+	DEFAULT_SHORTCUTS,
+	type ExportFormat,
+	SHORTCUT_ACTIONS,
+	type ShortcutAction,
+	type ShortcutOverrides,
+} from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { cn } from "@wallet/ui/lib/utils";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { MOD, NAV } from "@/components/layout/app-shell";
+import { NAV } from "@/components/layout/app-shell";
 import {
 	SettingsRow,
 	SettingsSection,
 	SettingsValue,
 } from "@/components/settings/settings-row";
+import { TERMS_UPDATED, TermsDialog } from "@/components/settings/terms";
+import { usePreferencesContext } from "@/contexts/preferences-context";
 import { ENV } from "@/env";
 import { apiDownload, errorMessage } from "@/lib/api";
+import {
+	comboFromEvent,
+	formatCombo,
+	isMacPlatform,
+	useShortcutMap,
+} from "@/lib/shortcuts";
 
 const SERVER = ENV.VITE_SERVER_URL.replace(/\/$/, "");
 const SERVER_LABEL = SERVER.replace(/^https?:\/\//, "");
@@ -26,33 +40,154 @@ function Kbd({ children }: { children: string }) {
 	);
 }
 
+const SHORTCUT_LABELS: Record<ShortcutAction, string> = {
+	newTransaction: "Nova transacção",
+	palette: "Procurar ou perguntar",
+	assistant: "Assistente",
+	settings: "Definições",
+	hideMoney: "Ocultar dinheiro",
+	theme: "Mudar de tema",
+	...(Object.fromEntries(
+		NAV.slice(0, 10).map((item, i) => [`nav${i + 1}`, `Ir para ${item.label}`]),
+	) as Record<`nav${number}`, string>),
+} as Record<ShortcutAction, string>;
+
+function ShortcutRow({
+	action,
+	combo,
+	custom,
+	recording,
+	onRecord,
+	onReset,
+}: {
+	action: ShortcutAction;
+	combo: string;
+	custom: boolean;
+	recording: boolean;
+	onRecord: () => void;
+	onReset: () => void;
+}) {
+	return (
+		<div className="border-line flex items-center justify-between gap-3 border-b py-2">
+			<span className="text-[13px]">{SHORTCUT_LABELS[action]}</span>
+			<span className="flex items-center gap-1.5">
+				{custom && !recording ? (
+					<Button
+						variant="quiet"
+						size="sm"
+						aria-label={`Repor o atalho de ${SHORTCUT_LABELS[action]}`}
+						onClick={onReset}
+					>
+						Repor
+					</Button>
+				) : null}
+				<Button
+					variant="neutral"
+					size="sm"
+					aria-label={
+						recording
+							? "A gravar: carregue nas teclas, Esc para cancelar"
+							: `Alterar o atalho de ${SHORTCUT_LABELS[action]} (${formatCombo(combo)})`
+					}
+					onClick={onRecord}
+					className={cn(
+						"num min-w-[88px]",
+						recording && "border-info-2 text-info",
+					)}
+				>
+					{recording ? "carregue…" : formatCombo(combo)}
+				</Button>
+			</span>
+		</div>
+	);
+}
+
 export function ShortcutsSection() {
-	const shortcuts: { label: string; keys: string }[] = [
-		{ label: "Nova transacção", keys: `${MOD}N` },
-		{ label: "Definições", keys: `${MOD},` },
-		{ label: "Ocultar dinheiro", keys: `⇧${MOD}H` },
-		{ label: "Mudar de tema", keys: `⇧${MOD}L` },
-		...NAV.slice(0, 10).map((item, i) => ({
-			label: item.label,
-			keys: `${MOD}${(i + 1) % 10}`,
-		})),
-		{ label: "Fechar janela", keys: "Esc" },
-	];
+	const { preferences, update } = usePreferencesContext();
+	const bindings = useShortcutMap();
+	const overrides = preferences?.shortcuts ?? {};
+	const [recording, setRecording] = useState<ShortcutAction | null>(null);
+
+	const save = useCallback(
+		(next: ShortcutOverrides) => update({ shortcuts: next }),
+		[update],
+	);
+
+	useEffect(() => {
+		if (!recording) return;
+		const onKey = (e: KeyboardEvent) => {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			if (e.key === "Escape") {
+				setRecording(null);
+				return;
+			}
+			const combo = comboFromEvent(e);
+			if (!combo) return;
+			if (!combo.startsWith("mod+") && !combo.startsWith("alt+")) {
+				toast.error(
+					`Use ${isMacPlatform ? "⌘ ou ⌥" : "Ctrl ou Alt"} com a tecla`,
+				);
+				return;
+			}
+			const taken = (Object.keys(bindings) as ShortcutAction[]).find(
+				(a) => a !== recording && bindings[a] === combo,
+			);
+			if (taken) {
+				toast.error(
+					`${formatCombo(combo)} já é usado por «${SHORTCUT_LABELS[taken]}»`,
+				);
+				return;
+			}
+			const next: ShortcutOverrides = { ...overrides };
+			if (combo === DEFAULT_SHORTCUTS[recording]) delete next[recording];
+			else next[recording] = combo;
+			save(next);
+			toast.success(`${SHORTCUT_LABELS[recording]}: ${formatCombo(combo)}`);
+			setRecording(null);
+		};
+		window.addEventListener("keydown", onKey, { capture: true });
+		return () =>
+			window.removeEventListener("keydown", onKey, { capture: true });
+	}, [recording, bindings, overrides, save]);
+
+	const customCount = Object.keys(overrides).length;
 	return (
 		<SettingsSection
 			title="Atalhos de teclado"
-			description="Funcionam em qualquer ecrã. Em Windows e Linux, ⌘ é Ctrl."
+			description="Clique num atalho e carregue nas novas teclas (com ⌘/Ctrl ou ⌥/Alt). Ficam guardados na conta. Esc cancela."
 		>
+			{customCount ? (
+				<div className="flex justify-end">
+					<Button variant="neutral" size="sm" onClick={() => save({})}>
+						Repor todos ({customCount})
+					</Button>
+				</div>
+			) : null}
 			<div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
-				{shortcuts.map((s) => (
-					<div
-						key={s.label}
-						className="border-line flex items-center justify-between gap-3 border-b py-2.5"
-					>
-						<span className="text-[13px]">{s.label}</span>
-						<Kbd>{s.keys}</Kbd>
-					</div>
+				{SHORTCUT_ACTIONS.map((action) => (
+					<ShortcutRow
+						key={action}
+						action={action}
+						combo={bindings[action]}
+						custom={action in overrides}
+						recording={recording === action}
+						onRecord={() => setRecording(recording === action ? null : action)}
+						onReset={() => {
+							const next: ShortcutOverrides = { ...overrides };
+							delete next[action];
+							save(next);
+						}}
+					/>
 				))}
+				<div className="border-line flex items-center justify-between gap-3 border-b py-2">
+					<span className="text-[13px]">Fechar janela ou diálogo</span>
+					<Kbd>Esc</Kbd>
+				</div>
+				<div className="border-line flex items-center justify-between gap-3 border-b py-2">
+					<span className="text-[13px]">Mover entre controlos</span>
+					<Kbd>Tab</Kbd>
+				</div>
 			</div>
 		</SettingsSection>
 	);
@@ -149,6 +284,7 @@ export function DataSection({ onNavigate }: { onNavigate: () => void }) {
 }
 
 export function AboutSection() {
+	const [termsOpen, setTermsOpen] = useState(false);
 	return (
 		<SettingsSection title="Sobre">
 			<SettingsRow title="Versão">
@@ -160,8 +296,13 @@ export function AboutSection() {
 			/>
 			<SettingsRow
 				title="Termos de uso"
-				description="Ainda por escrever. Entram antes de o app ser partilhado com outras pessoas."
-			/>
+				description={`Conta, dados, limites do app e alterações. Actualizados a ${TERMS_UPDATED}.`}
+			>
+				<Button variant="neutral" onClick={() => setTermsOpen(true)}>
+					Ler os termos
+				</Button>
+			</SettingsRow>
+			<TermsDialog open={termsOpen} onOpenChange={setTermsOpen} />
 		</SettingsSection>
 	);
 }

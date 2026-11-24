@@ -12,6 +12,7 @@ import { createDashboardModule } from "./modules/dashboard";
 import { createDebtsModule } from "./modules/debts";
 import { createGoalsModule } from "./modules/goals";
 import { createImportsModule } from "./modules/imports";
+import { createNotificationsModule } from "./modules/notifications";
 import { createPlannedModule } from "./modules/planned";
 import { createSearchModule } from "./modules/search";
 import { createSettingsModule } from "./modules/settings";
@@ -190,6 +191,20 @@ export function buildModules(db: Database) {
 		},
 	});
 	const assistant = createAssistantModule(db);
+	const notifications = createNotificationsModule({
+		preferences: (userId) => settings.service.preferences(userId),
+		planned: {
+			reminders: (userId, today) => planned.service.reminders(userId, today),
+		},
+		debts: { list: (userId, options) => debts!.service.list(userId, options) },
+		budgets: {
+			getMonth: (userId, month) => budgets!.service.getMonth(userId, month),
+		},
+		analytics: {
+			overview: (userId, from, to) =>
+				analytics.service.overview(userId, from, to),
+		},
+	});
 	return {
 		accounts,
 		categories,
@@ -205,6 +220,7 @@ export function buildModules(db: Database) {
 		settings,
 		search,
 		assistant,
+		notifications,
 	};
 }
 

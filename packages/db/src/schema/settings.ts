@@ -29,6 +29,7 @@ export const userPreferences = pgTable("user_preferences", {
 		onDelete: "set null",
 	}),
 	notifications: jsonb("notifications").notNull().default({}),
+	shortcuts: jsonb("shortcuts").notNull().default({}),
 	pinHash: text("pin_hash"),
 	pinFailedAttempts: integer("pin_failed_attempts").notNull().default(0),
 	pinLockedUntil: timestamp("pin_locked_until", { withTimezone: true }),

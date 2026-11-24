@@ -19,6 +19,7 @@ import {
 	type Preferences,
 	type Profile,
 	type SetPinInput,
+	type ShortcutOverrides,
 	type Theme,
 	type TransactionTemplate,
 	type UpdatePreferencesInput,
@@ -43,6 +44,7 @@ const toPreferences = (row: PreferencesRow): Preferences => ({
 		...DEFAULT_NOTIFICATIONS,
 		...(row.notifications as Partial<NotificationPreferences>),
 	},
+	shortcuts: (row.shortcuts ?? {}) as ShortcutOverrides,
 	hasPin: !!row.pinHash,
 });
 
