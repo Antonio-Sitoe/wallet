@@ -2,7 +2,7 @@ FROM node:26-slim AS builder
 WORKDIR /app
 
 COPY . .
-RUN --mount=type=cache,target=/root/.npm npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci --include=dev
 
 ENV NODE_ENV=production
 RUN cd apps/server && npm run build
