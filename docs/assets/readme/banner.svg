@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A0C0F"/>
+      <stop offset="1" stop-color="#11161C"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.82" cy="0.3" r="0.55">
+      <stop offset="0" stop-color="#3FB950" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#3FB950" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#1F242B" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="400" rx="24" fill="url(#bg)"/>
+  <rect width="1280" height="400" rx="24" fill="url(#grid)" opacity="0.5"/>
+  <rect width="1280" height="400" rx="24" fill="url(#glow)"/>
+  <rect x="1" y="1" width="1278" height="398" rx="23" fill="none" stroke="#2D333B" stroke-width="2"/>
+
+  <g transform="translate(88 104) scale(0.19)">
+    <rect x="100" y="100" width="824" height="824" rx="185" fill="#0F1216"/>
+    <rect x="104" y="104" width="816" height="816" rx="181" fill="none" stroke="#2D333B" stroke-width="8"/>
+    <path d="M230 400H794M230 512H794M230 624H794" stroke="#1F242B" stroke-width="8"/>
+    <circle cx="774" cy="340" r="88" fill="#3FB950" fill-opacity="0.18"/>
+    <polyline points="250,370 380,660 512,470 644,660 774,340" fill="none" stroke="#3FB950" stroke-width="72" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="300" y="178" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="76" font-weight="700" fill="#E6E8EB" letter-spacing="-2">Wallet</text>
+  <text x="302" y="220" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="25" fill="#9BA3AE">Finanças pessoais em meticais,</text>
+  <text x="302" y="252" font-family="Inter, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="25" fill="#9BA3AE">do plano ao último centavo.</text>
+  <text x="302" y="296" font-family="JetBrains Mono, SFMono-Regular, Menlo, monospace" font-size="17" fill="#6E7681" letter-spacing="1">ORÇAMENTO · PAGAMENTOS · METAS · DÍVIDAS · ASSISTENTE</text>
+
+  <g font-family="JetBrains Mono, SFMono-Regular, Menlo, monospace" font-size="15">
+    <rect x="302" y="318" width="118" height="34" rx="17" fill="#3FB950" fill-opacity="0.14" stroke="#3FB950" stroke-opacity="0.45"/>
+    <text x="361" y="340" text-anchor="middle" fill="#3FB950">web</text>
+    <rect x="432" y="318" width="132" height="34" rx="17" fill="#58A6FF" fill-opacity="0.12" stroke="#58A6FF" stroke-opacity="0.45"/>
+    <text x="498" y="340" text-anchor="middle" fill="#58A6FF">desktop</text>
+    <rect x="576" y="318" width="104" height="34" rx="17" fill="#F0883E" fill-opacity="0.12" stroke="#F0883E" stroke-opacity="0.45"/>
+    <text x="628" y="340" text-anchor="middle" fill="#F0883E">MZN</text>
+  </g>
+
+  <g transform="translate(930 92)" font-family="JetBrains Mono, SFMono-Regular, Menlo, monospace">
+    <rect width="270" height="216" rx="14" fill="#0F1216" stroke="#2D333B"/>
+    <text x="20" y="34" font-size="12" fill="#6E7681" letter-spacing="1.5">GASTO · NOV</text>
+    <text x="20" y="74" font-size="34" fill="#3FB950">11 670</text>
+    <text x="150" y="74" font-size="14" fill="#6E7681">MZN</text>
+    <rect x="20" y="92" width="230" height="5" rx="2.5" fill="#1F242B"/>
+    <rect x="20" y="92" width="62" height="5" rx="2.5" fill="#3FB950"/>
+    <g font-size="13">
+      <rect x="20" y="118" width="12" height="12" rx="3" fill="none" stroke="#3FB950" stroke-width="1.5"/>
+      <path d="M23 124l2.5 2.5 4-5" stroke="#3FB950" stroke-width="1.6" fill="none"/>
+      <text x="42" y="129" fill="#C9D1D9">Moradia</text>
+      <text x="250" y="129" text-anchor="end" fill="#8B949E">5 000</text>
+      <rect x="20" y="146" width="12" height="12" rx="3" fill="none" stroke="#3FB950" stroke-width="1.5"/>
+      <path d="M23 152l2.5 2.5 4-5" stroke="#3FB950" stroke-width="1.6" fill="none"/>
+      <text x="42" y="157" fill="#C9D1D9">Internet</text>
+      <text x="250" y="157" text-anchor="end" fill="#8B949E">1 900</text>
+      <rect x="20" y="174" width="12" height="12" rx="3" fill="none" stroke="#484F58" stroke-width="1.5"/>
+      <text x="42" y="185" fill="#C9D1D9">Xitique</text>
+      <text x="250" y="185" text-anchor="end" fill="#F0883E">20 000</text>
+    </g>
+  </g>
+</svg>
