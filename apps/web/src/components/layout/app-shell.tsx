@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
 import {
 	ArrowLeftRightIcon,
@@ -28,6 +27,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import {
 	CommandPalette,
@@ -118,7 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	useThemeShortcut();
-	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const { pathname } = useLocation();
 	const { data: session } = authClient.useSession();
 	const openSettings = useOpenSettings();
 	const [dialog, setDialog] = useState<{
@@ -147,14 +147,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 	const keys = useShortcutMap();
 	const go = (index: number) => () => {
 		const target = NAV[index];
-		if (target) navigate({ to: target.to });
+		if (target) navigate(target.to);
 	};
 	useShortcuts({
 		newTransaction: () => openNew(),
 		palette: () => setPalette((p) => ({ open: !p.open, mode: "search" })),
 		assistant: () => {
 			setPalette((p) => ({ ...p, open: false }));
-			navigate({ to: "/assistant" });
+			navigate("/assistant");
 		},
 		hideMoney: () => {
 			if (!preferences) return;
@@ -181,7 +181,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 				onSuccess: () => {
 					clearDesktopToken();
 					queryClient.clear();
-					navigate({ to: "/login" });
+					navigate("/login");
 				},
 			},
 		});

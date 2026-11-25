@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import type { AppNotice } from "@wallet/shared";
 import { useEffect } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import {
@@ -33,7 +33,7 @@ export function NotificationsRunner() {
 	useEffect(() => {
 		let stop: (() => void) | undefined;
 		let cancelled = false;
-		void listenDesktopNotificationClicks((href) => navigate({ href })).then(
+		void listenDesktopNotificationClicks((href) => navigate(href)).then(
 			(unlisten) => {
 				if (cancelled) unlisten();
 				else stop = unlisten;
@@ -51,7 +51,7 @@ export function NotificationsRunner() {
 		const fresh = notices.filter((n) => !seen.has(n.key));
 		if (!fresh.length) return;
 		markSeen(fresh.map((n) => n.key));
-		const open = (href: string) => () => navigate({ href });
+		const open = (href: string) => () => navigate(href);
 		void (async () => {
 			for (const notice of fresh.slice(0, AT_ONCE)) {
 				const sent = await showNotification(

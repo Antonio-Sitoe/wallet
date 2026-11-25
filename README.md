@@ -62,7 +62,7 @@ A maior parte das apps de finanças regista o que já gastaste. O Wallet começa
 ```
 wallet/
 ├── apps/
-│   ├── web/          React + TanStack Start (web e desktop Tauri)
+│   ├── web/          React + Vite + React Router (web e desktop Tauri)
 │   └── server/       API Fastify, módulos em camadas + tarefas pg-boss
 └── packages/
     ├── db/           Schema Drizzle e migrações (PostgreSQL)
@@ -74,7 +74,7 @@ wallet/
 - **Servidor:** cada módulo em `apps/server/src/modules/*` tem `repository → service → controller → routes`, e as dependências entre módulos são injectadas em `app.ts`.
 - **Contratos:** os schemas zod em `packages/shared` validam a API e dão os tipos à web.
 - **Tarefas em segundo plano:** o [pg-boss](https://github.com/timgit/pg-boss) usa o próprio Postgres. A confirmação automática dos pagamentos planeados corre de hora a hora (Africa/Maputo) e ao arrancar o servidor.
-- **Web:** as rotas públicas são pré-renderizadas e as privadas correm só no cliente. O resultado é estático (`.output/public`), por isso o mesmo build serve o browser e o Tauri.
+- **Web:** SPA com Vite e React Router; o estado dos filtros vive no URL (nuqs). O resultado é estático (`apps/web/dist`), por isso o mesmo build serve o browser e o Tauri.
 
 ## Começar
 
@@ -155,6 +155,6 @@ A API não corre em serverless (Vercel Functions), porque o pg-boss precisa de u
 
 ## Stack
 
-[TanStack Start](https://tanstack.com/start) · [React](https://react.dev) · [Tailwind CSS](https://tailwindcss.com) · [shadcn/ui](https://ui.shadcn.com) · [Fastify](https://fastify.dev) · [Drizzle ORM](https://orm.drizzle.team) · [PostgreSQL](https://www.postgresql.org) · [pg-boss](https://github.com/timgit/pg-boss) · [Better Auth](https://better-auth.com) · [Zod](https://zod.dev) · [Tauri](https://tauri.app) · [Vitest](https://vitest.dev) · [Biome](https://biomejs.dev) · [Varlock](https://varlock.dev)
+[Vite](https://vite.dev) · [React](https://react.dev) · [React Router](https://reactrouter.com) · [nuqs](https://nuqs.dev) · [Tailwind CSS](https://tailwindcss.com) · [shadcn/ui](https://ui.shadcn.com) · [Fastify](https://fastify.dev) · [Drizzle ORM](https://orm.drizzle.team) · [PostgreSQL](https://www.postgresql.org) · [pg-boss](https://github.com/timgit/pg-boss) · [Better Auth](https://better-auth.com) · [Zod](https://zod.dev) · [Tauri](https://tauri.app) · [Vitest](https://vitest.dev) · [Biome](https://biomejs.dev) · [Varlock](https://varlock.dev)
 
 <p align="center"><sub>Feito em Moçambique 🇲🇿</sub></p>

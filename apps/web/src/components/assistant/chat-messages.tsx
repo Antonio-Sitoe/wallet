@@ -1,7 +1,7 @@
-import { Link } from "@tanstack/react-router";
 import type { AssistantMessage } from "@wallet/shared";
 import { cn } from "@wallet/ui/lib/utils";
 import { SparklesIcon } from "lucide-react";
+import { Link } from "react-router";
 import { signedMoney } from "@/utils/format";
 
 export const SUGGESTIONS = [

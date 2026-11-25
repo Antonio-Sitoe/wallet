@@ -1,4 +1,3 @@
-import { getRouteApi, Link } from "@tanstack/react-router";
 import type { ShoppingItem, ShoppingListSummary } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
@@ -12,6 +11,7 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useDeleteShoppingList } from "@/actions/shopping/use-delete-shopping-list";
@@ -38,15 +38,18 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { useConfirm } from "@/contexts/confirm-context";
+import {
+	searchHref,
+	usePageNavigate,
+	usePageSearch,
+} from "@/lib/search-params";
 import { addMonths, currentMonth, money, monthLabel } from "@/utils/format";
-
-const route = getRouteApi("/_private/shopping");
 
 type Editing = { kind: "new" } | { kind: "edit"; list: ShoppingListSummary };
 
 export function ShoppingPage() {
-	const { id, archived } = route.useSearch();
-	const navigate = route.useNavigate();
+	const { id, archived } = usePageSearch("shopping");
+	const navigate = usePageNavigate("shopping");
 	const confirm = useConfirm();
 	const lists = useShoppingLists(!!archived);
 	const all = lists.data ?? [];
@@ -140,8 +143,7 @@ export function ShoppingPage() {
 		<>
 			<PageHeader crumb={["compras"]}>
 				<Link
-					to="/shopping"
-					search={{ archived: !archived }}
+					to={searchHref("shopping", { archived: !archived })}
 					className="text-fg-2 hover:text-fg text-xs"
 				>
 					{archived ? "Esconder arquivadas" : "Mostrar arquivadas"}

@@ -1,4 +1,3 @@
-import type { ErrorComponentProps } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
 import {
 	Collapsible,
@@ -8,6 +7,7 @@ import {
 import { cn } from "@wallet/ui/lib/utils";
 import { RotateCwIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouteError } from "react-router";
 import { toast } from "sonner";
 import { Illustration } from "@/components/feedback/connection-error-illustration";
 import { ENV } from "@/env";
@@ -53,7 +53,8 @@ export function formatTime(date: Date) {
 	return `${day.replace(/\./g, "").replace(/ de /g, " ")} · ${time}`;
 }
 
-export function ConnectionError({ error }: ErrorComponentProps) {
+export function ConnectionError() {
+	const error = useRouteError();
 	const offline = isConnectionError(error);
 	const [busy, setBusy] = useState(false);
 	const [tries, setTries] = useState(1);

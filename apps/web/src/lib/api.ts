@@ -1,5 +1,5 @@
 import { ENV } from "@/env";
-import { isDesktop, readDesktopToken } from "@/lib/auth-client";
+import { isDesktop, readDesktopToken, resetSession } from "@/lib/auth-client";
 
 const BASE = ENV.VITE_SERVER_URL.replace(/\/$/, "");
 
@@ -50,6 +50,7 @@ export async function api<T>(
 		credentials: "include",
 		body: options.body === undefined ? undefined : JSON.stringify(options.body),
 	});
+	if (res.status === 401) resetSession();
 	if (res.status === 204) return undefined as T;
 	const data = await res.json().catch(() => null);
 	if (!res.ok) {

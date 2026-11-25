@@ -1,4 +1,3 @@
-import { getRouteApi } from "@tanstack/react-router";
 import type {
 	BreakdownDimension,
 	BreakdownSlice,
@@ -14,13 +13,6 @@ import { useOverview } from "@/actions/analytics/use-overview";
 import { Delta } from "@/components/charts/delta";
 import { GroupedBars } from "@/components/charts/grouped-bars";
 import { SERIES } from "@/components/charts/series";
-import {
-	KINDS,
-	type Kind,
-	periodLabel,
-	periodOf,
-	shift,
-} from "@/components/dashboard/dashboard";
 import { Ranking, type RowLink } from "@/components/stats/ranking";
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card-header";
@@ -30,6 +22,14 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Segmented } from "@/components/ui/segmented";
 import { Select } from "@/components/ui/select";
+import { usePageNavigate, usePageSearch } from "@/lib/search-params";
+import {
+	KINDS,
+	type Kind,
+	periodLabel,
+	periodOf,
+	shift,
+} from "@/pages/private/dashboard-page";
 import {
 	currentMonth,
 	dayLabel,
@@ -38,8 +38,6 @@ import {
 	monthLabel,
 	todayInput,
 } from "@/utils/format";
-
-const route = getRouteApi("/_private/stats");
 
 const VIEWS: { value: BreakdownDimension; label: string }[] = [
 	{ value: "category", label: "Categorias" },
@@ -71,8 +69,8 @@ function transactionsPeriod(kind: Kind, period: Period): RowLink["search"] {
 }
 
 export function StatsPage() {
-	const search = route.useSearch();
-	const navigate = route.useNavigate();
+	const search = usePageSearch("stats");
+	const navigate = usePageNavigate("stats");
 	const kind: Kind = search.period ?? "year";
 	const period = periodOf(kind, search.from);
 	const by = search.by ?? "category";

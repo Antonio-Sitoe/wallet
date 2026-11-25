@@ -1,26 +1,15 @@
 import { createAuthClient } from "better-auth/react";
 import { ENV } from "@/env";
 
-function getServerUrl(url: string) {
-	const processEnv = typeof process === "undefined" ? undefined : process.env;
-	if (typeof window === "undefined" && processEnv?.SERVER_URL) {
-		return processEnv.SERVER_URL.endsWith("/")
-			? processEnv.SERVER_URL.slice(0, -1)
-			: processEnv.SERVER_URL;
-	}
-
-	return url.endsWith("/") ? url.slice(0, -1) : url;
-}
-
 export const isDesktop =
 	typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 const LEGACY_TOKEN_KEY = "wallet.auth-token";
 
-const keychain = async <T>(command: string, args?: Record<string, unknown>) => {
+async function keychain<T>(command: string, args?: Record<string, unknown>) {
 	const { invoke } = await import("@tauri-apps/api/core");
 	return invoke<T>(command, args);
-};
+}
 
 const readLegacyToken = () => {
 	try {
@@ -70,13 +59,14 @@ function saveDesktopToken(token: string) {
 }
 
 export function clearDesktopToken() {
+	resetSession();
 	desktopToken = Promise.resolve("");
 	writeLegacyToken("");
 	keychain("auth_token_delete").catch(() => undefined);
 }
 
 export const authClient = createAuthClient({
-	baseURL: new URL("/api/auth", getServerUrl(ENV.VITE_SERVER_URL)).toString(),
+	baseURL: new URL("/api/auth", ENV.VITE_SERVER_URL).toString(),
 	fetchOptions: isDesktop
 		? {
 				auth: { type: "Bearer", token: readDesktopToken },
@@ -87,3 +77,19 @@ export const authClient = createAuthClient({
 			}
 		: undefined,
 });
+
+type SessionResult = Awaited<ReturnType<typeof authClient.getSession>>;
+
+let cachedSession: Promise<SessionResult> | null = null;
+
+export function getSession() {
+	cachedSession ??= authClient.getSession().then((result) => {
+		if (!result.data) cachedSession = null;
+		return result;
+	});
+	return cachedSession;
+}
+
+export function resetSession() {
+	cachedSession = null;
+}

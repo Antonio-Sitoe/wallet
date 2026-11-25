@@ -1,9 +1,9 @@
-import { getRouteApi, Link } from "@tanstack/react-router";
 import type { DebtDirection } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useDebtSuggestions } from "@/actions/debts/use-debt-suggestions";
 import { useDebts } from "@/actions/debts/use-debts";
@@ -25,17 +25,20 @@ import { PageTitle } from "@/components/ui/page-title";
 import { Segmented } from "@/components/ui/segmented";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
+import {
+	searchHref,
+	usePageNavigate,
+	usePageSearch,
+} from "@/lib/search-params";
 import { money } from "@/utils/format";
-
-const route = getRouteApi("/_private/debts");
 
 type DebtTab = DebtDirection | "history";
 
 const people = (n: number) => `${n} ${n === 1 ? "pessoa" : "pessoas"}`;
 
 export function DebtsPage() {
-	const { id, tab = "owed_to_me", archived } = route.useSearch();
-	const navigate = route.useNavigate();
+	const { id, tab = "owed_to_me", archived } = usePageSearch("debts");
+	const navigate = usePageNavigate("debts");
 	const debts = useDebts(!!archived);
 	const suggestions = useDebtSuggestions().data ?? [];
 	const accounts = useAccounts(true).data ?? [];
@@ -62,8 +65,7 @@ export function DebtsPage() {
 		<>
 			<PageHeader crumb={["dívidas"]}>
 				<Link
-					to="/debts"
-					search={{ tab, archived: !archived }}
+					to={searchHref("debts", { tab, archived: !archived })}
 					className="text-fg-2 hover:text-fg text-xs"
 				>
 					{archived ? "Esconder arquivadas" : "Mostrar arquivadas"}

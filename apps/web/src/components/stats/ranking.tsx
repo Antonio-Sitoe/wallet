@@ -1,7 +1,8 @@
-import { Link } from "@tanstack/react-router";
 import type { Breakdown, BreakdownSlice } from "@wallet/shared";
+import { Link } from "react-router";
 import { Delta } from "@/components/charts/delta";
 import { distinctColors, OTHERS_COLOR } from "@/components/charts/donut";
+import { searchHref } from "@/lib/search-params";
 import { money } from "@/utils/format";
 
 export type RowLink = {
@@ -84,8 +85,7 @@ export function Ranking({
 							<th scope="row" className="min-w-0 px-3.5 text-left font-normal">
 								{link ? (
 									<Link
-										to="/transactions"
-										search={link.search}
+										to={searchHref("transactions", link.search)}
 										className="hover:text-info-fg block min-w-0"
 									>
 										{name}

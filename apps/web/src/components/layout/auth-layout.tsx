@@ -1,5 +1,5 @@
-import { Outlet } from "@tanstack/react-router";
 import { TooltipProvider } from "@wallet/ui/components/tooltip";
+import { Outlet } from "react-router";
 import { ConfirmProvider } from "@/components/feedback/confirm-provider";
 import { AppShell } from "@/components/layout/app-shell";
 import { PinGate } from "@/components/settings/pin-gate";

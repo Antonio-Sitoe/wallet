@@ -1,4 +1,3 @@
-import { getRouteApi } from "@tanstack/react-router";
 import type { Category } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
@@ -23,12 +22,11 @@ import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Segmented } from "@/components/ui/segmented";
-
-const route = getRouteApi("/_private/categories");
+import { usePageNavigate, usePageSearch } from "@/lib/search-params";
 
 export function CategoriesPage() {
-	const { id } = route.useSearch();
-	const navigate = route.useNavigate();
+	const { id } = usePageSearch("categories");
+	const navigate = usePageNavigate("categories");
 	const categories = useCategories();
 	const [tab, setTab] = useState<"all" | "expense" | "income">("all");
 	const [creating, setCreating] = useState(false);

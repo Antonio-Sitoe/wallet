@@ -1,9 +1,9 @@
-import { getRouteApi, Link } from "@tanstack/react-router";
 import { ACCOUNT_TYPES, type AccountType } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { AccountDetail } from "@/components/accounts/account-detail";
 import { NewAccountDialog } from "@/components/accounts/new-account-dialog";
@@ -20,9 +20,12 @@ import { Pill } from "@/components/ui/pill";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { Swatch } from "@/components/ui/swatch";
+import {
+	searchHref,
+	usePageNavigate,
+	usePageSearch,
+} from "@/lib/search-params";
 import { ACCOUNT_TYPE_LABEL, money } from "@/utils/format";
-
-const route = getRouteApi("/_private/accounts");
 
 export const GROUPS: { title: string; types: AccountType[] }[] = [
 	{ title: "Bancos", types: ["bank"] },
@@ -31,8 +34,8 @@ export const GROUPS: { title: string; types: AccountType[] }[] = [
 ];
 
 export function AccountsPage() {
-	const { id, archived, validate, create } = route.useSearch();
-	const navigate = route.useNavigate();
+	const { id, archived, validate, create } = usePageSearch("accounts");
+	const navigate = usePageNavigate("accounts");
 	const accounts = useAccounts(!!archived);
 	const [creating, setCreating] = useState(!!create);
 	const [startOver, setStartOver] = useState(false);
@@ -47,8 +50,7 @@ export function AccountsPage() {
 		<>
 			<PageHeader crumb={["contas"]}>
 				<Link
-					to="/accounts"
-					search={{ id, archived: !archived }}
+					to={searchHref("accounts", { id, archived: !archived })}
 					className="text-fg-2 hover:text-fg text-xs"
 				>
 					{archived ? "Esconder arquivadas" : "Mostrar arquivadas"}

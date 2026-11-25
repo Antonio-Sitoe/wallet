@@ -1,10 +1,11 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router";
 import type { Period } from "@/@types/period";
 import { useMonthBudget } from "@/actions/budgets/use-month-budget";
 import { Empty } from "@/components/dashboard/empty";
 import { Loading } from "@/components/dashboard/loading";
 import { monthOfPeriod } from "@/components/dashboard/utils";
 import { StatusPill } from "@/components/ui/status-pill";
+import { searchHref } from "@/lib/search-params";
 import { money, monthLabel } from "@/utils/format";
 
 export function UpcomingCard({ period }: { period: Period }) {
@@ -27,8 +28,7 @@ export function UpcomingCard({ period }: { period: Period }) {
 			{items.slice(0, 6).map((i) => (
 				<li key={i.id}>
 					<Link
-						to="/budget"
-						search={{ month: month }}
+						to={searchHref("budget", { month: month })}
 						className="border-line text-fg hover:bg-hover flex items-center gap-3 rounded-lg border px-3 py-2.5 no-underline"
 					>
 						<span

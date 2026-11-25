@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import {
 	DEFAULT_SHORTCUTS,
 	type ExportFormat,
@@ -10,6 +9,7 @@ import {
 import { Button } from "@wallet/ui/components/button";
 import { cn } from "@wallet/ui/lib/utils";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { NAV } from "@/components/layout/app-shell";
 import {
@@ -254,7 +254,7 @@ export function DataSection({ onNavigate }: { onNavigate: () => void }) {
 					variant="neutral"
 					onClick={() => {
 						onNavigate();
-						navigate({ to: "/import" });
+						navigate("/import");
 					}}
 				>
 					Ver imports

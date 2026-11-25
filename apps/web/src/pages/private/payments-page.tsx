@@ -1,4 +1,3 @@
-import { getRouteApi } from "@tanstack/react-router";
 import {
 	addDays,
 	type PlannedOccurrence,
@@ -34,11 +33,13 @@ import { PageTitle } from "@/components/ui/page-title";
 import { Segmented } from "@/components/ui/segmented";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
+import {
+	type PAYMENT_TABS,
+	usePageNavigate,
+	usePageSearch,
+} from "@/lib/search-params";
 import { money } from "@/utils/format";
 
-const route = getRouteApi("/_private/payments");
-
-export const PAYMENT_TABS = ["next", "overdue", "done", "all"] as const;
 export type PaymentTab = (typeof PAYMENT_TABS)[number];
 
 const GROUP_ORDER: GroupKey[] = [
@@ -54,8 +55,8 @@ const count = (n: number, one: string, many: string) =>
 	`${n} ${n === 1 ? one : many}`;
 
 export function PaymentsPage() {
-	const { id, tab = "next" } = route.useSearch();
-	const navigate = route.useNavigate();
+	const { id, tab = "next" } = usePageSearch("payments");
+	const navigate = usePageNavigate("payments");
 	const [today] = useState(todayIso);
 	const [range] = useState(() => ({
 		from: addDays(today, -90),

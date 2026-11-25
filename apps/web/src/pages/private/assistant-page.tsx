@@ -1,4 +1,3 @@
-import { getRouteApi } from "@tanstack/react-router";
 import type { Conversation } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
@@ -28,9 +27,8 @@ import { useChat } from "@/components/assistant/use-chat";
 import { MOD } from "@/components/layout/app-shell";
 import { useConfirm } from "@/contexts/confirm-context";
 import { apiDownload, errorMessage } from "@/lib/api";
+import { usePageNavigate, usePageSearch } from "@/lib/search-params";
 import { currentMonth, monthLabel } from "@/utils/format";
-
-const route = getRouteApi("/_private/assistant");
 
 const DAY = 86_400_000;
 
@@ -153,8 +151,8 @@ function History({
 }
 
 export function AssistantPage() {
-	const search = route.useSearch();
-	const navigate = route.useNavigate();
+	const search = usePageSearch("assistant");
+	const navigate = usePageNavigate("assistant");
 	const id = search.id;
 	const inputRef = useRef<HTMLTextAreaElement>(null);
 	const open = (next?: string) => {

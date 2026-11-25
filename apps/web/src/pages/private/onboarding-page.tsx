@@ -1,8 +1,9 @@
-import { Link } from "@tanstack/react-router";
 import { DownloadIcon, PlusIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { Link } from "react-router";
 import { MOD } from "@/components/layout/app-shell";
 import { authClient } from "@/lib/auth-client";
+import { searchHref } from "@/lib/search-params";
 
 const IMPORT_STEPS = [
 	"Ficheiros CSV + .xlsx",
@@ -93,8 +94,7 @@ export function OnboardingPage() {
 						</Link>
 
 						<Link
-							to="/accounts"
-							search={{ create: true }}
+							to={searchHref("accounts", { create: true })}
 							className="border-line-strong bg-panel rounded-card text-fg hover:border-info-2 flex flex-[1_1_320px] flex-col gap-3.5 border p-5.5 transition-colors"
 						>
 							<PlusIcon

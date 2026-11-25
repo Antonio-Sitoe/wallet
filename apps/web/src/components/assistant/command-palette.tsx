@@ -1,4 +1,3 @@
-import { Link, useNavigate } from "@tanstack/react-router";
 import type { SearchHit } from "@wallet/shared";
 import {
 	DialogContent,
@@ -14,6 +13,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { Link, useNavigate } from "react-router";
 import { useAssistantStatus } from "@/actions/assistant/use-assistant-status";
 import { useSearch } from "@/actions/search/use-search";
 import {
@@ -24,6 +24,7 @@ import { useChat } from "@/components/assistant/use-chat";
 import { NAV } from "@/components/layout/app-shell";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
 import { useOpenSettings } from "@/contexts/settings-context";
+import { searchHref } from "@/lib/search-params";
 import { formatCombo, useShortcutMap } from "@/lib/shortcuts";
 import { ink, tint } from "@/utils/color";
 import { signedMoney } from "@/utils/format";
@@ -190,7 +191,7 @@ function Palette({
 				icon: "✦",
 				color: "var(--color-ai)",
 				keywords: "ia chat perguntar conversa",
-				run: () => navigate({ to: "/assistant" }),
+				run: () => navigate("/assistant"),
 			},
 			{
 				key: "settings",
@@ -214,7 +215,7 @@ function Palette({
 						: undefined,
 				icon: initials(n.label).slice(0, 1),
 				color: "var(--color-dim)",
-				run: () => navigate({ to: n.to }),
+				run: () => navigate(n.to),
 			})),
 		],
 		[navigate, openNew, openSettings, keys],
@@ -268,27 +269,29 @@ function Palette({
 			...fromHits(
 				data?.accounts,
 				"Contas",
-				(h) => () => navigate({ to: "/accounts", search: { id: h.id } }),
+				(h) => () => navigate(searchHref("accounts", { id: h.id })),
 				"#58a6ff",
 			),
 			...fromHits(
 				data?.categories,
 				"Categorias",
 				(h) => () =>
-					navigate({
-						to: "/transactions",
-						search: { period: "all", category: h.id },
-					}),
+					navigate(
+						searchHref("transactions", { period: "all", category: h.id }),
+					),
 				"#8b949e",
 			),
 			...fromHits(
 				data?.transactions,
 				"Transacções",
 				(h) => () =>
-					navigate({
-						to: "/transactions",
-						search: { period: "all", q: parsed.q, id: h.id },
-					}),
+					navigate(
+						searchHref("transactions", {
+							period: "all",
+							q: parsed.q,
+							id: h.id,
+						}),
+					),
 				"#8b949e",
 			),
 		];
@@ -585,8 +588,10 @@ function Palette({
 				</span>
 				{isAsk ? (
 					<Link
-						to="/assistant"
-						search={conversationId ? { id: conversationId } : {}}
+						to={searchHref(
+							"assistant",
+							conversationId ? { id: conversationId } : {},
+						)}
 						onClick={close}
 						className="text-ai-fg hover:underline"
 					>

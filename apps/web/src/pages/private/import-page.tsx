@@ -1,4 +1,3 @@
-import { getRouteApi } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
 import { UploadIcon } from "lucide-react";
@@ -18,9 +17,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Pill } from "@/components/ui/pill";
 import { useConfirm } from "@/contexts/confirm-context";
+import { usePageNavigate, usePageSearch } from "@/lib/search-params";
 import { dayKey, dayLabel } from "@/utils/format";
-
-const route = getRouteApi("/_private/import");
 
 export const STATUS = {
 	draft: ["rascunho", "info"],
@@ -30,8 +28,8 @@ export const STATUS = {
 
 export function ImportPage() {
 	const confirmAction = useConfirm();
-	const { id, sheet } = route.useSearch();
-	const navigate = route.useNavigate();
+	const { id, sheet } = usePageSearch("import");
+	const navigate = usePageNavigate("import");
 	const upload = useUploadWallet();
 	const history = useImports();
 	const preview = useImportPreview(id ?? null);

@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import {
 	Table,
 	TableBody,
@@ -7,9 +6,11 @@ import {
 	TableHeader,
 	TableRow,
 } from "@wallet/ui/components/table";
+import { Link } from "react-router";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { Empty } from "@/components/dashboard/empty";
 import { Loading } from "@/components/dashboard/loading";
+import { searchHref } from "@/lib/search-params";
 import { ACCOUNT_TYPE_LABEL, money } from "@/utils/format";
 
 export function AccountsCard() {
@@ -41,8 +42,7 @@ export function AccountsCard() {
 						>
 							<TableCell className="px-0 py-2 whitespace-normal">
 								<Link
-									to="/accounts"
-									search={{ id: a.id }}
+									to={searchHref("accounts", { id: a.id })}
 									className="text-fg flex items-center gap-2 no-underline hover:underline"
 								>
 									<span

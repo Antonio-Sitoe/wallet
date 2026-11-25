@@ -1,9 +1,9 @@
-import { getRouteApi, Link } from "@tanstack/react-router";
 import { BUDGET_GROUPS, type MonthItem } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
 import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useMonthBudget } from "@/actions/budgets/use-month-budget";
@@ -24,6 +24,11 @@ import { StatRow } from "@/components/ui/stat-row";
 import { useConfirm } from "@/contexts/confirm-context";
 import { usePreferencesContext } from "@/contexts/preferences-context";
 import {
+	searchHref,
+	usePageNavigate,
+	usePageSearch,
+} from "@/lib/search-params";
+import {
 	addMonths,
 	currentMonth,
 	money,
@@ -31,13 +36,11 @@ import {
 	shortMonth,
 } from "@/utils/format";
 
-const route = getRouteApi("/_private/budget");
-
 export function BudgetPage() {
 	const confirmAction = useConfirm();
-	const { month: monthParam } = route.useSearch();
+	const { month: monthParam } = usePageSearch("budget");
 	const month = monthParam ?? currentMonth();
-	const navigate = route.useNavigate();
+	const navigate = usePageNavigate("budget");
 	const budget = useMonthBudget(month);
 	const accounts = useAccounts().data ?? [];
 	const categories = useCategories().data ?? [];
@@ -100,8 +103,7 @@ export function BudgetPage() {
 						return (
 							<Link
 								key={m}
-								to="/budget"
-								search={{ month: m }}
+								to={searchHref("budget", { month: m })}
 								className={`rounded-check border px-2 py-1 no-underline ${d === 0 ? "border-line-strong text-fg bg-track" : "text-dim hover:text-fg border-transparent"}`}
 							>
 								{shortMonth(m)}

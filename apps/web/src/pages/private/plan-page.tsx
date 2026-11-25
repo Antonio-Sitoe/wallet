@@ -1,4 +1,3 @@
-import { getRouteApi } from "@tanstack/react-router";
 import { BUDGET_GROUPS, type PlanItemYear } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
@@ -35,6 +34,7 @@ import { Select } from "@/components/ui/select";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { ApiError } from "@/lib/api";
+import { usePageNavigate, usePageSearch } from "@/lib/search-params";
 import {
 	currentMonth,
 	GROUP_LABEL,
@@ -45,8 +45,6 @@ import {
 	parseMoney,
 } from "@/utils/format";
 
-const route = getRouteApi("/_private/plan");
-
 export function describeFrequency(item: PlanItemYear) {
 	if (item.frequency === "monthly")
 		return item.partial ? "mensal · aos poucos" : "mensal";
@@ -55,9 +53,9 @@ export function describeFrequency(item: PlanItemYear) {
 }
 
 export function PlanPage() {
-	const { year: yearParam } = route.useSearch();
+	const { year: yearParam } = usePageSearch("plan");
 	const year = yearParam ?? Number(currentMonth().slice(0, 4));
-	const navigate = route.useNavigate();
+	const navigate = usePageNavigate("plan");
 	const plan = usePlan(year);
 	const plans = usePlans().data ?? [];
 	const categories = useCategories().data ?? [];

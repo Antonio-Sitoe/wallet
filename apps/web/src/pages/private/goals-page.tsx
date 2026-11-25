@@ -1,8 +1,8 @@
-import { getRouteApi, Link } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
 import { PlusIcon, TrophyIcon } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useGoal } from "@/actions/goals/use-goal";
 import { useGoals } from "@/actions/goals/use-goals";
@@ -20,13 +20,16 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
+import {
+	searchHref,
+	usePageNavigate,
+	usePageSearch,
+} from "@/lib/search-params";
 import { money } from "@/utils/format";
 
-const route = getRouteApi("/_private/goals");
-
 export function GoalsPage() {
-	const { id, archived, tab = "active" } = route.useSearch();
-	const navigate = route.useNavigate();
+	const { id, archived, tab = "active" } = usePageSearch("goals");
+	const navigate = usePageNavigate("goals");
 	const goals = useGoals(!!archived);
 	const accounts = useAccounts(true).data ?? [];
 	const [creating, setCreating] = useState(false);
@@ -63,8 +66,7 @@ export function GoalsPage() {
 		<>
 			<PageHeader crumb={["metas"]}>
 				<Link
-					to="/goals"
-					search={{ id, archived: !archived, tab }}
+					to={searchHref("goals", { id, archived: !archived, tab })}
 					className="text-fg-2 hover:text-fg text-xs"
 				>
 					{archived ? "Esconder arquivadas" : "Mostrar arquivadas"}

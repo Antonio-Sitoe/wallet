@@ -4,10 +4,6 @@ const ignored = [
 	"node_modules/**",
 	"**/node_modules/**",
 	"apps/web/dist/**",
-	"apps/web/.output/**",
-	"apps/web/.vinxi/**",
-	"apps/web/.tanstack/**",
-	"apps/web/src/routeTree.gen.ts",
 	"apps/server/dist/**",
 	"packages/db/dist/**",
 ];

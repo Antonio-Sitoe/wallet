@@ -1,6 +1,6 @@
-import { Link, useRouter } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
 import { ArrowLeftIcon, LayoutDashboardIcon } from "lucide-react";
+import { Link, useNavigate } from "react-router";
 import { Illustration } from "@/components/feedback/not-found-illustration";
 
 export const LINKS = [
@@ -11,7 +11,7 @@ export const LINKS = [
 ] as const;
 
 export function NotFound() {
-	const router = useRouter();
+	const navigate = useNavigate();
 	const path = typeof window === "undefined" ? "" : window.location.pathname;
 
 	return (
@@ -59,7 +59,7 @@ export function NotFound() {
 					</Link>
 					<Button
 						variant="neutral"
-						onClick={() => router.history.back()}
+						onClick={() => navigate(-1)}
 						className="border-line-strong text-fg-2 hover:bg-hover hover:text-fg focus-visible:ring-info-2 rounded-card inline-flex h-11 cursor-pointer items-center gap-2 border bg-transparent px-[18px] text-sm outline-none focus-visible:ring-2"
 					>
 						<ArrowLeftIcon aria-hidden="true" className="size-4" />

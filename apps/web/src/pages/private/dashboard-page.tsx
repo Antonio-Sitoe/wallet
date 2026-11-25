@@ -12,7 +12,6 @@ import {
 	SortableContext,
 	sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { getRouteApi, Link } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
 import {
@@ -23,6 +22,7 @@ import {
 	TriangleAlertIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 import type { Period } from "@/@types/period";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useMonthBudget } from "@/actions/budgets/use-month-budget";
@@ -40,6 +40,11 @@ import { Select } from "@/components/ui/select";
 import { useConfirm } from "@/contexts/confirm-context";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
 import {
+	searchHref,
+	usePageNavigate,
+	usePageSearch,
+} from "@/lib/search-params";
+import {
 	addMonths,
 	currentMonth,
 	MONTH_SHORT,
@@ -47,8 +52,6 @@ import {
 	monthLabel,
 	todayInput,
 } from "@/utils/format";
-
-const route = getRouteApi("/_private/dashboard");
 
 export const KINDS = { month: "mês", "30d": "30 dias", year: "ano" } as const;
 
@@ -93,8 +96,8 @@ export function periodLabel(kind: Kind, p: Period) {
 
 export function Dashboard() {
 	const confirmAction = useConfirm();
-	const search = route.useSearch();
-	const navigate = route.useNavigate();
+	const search = usePageSearch("dashboard");
+	const navigate = usePageNavigate("dashboard");
 	const kind: Kind = search.period ?? "month";
 	const period = periodOf(kind, search.from);
 	const cards = useDashboardCards();
@@ -181,7 +184,7 @@ export function Dashboard() {
 						<ChevronRightIcon className="size-4" />
 					</Button>
 				</div>
-				<Link to="/budget" search={{ month: period.to.slice(0, 7) }}>
+				<Link to={searchHref("budget", { month: period.to.slice(0, 7) })}>
 					<Button variant="neutral">
 						Lista de {monthLabel(period.to.slice(0, 7)).split(" ")[0]}
 					</Button>
@@ -213,8 +216,7 @@ export function Dashboard() {
 							{unset.length > 1 ? ` (+${unset.length - 1} contas)` : ""}
 						</span>
 						<Link
-							to="/accounts"
-							search={{ validate: true }}
+							to={searchHref("accounts", { validate: true })}
 							className="text-warn font-medium"
 						>
 							Definir saldos →

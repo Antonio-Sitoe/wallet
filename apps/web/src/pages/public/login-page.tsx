@@ -1,8 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@wallet/ui/components/button";
 import { Input } from "@wallet/ui/components/input";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { BrandMark } from "@/components/ui/brand-mark";
 import { Card } from "@/components/ui/card";
@@ -27,7 +27,7 @@ export function LoginPage() {
 		const options = {
 			onSuccess: () => {
 				queryClient.clear();
-				navigate({ to: "/" });
+				navigate("/");
 			},
 			onError: (ctx: { error: { message?: string; statusText?: string } }) => {
 				toast.error(

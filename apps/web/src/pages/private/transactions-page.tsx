@@ -1,4 +1,3 @@
-import { getRouteApi } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { Transaction } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
@@ -22,6 +21,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Select } from "@/components/ui/select";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
+import { usePageNavigate, usePageSearch } from "@/lib/search-params";
 import {
 	addMonths,
 	currentMonth,
@@ -30,8 +30,6 @@ import {
 	monthLabel,
 	signedMoney,
 } from "@/utils/format";
-
-const route = getRouteApi("/_private/transactions");
 
 export function periodRange(period: Period): { from?: string; to?: string } {
 	const now = new Date();
@@ -59,8 +57,8 @@ export type Row =
 	| { kind: "tx"; tx: Transaction };
 
 export function TransactionsPage() {
-	const search = route.useSearch();
-	const navigate = route.useNavigate();
+	const search = usePageSearch("transactions");
+	const navigate = usePageNavigate("transactions");
 	const period = search.period ?? (search.month ? "all" : "30d");
 	const accounts = useAccounts(true).data ?? [];
 	const categories = useCategories().data ?? [];

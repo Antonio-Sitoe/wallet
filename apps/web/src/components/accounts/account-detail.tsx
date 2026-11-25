@@ -1,8 +1,8 @@
-import { Link } from "@tanstack/react-router";
 import { ACCOUNT_TYPES, type Account, type AccountType } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Input } from "@wallet/ui/components/input";
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { useDeleteAccount } from "@/actions/accounts/use-delete-account";
 import { useReconcileAccount } from "@/actions/accounts/use-reconcile-account";
@@ -20,6 +20,7 @@ import { Select } from "@/components/ui/select";
 import { Swatch } from "@/components/ui/swatch";
 import { useConfirm } from "@/contexts/confirm-context";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
+import { searchHref } from "@/lib/search-params";
 import {
 	ACCOUNT_TYPE_LABEL,
 	dayKey,
@@ -171,8 +172,7 @@ export function AccountDetail({
 				<div className="border-line bg-panel-2 flex items-center justify-between border-b px-3 py-2">
 					<h3 className="text-sm font-semibold">Movimentos recentes</h3>
 					<Link
-						to="/transactions"
-						search={{ account: account.id }}
+						to={searchHref("transactions", { account: account.id })}
 						className="text-xs"
 					>
 						ver todos

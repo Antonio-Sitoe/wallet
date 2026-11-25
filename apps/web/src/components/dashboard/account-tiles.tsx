@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import type { Account, AccountType } from "@wallet/shared";
 import { Skeleton } from "@wallet/ui/components/skeleton";
 import {
@@ -9,7 +8,9 @@ import {
 	SmartphoneIcon,
 	WalletIcon,
 } from "lucide-react";
+import { Link } from "react-router";
 import { useAccounts } from "@/actions/accounts/use-accounts";
+import { searchHref } from "@/lib/search-params";
 import { money } from "@/utils/format";
 
 const ICON_BY_TYPE: Record<AccountType, LucideIcon> = {
@@ -31,8 +32,7 @@ function AccountTile({ account }: { account: Account }) {
 	const Icon = ICON_BY_TYPE[account.type];
 	return (
 		<Link
-			to="/accounts"
-			search={{ id: account.id }}
+			to={searchHref("accounts", { id: account.id })}
 			className="group border-line rounded-card flex min-w-0 items-center gap-3 border p-3 no-underline transition-colors hover:brightness-125"
 			style={{
 				background: `color-mix(in srgb, ${color} 16%, var(--color-panel))`,
@@ -77,8 +77,7 @@ export function AccountTiles() {
 				<AccountTile key={account.id} account={account} />
 			))}
 			<Link
-				to="/accounts"
-				search={{ create: true }}
+				to={searchHref("accounts", { create: true })}
 				className="border-line-strong text-fg-2 hover:text-fg hover:border-fg-2 rounded-card flex min-h-16.5 items-center justify-center gap-1.5 border border-dashed text-sm no-underline transition-colors"
 			>
 				<PlusIcon className="size-4" aria-hidden="true" /> Adicionar conta

@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import {
 	BUDGET_GROUPS,
 	type BudgetGroup,
@@ -8,6 +7,7 @@ import {
 import { Button } from "@wallet/ui/components/button";
 import { Input } from "@wallet/ui/components/input";
 import { useState } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useCategories } from "@/actions/categories/use-categories";
@@ -21,6 +21,7 @@ import { Field } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
 import { useConfirm } from "@/contexts/confirm-context";
+import { searchHref } from "@/lib/search-params";
 import {
 	currentMonth,
 	GROUP_LABEL,
@@ -295,7 +296,10 @@ export function PlanItemDialog({
 				</Field>
 			) : null}
 			{!item ? null : (
-				<Link to="/budget" search={{ month: applyFrom }} className="text-xs">
+				<Link
+					to={searchHref("budget", { month: applyFrom })}
+					className="text-xs"
+				>
 					ver a lista de {applyFrom}
 				</Link>
 			)}

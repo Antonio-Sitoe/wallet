@@ -1,11 +1,12 @@
-import { Link } from "@tanstack/react-router";
 import { parseYearMonth } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { useCreatePlan } from "@/actions/plan/use-create-plan";
 import { useGeneratePlan } from "@/actions/plan/use-generate-plan";
 import { usePlans } from "@/actions/plan/use-plans";
 import { EmptyState } from "@/components/ui/empty-state";
+import { searchHref } from "@/lib/search-params";
 import { monthLabel } from "@/utils/format";
 
 export function NoListState({ month }: { month: string }) {
@@ -32,7 +33,7 @@ export function NoListState({ month }: { month: string }) {
 						>
 							Gerar 12 listas
 						</Button>
-						<Link to="/plan" search={{ year: year }}>
+						<Link to={searchHref("plan", { year: year })}>
 							<Button variant="neutral">Ver plano anual</Button>
 						</Link>
 					</>
@@ -47,7 +48,7 @@ export function NoListState({ month }: { month: string }) {
 			<EmptyState
 				title={`${monthLabel(month)} não tem itens`}
 				actions={
-					<Link to="/plan" search={{ year: year }}>
+					<Link to={searchHref("plan", { year: year })}>
 						<Button variant="neutral">Ver plano anual</Button>
 					</Link>
 				}
@@ -74,7 +75,7 @@ export function NoListState({ month }: { month: string }) {
 							Copiar plano de {year - 1}
 						</Button>
 					) : null}
-					<Link to="/plan" search={{ year: year }}>
+					<Link to={searchHref("plan", { year: year })}>
 						<Button variant={previous ? "neutral" : "primary"}>
 							Criar plano {year}
 						</Button>

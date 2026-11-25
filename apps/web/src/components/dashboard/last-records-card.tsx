@@ -1,10 +1,11 @@
-import { Link } from "@tanstack/react-router";
 import { ArrowLeftRightIcon, ScaleIcon } from "lucide-react";
+import { Link } from "react-router";
 import { useAccounts } from "@/actions/accounts/use-accounts";
 import { useCategories } from "@/actions/categories/use-categories";
 import { useTransactionPages } from "@/actions/transactions/use-transaction-pages";
 import { Empty } from "@/components/dashboard/empty";
 import { Loading } from "@/components/dashboard/loading";
+import { searchHref } from "@/lib/search-params";
 import { ink, tint } from "@/utils/color";
 import { dayKey, dayLabel, signedMoney } from "@/utils/format";
 
@@ -21,8 +22,7 @@ export function LastRecordsCard() {
 				return (
 					<li key={t.id} className="border-hover border-b last:border-0">
 						<Link
-							to="/transactions"
-							search={{ id: t.id }}
+							to={searchHref("transactions", { id: t.id })}
 							className="text-fg hover:bg-hover flex items-center gap-3 py-2 no-underline"
 						>
 							<span

@@ -5,7 +5,6 @@
 **/build
 **/.next
 **/.nuxt
-**/.output
 **/.svelte-kit
 **/.astro
 **/.turbo
