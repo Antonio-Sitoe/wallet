@@ -1,4 +1,4 @@
-import type { Category, Transaction } from "@wallet/shared";
+import type { Category, Transaction, Transfer } from "@wallet/shared";
 import type { TransactionFilters } from "@/@types/transaction-filters";
 
 const WINDOW_MONTHS = 12;
@@ -65,4 +65,21 @@ export function filterTransactions(
 				? b.id.localeCompare(a.id)
 				: new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
 		);
+}
+
+export function transferOf(id: string, legs: Transaction[]): Transfer | null {
+	const out = legs.find((leg) => leg.amount < 0);
+	const into = legs.find((leg) => leg.amount >= 0);
+	if (!out || !into) return null;
+	return {
+		id,
+		fromAccountId: out.accountId,
+		toAccountId: into.accountId,
+		amount: into.amount,
+		occurredAt: out.occurredAt,
+		referenceMonth: out.referenceMonth,
+		note: out.note,
+		monthItemId: out.monthItemId,
+		legs: { outId: out.id, inId: into.id },
+	};
 }

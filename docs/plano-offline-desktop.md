@@ -30,6 +30,8 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 - **Entrar sem rede:** no desktop, se o servidor não responder e houver token guardado, usa-se o último utilizador. Um 401 continua a mandar para o login.
 - **SQLite no Tauri:** comandos próprios (`offline_db_*` em `src-tauri/src/offline_db.rs`) com uma ligação por ficheiro, em vez do `tauri-plugin-sql`. O pool do plugin mandava o `BEGIN` e o `COMMIT` do TanStack para ligações diferentes e as coleções falhavam.
 - **Abrir sem rede:** as coleções usam `initialRender: { strategy: "network-first" }`; se a rede falhar ou passar de 3 s, abrem com o que está no disco.
+- **Transferências offline:** sem coleção própria; uma transferência são as duas pernas na coleção `transactions` (`transferId`). Depois de enviar, as pernas optimistas dão lugar às do servidor (`GET /transactions/:id` de cada perna).
+- **Fila offline:** `@tanstack/offline-transactions` com IndexedDB, uma fila por utilizador (`wallet-outbox-<userId>`). Erros 4xx (fora 401/408/425/429) não se repetem e desfazem a alteração local com aviso.
 - **Preferências:** ficam com TanStack Query por agora (são um objecto só, com escrita optimista própria); entram mais tarde.
 
 ## Passos
@@ -64,13 +66,13 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 - Ligar `@tanstack/offline-transactions` para guardar a fila no disco e reenviar ao voltar a ligação.
 - Os hooks `useCreateTransaction`, `useUpdateTransaction`, `useDeleteTransaction` e os de transferência passam a escrever na coleção no desktop.
 - Depois de cada envio com sucesso, invalidar as queries online que dependem do dinheiro (o actual `refreshMoney`).
-- Bloquear offline as acções fora do âmbito (mensagem "precisa de ligação").
+- Bloquear offline as acções fora do âmbito (mensagem "precisa de ligação"). Passa para o passo 5, junto com esconder o que é só online, porque precisa do estado da ligação.
 - **Verificação:** criar, editar e apagar sem rede; fechar e reabrir o app; voltar a ligar a rede e confirmar no servidor sem duplicados.
 
 ### 5. Saldos e dashboard offline
 - Saldo mostrado = `balance` do servidor + alterações pendentes dessa conta.
 - No dashboard, saldos e totais do mês calculados a partir das coleções.
-- Offline, o que não funciona sem ligação não se mostra: cartões de analytics, menus e páginas só online ficam escondidos até a ligação voltar.
+- Offline, o que não funciona sem ligação não se mostra: cartões de analytics, menus e páginas só online ficam escondidos até a ligação voltar. Na sidebar só ficam as páginas que funcionam offline (Painel, Transacções, Contas, Categorias); as outras desaparecem e voltam quando a ligação volta. Abrir uma rota só online sem ligação manda para o Painel.
 - **Verificação:** registar um gasto offline actualiza logo o saldo e o total do mês.
 
 ### 6. Indicador de sincronização

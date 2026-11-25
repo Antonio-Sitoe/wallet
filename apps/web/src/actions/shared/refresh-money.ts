@@ -20,6 +20,9 @@ export function refreshMoney(qc: QueryClient) {
 		"shopping",
 		"planned",
 	]) {
-		qc.invalidateQueries({ queryKey: [key] });
+		qc.invalidateQueries({
+			queryKey: [key],
+			predicate: (query) => query.queryKey[1] !== "window",
+		});
 	}
 }

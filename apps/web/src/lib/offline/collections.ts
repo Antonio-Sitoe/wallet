@@ -11,8 +11,9 @@ import type {
 import { TEMPLATES_KEY } from "@/actions/settings/keys";
 import { api } from "@/lib/api";
 import { openPersistence, type Persistence } from "@/lib/offline/persistence";
-import { setOfflineCollections } from "@/lib/offline/registry";
+import { setOfflineCollections, setOfflineWrites } from "@/lib/offline/registry";
 import { windowStart } from "@/lib/offline/transaction-window";
+import { createOfflineWrites, type OfflineWrites } from "@/lib/offline/writes";
 import { queryClient } from "@/lib/query-client";
 
 export type Ordered<T> = T & { serverOrder: number };
@@ -110,6 +111,7 @@ export type OfflineCollections = ReturnType<typeof createCollections>;
 type Opened = {
 	userId: string;
 	collections: OfflineCollections;
+	writes: OfflineWrites;
 	close: () => Promise<unknown>;
 };
 
@@ -118,9 +120,13 @@ let opening: Promise<Opened> | null = null;
 
 async function open(userId: string): Promise<Opened> {
 	const { database, persistence } = await openPersistence(userId);
+	const collections = createCollections(persistence);
+	const writes = createOfflineWrites(userId, collections.transactions);
+	await writes.ready();
 	return {
 		userId,
-		collections: createCollections(persistence),
+		collections,
+		writes,
 		close: () => database.close(),
 	};
 }
@@ -132,6 +138,7 @@ export async function initOfflineCollections(userId: string) {
 		opened = result;
 		opening = null;
 		setOfflineCollections(result.collections);
+		setOfflineWrites(result.writes);
 		return result;
 	});
 	return (await opening).collections;
@@ -141,7 +148,9 @@ export async function resetOfflineCollections() {
 	const current = opened;
 	opened = null;
 	setOfflineCollections(null);
+	setOfflineWrites(null);
 	if (!current) return;
+	current.writes.dispose();
 	await Promise.all(
 		Object.values(current.collections).map((collection) =>
 			collection.cleanup(),

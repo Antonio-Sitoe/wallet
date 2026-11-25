@@ -1,4 +1,5 @@
 import type { OfflineCollections } from "@/lib/offline/collections";
+import type { OfflineWrites } from "@/lib/offline/writes";
 
 let current: OfflineCollections | null = null;
 
@@ -11,4 +12,18 @@ export function offlineCollections() {
 	return current;
 }
 
-export const loadOffline = () => import("@/lib/offline/collections");
+let writes: OfflineWrites | null = null;
+
+export function setOfflineWrites(next: OfflineWrites | null) {
+	writes = next;
+}
+
+export function offlineWrites() {
+	if (!writes) throw new Error("Offline writes are not ready");
+	return writes;
+}
+
+export const loadOffline = () =>
+	import.meta.env.VITE_DESKTOP === "1"
+		? import("@/lib/offline/collections")
+		: Promise.reject(new Error("Offline is desktop only"));
