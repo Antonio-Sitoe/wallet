@@ -4,6 +4,7 @@ import type { Category, Transaction, TransactionPage } from "@wallet/shared";
 import { useCallback, useMemo, useState } from "react";
 import type { TransactionFilters } from "@/@types/transaction-filters";
 import { api } from "@/lib/api";
+import { useOnline } from "@/lib/connection";
 import { offlineEnabled } from "@/lib/offline/flag";
 import { offlineCollections } from "@/lib/offline/registry";
 import {
@@ -75,9 +76,10 @@ function useLocalTransactionPages(filters: TransactionFilters, limit: number) {
 
 function useTransactionPagesDesktop(filters: TransactionFilters, limit = 100) {
 	const local = useLocalTransactionPages(filters, limit);
+	const connected = useOnline();
 	const inside = insideWindow(filters);
-	const online = useTransactionPagesOnline(filters, limit, !inside);
-	if (inside || online.isError) return local;
+	const online = useTransactionPagesOnline(filters, limit, !inside && connected);
+	if (inside || !connected || online.isError) return local;
 	return online;
 }
 

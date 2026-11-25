@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 import { useAccounts } from "@/actions/accounts/use-accounts";
+import { useOnline } from "@/lib/connection";
 import { searchHref } from "@/lib/search-params";
 import { money } from "@/utils/format";
 
@@ -61,6 +62,7 @@ function AccountTile({ account }: { account: Account }) {
 
 export function AccountTiles() {
 	const accounts = useAccounts();
+	const online = useOnline();
 
 	if (accounts.isPending)
 		return (
@@ -76,12 +78,14 @@ export function AccountTiles() {
 			{(accounts.data ?? []).map((account) => (
 				<AccountTile key={account.id} account={account} />
 			))}
+			{online ? (
 			<Link
 				to={searchHref("accounts", { create: true })}
 				className="border-line-strong text-fg-2 hover:text-fg hover:border-fg-2 rounded-card flex min-h-16.5 items-center justify-center gap-1.5 border border-dashed text-sm no-underline transition-colors"
 			>
 				<PlusIcon className="size-4" aria-hidden="true" /> Adicionar conta
 			</Link>
+			) : null}
 		</section>
 	);
 }

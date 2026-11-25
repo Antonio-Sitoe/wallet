@@ -9,6 +9,7 @@ import {
 	offlineUserId,
 	rememberOfflineUser,
 } from "@/lib/auth-client";
+import { reportOffline } from "@/lib/connection";
 import { isFirstUse } from "@/lib/first-use";
 import { offlineEnabled } from "@/lib/offline/flag";
 import { loadOffline } from "@/lib/offline/registry";
@@ -23,7 +24,9 @@ async function sessionUserId() {
 	if (session?.data) return session.data.user.id;
 	const status = session?.error?.status ?? 0;
 	const unreachable = !session || status === 0 || status >= 500;
-	return unreachable ? offlineUserId() : null;
+	if (!unreachable) return null;
+	reportOffline();
+	return offlineUserId();
 }
 
 async function requireSession() {

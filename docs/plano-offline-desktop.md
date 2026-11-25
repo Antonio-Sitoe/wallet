@@ -32,6 +32,7 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 - **Abrir sem rede:** as coleções usam `initialRender: { strategy: "network-first" }`; se a rede falhar ou passar de 3 s, abrem com o que está no disco.
 - **Transferências offline:** sem coleção própria; uma transferência são as duas pernas na coleção `transactions` (`transferId`). Depois de enviar, as pernas optimistas dão lugar às do servidor (`GET /transactions/:id` de cada perna).
 - **Fila offline:** `@tanstack/offline-transactions` com IndexedDB, uma fila por utilizador (`wallet-outbox-<userId>`). Erros 4xx (fora 401/408/425/429) não se repetem e desfazem a alteração local com aviso.
+- **Estado da ligação:** vem dos pedidos à API (`src/lib/connection.ts`). Um erro de rede marca offline; a partir daí testa-se `GET /` a cada 5 s. Ao voltar, a fila é enviada e todas as queries são pedidas outra vez. O `navigator.onLine` não serve porque a API pode estar em baixo com rede.
 - **Preferências:** ficam com TanStack Query por agora (são um objecto só, com escrita optimista própria); entram mais tarde.
 
 ## Passos
@@ -94,4 +95,5 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 
 - O TanStack DB ainda está em versão pré-1.0; fixar versões exactas.
 - Os filtros de transacções que o servidor resolve (ex.: categoria com descendentes) têm de ser replicados localmente.
+- Abrir o app sem servidor demora 10 a 20 s até aparecer o Painel; falta perceber onde se perde o tempo (sessão, keychain ou coleções).
 - O tamanho da janela de 12 meses pode ser grande para quem importou muito histórico. Medido no passo 3: cerca de 1 100 transacções por conta (de 3 100 no total), 6 pedidos de 200 por sincronização completa.

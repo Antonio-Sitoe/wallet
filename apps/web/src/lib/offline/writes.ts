@@ -17,6 +17,11 @@ import { toast } from "sonner";
 import type { Wire } from "@/@types/wire";
 import { refreshMoney } from "@/actions/shared/refresh-money";
 import { ApiError, api, errorMessage } from "@/lib/api";
+import {
+	isOnline,
+	reportOnline,
+	subscribeConnection,
+} from "@/lib/connection";
 import type { OfflineCollections } from "@/lib/offline/collections";
 import { transferOf } from "@/lib/offline/transaction-window";
 import { queryClient } from "@/lib/query-client";
@@ -35,6 +40,35 @@ type Transactions = OfflineCollections["transactions"];
 type Params = Parameters<OfflineConfig["mutationFns"][string]>[0];
 
 const RETRYABLE = new Set([401, 408, 425, 429]);
+
+type Mutation = {
+	type: string;
+	modified?: Partial<Transaction>;
+	original?: Partial<Transaction>;
+};
+
+export type PendingState = { count: number; deltas: Map<string, number> };
+
+function addDelta(
+	deltas: Map<string, number>,
+	row: Partial<Transaction> | undefined,
+	sign: 1 | -1,
+) {
+	if (!row?.accountId || typeof row.amount !== "number") return;
+	deltas.set(
+		row.accountId,
+		(deltas.get(row.accountId) ?? 0) + sign * row.amount,
+	);
+}
+
+function deltasOf(mutations: Mutation[]) {
+	const deltas = new Map<string, number>();
+	for (const mutation of mutations) {
+		if (mutation.type !== "insert") addDelta(deltas, mutation.original, -1);
+		if (mutation.type !== "delete") addDelta(deltas, mutation.modified, 1);
+	}
+	return deltas;
+}
 
 async function send<T>(request: () => Promise<T>) {
 	try {
@@ -100,12 +134,46 @@ export function createOfflineWrites(
 	const synced = <T>(work: (params: Params) => Promise<T>) =>
 		async (params: Params) => {
 			await work(params);
+			await queryClient.refetchQueries({ queryKey: ["accounts"] });
 			refreshMoney(queryClient);
 		};
+
+	const pending = new Map<string, Map<string, number>>();
+	const pendingListeners = new Set<() => void>();
+	let pendingState: PendingState = { count: 0, deltas: new Map() };
+
+	function publishPending() {
+		const deltas = new Map<string, number>();
+		for (const entry of pending.values())
+			for (const [accountId, amount] of entry)
+				deltas.set(accountId, (deltas.get(accountId) ?? 0) + amount);
+		pendingState = { count: pending.size, deltas };
+		for (const listener of pendingListeners) listener();
+	}
+
+	function track(id: string, mutations: Mutation[], settled: Promise<unknown>) {
+		pending.set(id, deltasOf(mutations));
+		publishPending();
+		void settled
+			.catch(() => undefined)
+			.then(() => {
+				pending.delete(id);
+				publishPending();
+			});
+	}
 
 	const executor = startOfflineExecutor({
 		collections: { transactions },
 		storage: new IndexedDBAdapter(`wallet-outbox-${userId}`, "transactions"),
+		onlineDetector: {
+			subscribe: (callback) =>
+				subscribeConnection(() => {
+					if (isOnline()) callback();
+				}),
+			notifyOnline: reportOnline,
+			isOnline,
+			dispose: () => undefined,
+		},
 		mutationFns: {
 			createTransaction: synced(async ({ transaction }) => {
 				const row = await send(() =>
@@ -170,9 +238,9 @@ export function createOfflineWrites(
 			metadata,
 		});
 		const transaction = offline.mutate(apply);
-		transaction
-			.when("settled")
-			.catch((error: unknown) => toast.error(errorMessage(error)));
+		const settled = transaction.when("settled");
+		settled.catch((error: unknown) => toast.error(errorMessage(error)));
+		track(transaction.id, transaction.mutations as Mutation[], settled);
 	}
 
 	async function online<T>(request: () => Promise<T>) {
@@ -182,7 +250,22 @@ export function createOfflineWrites(
 	}
 
 	return {
-		ready: () => executor.waitForInit(),
+		async ready() {
+			await executor.waitForInit();
+			for (const restored of await executor.peekOutbox())
+				track(
+					restored.id,
+					restored.mutations as Mutation[],
+					executor.waitForTransactionCompletion(restored.id),
+				);
+		},
+		subscribePending(listener: () => void) {
+			pendingListeners.add(listener);
+			return () => {
+				pendingListeners.delete(listener);
+			};
+		},
+		pendingState: () => pendingState,
 		dispose: () => executor.dispose(),
 
 		createTransaction(input: CreateTransactionBody) {

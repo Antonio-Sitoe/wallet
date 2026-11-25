@@ -10,6 +10,7 @@ import type {
 } from "@wallet/shared";
 import { TEMPLATES_KEY } from "@/actions/settings/keys";
 import { api } from "@/lib/api";
+import { isOnline, subscribeConnection } from "@/lib/connection";
 import { openPersistence, type Persistence } from "@/lib/offline/persistence";
 import { setOfflineCollections, setOfflineWrites } from "@/lib/offline/registry";
 import { windowStart } from "@/lib/offline/transaction-window";
@@ -123,11 +124,17 @@ async function open(userId: string): Promise<Opened> {
 	const collections = createCollections(persistence);
 	const writes = createOfflineWrites(userId, collections.transactions);
 	await writes.ready();
+	const stopWatching = subscribeConnection(() => {
+		if (isOnline()) void queryClient.invalidateQueries();
+	});
 	return {
 		userId,
 		collections,
 		writes,
-		close: () => database.close(),
+		close: () => {
+			stopWatching();
+			return database.close();
+		},
 	};
 }
 

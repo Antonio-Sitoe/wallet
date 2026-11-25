@@ -33,12 +33,14 @@ import { AccountTiles } from "@/components/dashboard/account-tiles";
 import { AddCardDialog } from "@/components/dashboard/add-card-dialog";
 import { DashboardCardFrame } from "@/components/dashboard/dashboard-card-frame";
 import { Greeting } from "@/components/dashboard/greeting";
+import { OfflineDashboard } from "@/components/dashboard/offline-dashboard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
 import { useConfirm } from "@/contexts/confirm-context";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
+import { useOnline } from "@/lib/connection";
 import {
 	searchHref,
 	usePageNavigate,
@@ -96,6 +98,7 @@ export function periodLabel(kind: Kind, p: Period) {
 
 export function Dashboard() {
 	const confirmAction = useConfirm();
+	const online = useOnline();
 	const search = usePageSearch("dashboard");
 	const navigate = usePageNavigate("dashboard");
 	const kind: Kind = search.period ?? "month";
@@ -184,18 +187,27 @@ export function Dashboard() {
 						<ChevronRightIcon className="size-4" />
 					</Button>
 				</div>
-				<Link to={searchHref("budget", { month: period.to.slice(0, 7) })}>
-					<Button variant="neutral">
-						Lista de {monthLabel(period.to.slice(0, 7)).split(" ")[0]}
-					</Button>
-				</Link>
-				<Button variant="primary" onClick={() => setAdding(true)}>
-					<PlusIcon className="size-3.5" strokeWidth={2.6} /> Adicionar carta
-				</Button>
+				{online ? (
+					<>
+						<Link to={searchHref("budget", { month: period.to.slice(0, 7) })}>
+							<Button variant="neutral">
+								Lista de {monthLabel(period.to.slice(0, 7)).split(" ")[0]}
+							</Button>
+						</Link>
+						<Button variant="primary" onClick={() => setAdding(true)}>
+							<PlusIcon className="size-3.5" strokeWidth={2.6} /> Adicionar
+							carta
+						</Button>
+					</>
+				) : null}
 			</PageHeader>
 			<Page>
 				<Greeting
-					meta={`${monthLabel(period.to.slice(0, 7)).toLowerCase()} · ${listMeta}`}
+					meta={
+						online
+							? `${monthLabel(period.to.slice(0, 7)).toLowerCase()} · ${listMeta}`
+							: `${monthLabel(period.to.slice(0, 7)).toLowerCase()} · sem ligação`
+					}
 				/>
 				<AccountTiles />
 
@@ -215,16 +227,20 @@ export function Dashboard() {
 							porque o export do Wallet não traz saldos iniciais.
 							{unset.length > 1 ? ` (+${unset.length - 1} contas)` : ""}
 						</span>
-						<Link
-							to={searchHref("accounts", { validate: true })}
-							className="text-warn font-medium"
-						>
-							Definir saldos →
-						</Link>
+						{online ? (
+							<Link
+								to={searchHref("accounts", { validate: true })}
+								className="text-warn font-medium"
+							>
+								Definir saldos →
+							</Link>
+						) : null}
 					</div>
 				) : null}
 
-				{cards.isPending ? (
+				{!online ? (
+					<OfflineDashboard period={period} />
+				) : cards.isPending ? (
 					<Skeleton className="h-96" />
 				) : list.length === 0 ? (
 					<EmptyState
@@ -269,7 +285,7 @@ export function Dashboard() {
 					</DndContext>
 				)}
 
-				{list.length > 0 ? (
+				{online && list.length > 0 ? (
 					<div className="flex flex-wrap justify-end gap-2">
 						<Button variant="quiet" size="sm" onClick={() => openNew()}>
 							Nova transacção

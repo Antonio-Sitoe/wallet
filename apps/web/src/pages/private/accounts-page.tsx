@@ -20,6 +20,7 @@ import { Pill } from "@/components/ui/pill";
 import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { Swatch } from "@/components/ui/swatch";
+import { useOnline } from "@/lib/connection";
 import {
 	searchHref,
 	usePageNavigate,
@@ -39,6 +40,7 @@ export function AccountsPage() {
 	const accounts = useAccounts(!!archived);
 	const [creating, setCreating] = useState(!!create);
 	const [startOver, setStartOver] = useState(false);
+	const online = useOnline();
 	const list = accounts.data ?? [];
 	const selected = list.find((a) => a.id === id);
 	const sum = (types: AccountType[]) =>
@@ -55,18 +57,24 @@ export function AccountsPage() {
 				>
 					{archived ? "Esconder arquivadas" : "Mostrar arquivadas"}
 				</Link>
-				<Button
-					variant="neutral"
-					onClick={() => navigate({ search: { id, archived, validate: true } })}
-				>
-					Validar saldos
-				</Button>
-				<Button variant="neutral" onClick={() => setStartOver(true)}>
-					Começar do zero
-				</Button>
-				<Button variant="primary" onClick={() => setCreating(true)}>
-					<PlusIcon className="size-3.5" strokeWidth={2.6} /> Nova conta
-				</Button>
+				{online ? (
+					<>
+						<Button
+							variant="neutral"
+							onClick={() =>
+								navigate({ search: { id, archived, validate: true } })
+							}
+						>
+							Validar saldos
+						</Button>
+						<Button variant="neutral" onClick={() => setStartOver(true)}>
+							Começar do zero
+						</Button>
+						<Button variant="primary" onClick={() => setCreating(true)}>
+							<PlusIcon className="size-3.5" strokeWidth={2.6} /> Nova conta
+						</Button>
+					</>
+				) : null}
 			</PageHeader>
 			{startOver ? (
 				<StartOverDialog

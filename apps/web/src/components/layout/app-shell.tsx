@@ -50,6 +50,7 @@ import { usePreferencesContext } from "@/contexts/preferences-context";
 import { useOpenSettings } from "@/contexts/settings-context";
 import { ApiError } from "@/lib/api";
 import { authClient, clearDesktopToken } from "@/lib/auth-client";
+import { useOnline } from "@/lib/connection";
 import { offlineEnabled } from "@/lib/offline/flag";
 import { loadOffline } from "@/lib/offline/registry";
 import { formatCombo, useShortcutMap, useShortcuts } from "@/lib/shortcuts";
@@ -60,12 +61,14 @@ export const NAV = [
 		label: "Painel",
 		icon: LayoutDashboardIcon,
 		group: "Dia a dia",
+		offline: true,
 	},
 	{
 		to: "/transactions",
 		label: "Transacções",
 		icon: ArrowLeftRightIcon,
 		group: "Dia a dia",
+		offline: true,
 	},
 	{
 		to: "/payments",
@@ -100,15 +103,25 @@ export const NAV = [
 		icon: SparklesIcon,
 		group: "Analisar",
 	},
-	{ to: "/accounts", label: "Contas", icon: LandmarkIcon, group: "Configurar" },
+	{
+		to: "/accounts",
+		label: "Contas",
+		icon: LandmarkIcon,
+		group: "Configurar",
+		offline: true,
+	},
 	{
 		to: "/categories",
 		label: "Categorias",
 		icon: TagIcon,
 		group: "Configurar",
+		offline: true,
 	},
 	{ to: "/import", label: "Importar", icon: DownloadIcon, group: "Configurar" },
 ] as const;
+
+const worksOffline = (item: (typeof NAV)[number]) =>
+	"offline" in item && item.offline;
 
 export const isMac =
 	typeof navigator !== "undefined" &&
@@ -121,7 +134,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 	const queryClient = useQueryClient();
 	useThemeShortcut();
 	const { pathname } = useLocation();
-	const { data: session } = authClient.useSession();
+	const online = useOnline();
+	const nav = online ? NAV : NAV.filter(worksOffline);
+	const { data: session, refetch: refetchSession } = authClient.useSession();
 	const openSettings = useOpenSettings();
 	const [dialog, setDialog] = useState<{
 		open: boolean;
@@ -136,6 +151,18 @@ export function AppShell({ children }: { children: ReactNode }) {
 		(defaults?: NewTransactionDefaults) => setDialog({ open: true, defaults }),
 		[],
 	);
+
+	useEffect(() => {
+		if (online && !session) refetchSession();
+	}, [online, session, refetchSession]);
+
+	useEffect(() => {
+		if (online) return;
+		const allowed = NAV.some(
+			(item) => worksOffline(item) && pathname.startsWith(item.to),
+		);
+		if (!allowed) navigate("/dashboard", { replace: true });
+	}, [online, pathname, navigate]);
 
 	useEffect(() => {
 		const onRejection = (e: PromiseRejectionEvent) => {
@@ -153,10 +180,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 	};
 	useShortcuts({
 		newTransaction: () => openNew(),
-		palette: () => setPalette((p) => ({ open: !p.open, mode: "search" })),
+		palette: () => {
+			if (online) setPalette((p) => ({ open: !p.open, mode: "search" }));
+		},
 		assistant: () => {
 			setPalette((p) => ({ ...p, open: false }));
-			navigate("/assistant");
+			if (online) navigate("/assistant");
 		},
 		hideMoney: () => {
 			if (!preferences) return;
@@ -246,6 +275,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 							{formatCombo(keys.newTransaction)}
 						</span>
 					</Button>
+					{online ? (
 					<Button
 						variant="neutral"
 						onClick={() => setPalette({ open: true, mode: "search" })}
@@ -255,12 +285,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 						<span className="flex-1 text-left">Procurar ou perguntar</span>
 						<span className="num text-[11px]">{formatCombo(keys.palette)}</span>
 					</Button>
+					) : null}
 
 					<div className="flex gap-0.5 overflow-x-auto md:flex-col">
-						{NAV.map((item, i) => {
+						{nav.map((item, i) => {
 							const active = pathname.startsWith(item.to);
 							const Icon = item.icon;
-							const startsGroup = i === 0 || NAV[i - 1]?.group !== item.group;
+							const startsGroup = i === 0 || nav[i - 1]?.group !== item.group;
 							return (
 								<Fragment key={item.to}>
 									{startsGroup ? (
@@ -284,7 +315,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 											strokeWidth={1.8}
 										/>
 										<span className="flex-1">{item.label}</span>
-										{i < 10 ? (
+										{online && i < 10 ? (
 											<span className="num text-dim hidden text-[11px] md:inline">
 												{formatCombo(keys[`nav${i + 1}` as keyof typeof keys])}
 											</span>
@@ -308,8 +339,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 					{children}
 					<footer className="num border-line bg-panel text-dim mt-auto flex min-h-7 flex-wrap items-center gap-4 border-t px-4 text-[11px]">
 						<span className="inline-flex items-center gap-1.5">
-							<span className="bg-money inline-block size-[7px] rounded-full" />
-							ligado
+							<span
+								className={`${online ? "bg-money" : "bg-warn"} inline-block size-[7px] rounded-full`}
+							/>
+							{online ? "ligado" : "sem ligação"}
 						</span>
 						<span className="ml-auto">v0.1 · mvp</span>
 					</footer>
