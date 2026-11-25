@@ -49,6 +49,14 @@ type Mutation = {
 
 export type PendingState = { count: number; deltas: Map<string, number> };
 
+export type RejectedChange = {
+	id: string;
+	mutationFnName: string;
+	metadata: Record<string, unknown>;
+	message: string;
+	at: string;
+};
+
 function addDelta(
 	deltas: Map<string, number>,
 	row: Partial<Transaction> | undefined,
@@ -151,13 +159,43 @@ export function createOfflineWrites(
 		for (const listener of pendingListeners) listener();
 	}
 
-	function track(id: string, mutations: Mutation[], settled: Promise<unknown>) {
-		pending.set(id, deltasOf(mutations));
+	const rejectedKey = `wallet-rejected-${userId}`;
+	const rejectedListeners = new Set<() => void>();
+	let rejected: RejectedChange[] = [];
+	try {
+		rejected = JSON.parse(localStorage.getItem(rejectedKey) ?? "[]");
+	} catch {
+		rejected = [];
+	}
+
+	function setRejected(next: RejectedChange[]) {
+		rejected = next;
+		try {
+			localStorage.setItem(rejectedKey, JSON.stringify(next));
+		} catch {}
+		for (const listener of rejectedListeners) listener();
+	}
+
+	function track(
+		entry: Omit<RejectedChange, "message" | "at">,
+		mutations: Mutation[],
+		settled: Promise<unknown>,
+	) {
+		pending.set(entry.id, deltasOf(mutations));
 		publishPending();
 		void settled
-			.catch(() => undefined)
+			.catch((error: unknown) => {
+				setRejected([
+					...rejected.filter((change) => change.id !== entry.id),
+					{
+						...entry,
+						message: errorMessage(error),
+						at: new Date().toISOString(),
+					},
+				]);
+			})
 			.then(() => {
-				pending.delete(id);
+				pending.delete(entry.id);
 				publishPending();
 			});
 	}
@@ -240,7 +278,11 @@ export function createOfflineWrites(
 		const transaction = offline.mutate(apply);
 		const settled = transaction.when("settled");
 		settled.catch((error: unknown) => toast.error(errorMessage(error)));
-		track(transaction.id, transaction.mutations as Mutation[], settled);
+		track(
+			{ id: transaction.id, mutationFnName, metadata },
+			transaction.mutations as Mutation[],
+			settled,
+		);
 	}
 
 	async function online<T>(request: () => Promise<T>) {
@@ -249,12 +291,16 @@ export function createOfflineWrites(
 		return result;
 	}
 
-	return {
+	const writes = {
 		async ready() {
 			await executor.waitForInit();
 			for (const restored of await executor.peekOutbox())
 				track(
-					restored.id,
+					{
+						id: restored.id,
+						mutationFnName: restored.mutationFnName,
+						metadata: restored.metadata ?? {},
+					},
 					restored.mutations as Mutation[],
 					executor.waitForTransactionCompletion(restored.id),
 				);
@@ -266,6 +312,16 @@ export function createOfflineWrites(
 			};
 		},
 		pendingState: () => pendingState,
+		subscribeRejected(listener: () => void) {
+			rejectedListeners.add(listener);
+			return () => {
+				rejectedListeners.delete(listener);
+			};
+		},
+		rejected: () => rejected,
+		discard(id: string) {
+			setRejected(rejected.filter((change) => change.id !== id));
+		},
 		dispose: () => executor.dispose(),
 
 		createTransaction(input: CreateTransactionBody) {
@@ -436,6 +492,34 @@ export function createOfflineWrites(
 			return Promise.resolve();
 		},
 	};
+
+	function retry(id: string) {
+		const change = rejected.find((entry) => entry.id === id);
+		if (!change) return Promise.resolve();
+		setRejected(rejected.filter((entry) => entry.id !== id));
+		const { body, id: target } = change.metadata as {
+			body?: unknown;
+			id?: string;
+		};
+		switch (change.mutationFnName) {
+			case "createTransaction":
+				return writes.createTransaction(body as CreateTransactionBody);
+			case "updateTransaction":
+				return writes.updateTransaction(body as UpdateTransactionBody);
+			case "deleteTransaction":
+				return writes.deleteTransaction(target as string);
+			case "createTransfer":
+				return writes.createTransfer(body as CreateTransferBody);
+			case "updateTransfer":
+				return writes.updateTransfer(body as UpdateTransferBody);
+			case "deleteTransfer":
+				return writes.deleteTransfer(target as string);
+			default:
+				return Promise.resolve();
+		}
+	}
+
+	return { ...writes, retry };
 }
 
 export type OfflineWrites = ReturnType<typeof createOfflineWrites>;

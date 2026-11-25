@@ -33,6 +33,7 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 - **Transferências offline:** sem coleção própria; uma transferência são as duas pernas na coleção `transactions` (`transferId`). Depois de enviar, as pernas optimistas dão lugar às do servidor (`GET /transactions/:id` de cada perna).
 - **Fila offline:** `@tanstack/offline-transactions` com IndexedDB, uma fila por utilizador (`wallet-outbox-<userId>`). Erros 4xx (fora 401/408/425/429) não se repetem e desfazem a alteração local com aviso.
 - **Estado da ligação:** vem dos pedidos à API (`src/lib/connection.ts`). Um erro de rede marca offline; a partir daí testa-se `GET /` a cada 5 s. Ao voltar, a fila é enviada e todas as queries são pedidas outra vez. O `navigator.onLine` não serve porque a API pode estar em baixo com rede.
+- **Alterações rejeitadas:** ficam guardadas por utilizador (`wallet-rejected-<userId>` no localStorage) com o pedido original; "Tentar outra vez" volta a pôr na fila, "Descartar" só tira da lista (a alteração local já foi desfeita).
 - **Preferências:** ficam com TanStack Query por agora (são um objecto só, com escrita optimista própria); entram mais tarde.
 
 ## Passos

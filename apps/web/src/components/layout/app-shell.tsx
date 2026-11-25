@@ -33,6 +33,7 @@ import {
 	CommandPalette,
 	type PaletteMode,
 } from "@/components/assistant/command-palette";
+import { SyncStatus } from "@/components/layout/sync-status";
 import {
 	ThemeCycleButton,
 	useThemeShortcut,
@@ -338,12 +339,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 				>
 					{children}
 					<footer className="num border-line bg-panel text-dim mt-auto flex min-h-7 flex-wrap items-center gap-4 border-t px-4 text-[11px]">
-						<span className="inline-flex items-center gap-1.5">
-							<span
-								className={`${online ? "bg-money" : "bg-warn"} inline-block size-[7px] rounded-full`}
-							/>
-							{online ? "ligado" : "sem ligação"}
-						</span>
+						{offlineEnabled ? (
+							<SyncStatus />
+						) : (
+							<span className="inline-flex items-center gap-1.5">
+								<span className="bg-money inline-block size-[7px] rounded-full" />
+								ligado
+							</span>
+						)}
 						<span className="ml-auto">v0.1 · mvp</span>
 					</footer>
 				</div>
