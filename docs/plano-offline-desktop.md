@@ -92,4 +92,4 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 
 - O TanStack DB ainda está em versão pré-1.0; fixar versões exactas.
 - Os filtros de transacções que o servidor resolve (ex.: categoria com descendentes) têm de ser replicados localmente.
-- O tamanho da janela de 12 meses pode ser grande para quem importou muito histórico; medir no passo 3.
+- O tamanho da janela de 12 meses pode ser grande para quem importou muito histórico. Medido no passo 3: cerca de 1 100 transacções por conta (de 3 100 no total), 6 pedidos de 200 por sincronização completa.

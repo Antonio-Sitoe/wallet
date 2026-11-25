@@ -1,17 +1,40 @@
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import { createCollection } from "@tanstack/react-db";
 import { persistedCollectionOptions } from "@tanstack/tauri-db-sqlite-persistence";
-import type { Account, Category, TransactionTemplate } from "@wallet/shared";
+import type {
+	Account,
+	Category,
+	Transaction,
+	TransactionPage,
+	TransactionTemplate,
+} from "@wallet/shared";
 import { TEMPLATES_KEY } from "@/actions/settings/keys";
 import { api } from "@/lib/api";
 import { openPersistence, type Persistence } from "@/lib/offline/persistence";
 import { setOfflineCollections } from "@/lib/offline/registry";
+import { windowStart } from "@/lib/offline/transaction-window";
 import { queryClient } from "@/lib/query-client";
 
 export type Ordered<T> = T & { serverOrder: number };
 
 const withOrder = <T>(rows: T[]): Ordered<T>[] =>
 	rows.map((row, serverOrder) => ({ ...row, serverOrder }));
+
+export const TRANSACTIONS_WINDOW_KEY = ["transactions", "window"] as const;
+
+async function fetchTransactionWindow() {
+	const from = windowStart().toISOString();
+	const rows: Transaction[] = [];
+	let cursor: string | undefined;
+	do {
+		const page = await api<TransactionPage>("/transactions", {
+			query: { from, limit: 200, cursor },
+		});
+		rows.push(...page.items);
+		cursor = page.nextCursor ?? undefined;
+	} while (cursor);
+	return rows;
+}
 
 function createCollections(persistence: Persistence) {
 	return {
@@ -59,6 +82,20 @@ function createCollections(persistence: Persistence) {
 						),
 					queryClient,
 					getKey: (template: Ordered<TransactionTemplate>) => template.id,
+				}),
+				persistence,
+				schemaVersion: 1,
+				initialRender: { strategy: "network-first" },
+			}),
+		),
+		transactions: createCollection(
+			persistedCollectionOptions({
+				...queryCollectionOptions({
+					id: "transactions",
+					queryKey: [...TRANSACTIONS_WINDOW_KEY],
+					queryFn: fetchTransactionWindow,
+					queryClient,
+					getKey: (transaction: Transaction) => transaction.id,
 				}),
 				persistence,
 				schemaVersion: 1,
