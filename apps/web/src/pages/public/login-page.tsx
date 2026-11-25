@@ -24,27 +24,23 @@ export function LoginPage() {
 		if (password.length < 8)
 			return toast.error("A palavra-passe tem de ter pelo menos 8 caracteres");
 		setBusy(true);
-		const options = {
-			onSuccess: () => {
-				queryClient.clear();
-				navigate("/");
-			},
-			onError: (ctx: { error: { message?: string; statusText?: string } }) => {
-				toast.error(
-					ctx.error.message ||
-						ctx.error.statusText ||
-						"Não foi possível entrar",
-				);
-			},
-		};
-		if (mode === "in")
-			await authClient.signIn.email({ email, password }, options);
-		else
-			await authClient.signUp.email(
-				{ name: name || email.split("@")[0]!, email, password },
-				options,
-			);
+		const { error } =
+			mode === "in"
+				? await authClient.signIn.email({ email, password })
+				: await authClient.signUp.email({
+						name: name || email.split("@")[0]!,
+						email,
+						password,
+					});
 		setBusy(false);
+		if (error) {
+			toast.error(
+				error.message || error.statusText || "Não foi possível entrar",
+			);
+			return;
+		}
+		queryClient.clear();
+		navigate("/");
 	}
 
 	return (
