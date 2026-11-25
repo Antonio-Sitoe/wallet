@@ -18,6 +18,7 @@ export const labelList = z
 	.transform((list) => [...new Set(list)]);
 
 export const createTransactionInput = z.object({
+	id: id.optional(),
 	type: z.enum(["expense", "income"]),
 	accountId: id,
 	categoryId: id.nullable().default(null),
@@ -35,13 +36,14 @@ export const createTransactionInput = z.object({
 export type CreateTransactionInput = z.infer<typeof createTransactionInput>;
 
 export const updateTransactionInput = createTransactionInput
-	.omit({ categoryId: true })
+	.omit({ id: true, categoryId: true })
 	.extend({ categoryId: id.nullable() })
 	.partial();
 export type UpdateTransactionInput = z.infer<typeof updateTransactionInput>;
 
 export const createTransferInput = z
 	.object({
+		id: id.optional(),
 		fromAccountId: id,
 		toAccountId: id,
 		amount: positiveCents,

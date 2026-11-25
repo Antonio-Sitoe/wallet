@@ -133,12 +133,17 @@ export class TransactionsService {
 		input: CreateTransactionInput,
 		options: { debtId?: string } = {},
 	) {
+		if (input.id) {
+			const existing = await this.repository.findById(userId, input.id);
+			if (existing) return toTransaction(existing);
+		}
 		await this.deps.accounts.assertOwned(userId, [input.accountId]);
 		if (input.categoryId)
 			await this.deps.categories.assertOwned(userId, [input.categoryId]);
 		if (input.monthItemId)
 			await this.deps.budgets.assertMonthItemOwned(userId, input.monthItemId);
 		const id = await this.repository.insert({
+			id: input.id,
 			userId,
 			accountId: input.accountId,
 			categoryId: input.categoryId,
@@ -209,6 +214,8 @@ export class TransactionsService {
 		input: CreateTransferInput,
 		options: { goalId?: string } = {},
 	) {
+		if (input.id && (await this.repository.findTransfer(userId, input.id)))
+			return this.findTransfer(userId, input.id);
 		await this.deps.accounts.assertOwned(userId, [
 			input.fromAccountId,
 			input.toAccountId,
@@ -226,6 +233,7 @@ export class TransactionsService {
 		};
 		const id = await this.repository.insertTransfer(
 			{
+				id: input.id,
 				userId,
 				fromAccountId: input.fromAccountId,
 				toAccountId: input.toAccountId,

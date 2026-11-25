@@ -6,6 +6,8 @@
   "permissions": [
     "core:default",
     "notification:default",
+    "sql:default",
+    "sql:allow-execute",
     "core:window:allow-set-focus",
     "core:window:allow-unminimize",
     "core:window:allow-show"
