@@ -33,10 +33,12 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: paths.login,
+				handle: { title: "Entrar" },
 				lazy: page(() => import("@/pages/public/login-page"), "LoginPage"),
 			},
 			{
 				path: paths.start,
+				handle: { title: "Começar" },
 				loader: requireSession,
 				lazy: page(
 					() => import("@/pages/private/onboarding-page"),
@@ -53,6 +55,7 @@ export const router = createBrowserRouter([
 				children: [
 					{
 						path: paths.dashboard,
+						handle: { title: "Painel" },
 						lazy: page(
 							() => import("@/pages/private/dashboard-page"),
 							"Dashboard",
@@ -60,6 +63,7 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: paths.transactions,
+						handle: { title: "Transacções" },
 						lazy: page(
 							() => import("@/pages/private/transactions-page"),
 							"TransactionsPage",
@@ -67,6 +71,7 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: paths.accounts,
+						handle: { title: "Contas" },
 						lazy: page(
 							() => import("@/pages/private/accounts-page"),
 							"AccountsPage",
@@ -74,6 +79,7 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: paths.budget,
+						handle: { title: "Orçamento" },
 						lazy: page(
 							() => import("@/pages/private/budget-page"),
 							"BudgetPage",
@@ -81,18 +87,22 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: paths.stats,
+						handle: { title: "Estatísticas" },
 						lazy: page(() => import("@/pages/private/stats-page"), "StatsPage"),
 					},
 					{
 						path: paths.debts,
+						handle: { title: "Dívidas" },
 						lazy: page(() => import("@/pages/private/debts-page"), "DebtsPage"),
 					},
 					{
 						path: paths.goals,
+						handle: { title: "Metas" },
 						lazy: page(() => import("@/pages/private/goals-page"), "GoalsPage"),
 					},
 					{
 						path: paths.payments,
+						handle: { title: "Pagamentos" },
 						lazy: page(
 							() => import("@/pages/private/payments-page"),
 							"PaymentsPage",
@@ -100,10 +110,12 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: paths.plan,
+						handle: { title: "Plano anual" },
 						lazy: page(() => import("@/pages/private/plan-page"), "PlanPage"),
 					},
 					{
 						path: paths.import,
+						handle: { title: "Importar" },
 						lazy: page(
 							() => import("@/pages/private/import-page"),
 							"ImportPage",
@@ -111,6 +123,7 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: paths.shopping,
+						handle: { title: "Compras" },
 						lazy: page(
 							() => import("@/pages/private/shopping-page"),
 							"ShoppingPage",
@@ -118,6 +131,7 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: paths.categories,
+						handle: { title: "Categorias" },
 						lazy: page(
 							() => import("@/pages/private/categories-page"),
 							"CategoriesPage",
@@ -125,12 +139,17 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: paths.assistant,
+						handle: { title: "Assistente" },
 						lazy: page(
 							() => import("@/pages/private/assistant-page"),
 							"AssistantPage",
 						),
 					},
-					{ path: "*", Component: NotFound },
+					{
+						path: "*",
+						handle: { title: "Página não encontrada" },
+						Component: NotFound,
+					},
 				],
 			},
 		],

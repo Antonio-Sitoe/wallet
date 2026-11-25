@@ -2,10 +2,22 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@wallet/ui/components/sonner";
 import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
-import { useState } from "react";
-import { Outlet } from "react-router";
+import { useEffect, useState } from "react";
+import { Outlet, useMatches } from "react-router";
+
+function usePageTitle() {
+	const matches = useMatches();
+	const title = matches
+		.map((match) => (match.handle as { title?: string } | undefined)?.title)
+		.filter(Boolean)
+		.at(-1);
+	useEffect(() => {
+		document.title = title ? `${title} · Wallet` : "Wallet";
+	}, [title]);
+}
 
 export function RootLayout() {
+	usePageTitle();
 	const [queryClient] = useState(
 		() =>
 			new QueryClient({
