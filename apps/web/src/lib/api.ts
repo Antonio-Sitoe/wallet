@@ -42,7 +42,7 @@ export async function api<T>(
 ): Promise<T> {
 	const headers: Record<string, string> = {};
 	if (options.body !== undefined) headers["Content-Type"] = "application/json";
-	if (isDesktop) headers.Authorization = `Bearer ${readDesktopToken()}`;
+	if (isDesktop) headers.Authorization = `Bearer ${await readDesktopToken()}`;
 
 	const res = await fetch(`${BASE}/api${path}${toSearch(options.query)}`, {
 		method: options.method ?? "GET",
@@ -77,7 +77,7 @@ export function errorMessage(error: unknown): string {
 
 export async function apiDownload(path: string, query?: Query) {
 	const headers: Record<string, string> = {};
-	if (isDesktop) headers.Authorization = `Bearer ${readDesktopToken()}`;
+	if (isDesktop) headers.Authorization = `Bearer ${await readDesktopToken()}`;
 	const res = await fetch(`${BASE}/api${path}${toSearch(query)}`, {
 		headers,
 		credentials: "include",

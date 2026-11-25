@@ -37,6 +37,7 @@ import {
 } from "@/components/settings/preference-sections";
 import { ProfileSection } from "@/components/settings/profile-section";
 import { SecuritySection } from "@/components/settings/security-section";
+import { SessionsSection } from "@/components/settings/sessions-section";
 import { TemplatesSection } from "@/components/settings/templates-section";
 import type { SettingsSection } from "@/contexts/settings-context";
 
@@ -96,7 +97,7 @@ const SECTIONS: SectionMeta[] = [
 		label: "Segurança",
 		icon: ShieldIcon,
 		group: 1,
-		keywords: "pin bloquear",
+		keywords: "pin bloquear sessões dispositivos terminar",
 	},
 	{
 		id: "shortcuts",
@@ -157,7 +158,12 @@ export function SettingsDialog({
 		appearance: <AppearanceSection />,
 		templates: <TemplatesSection />,
 		notifications: <NotificationsSection />,
-		security: <SecuritySection onLock={close} />,
+		security: (
+			<div className="flex flex-col gap-8">
+				<SecuritySection onLock={close} />
+				<SessionsSection />
+			</div>
+		),
 		shortcuts: <ShortcutsSection />,
 		data: <DataSection onNavigate={close} />,
 		about: <AboutSection />,

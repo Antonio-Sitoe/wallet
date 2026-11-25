@@ -22,6 +22,10 @@ export function createAuth(
 		}),
 		trustedOrigins: [env.CORS_ORIGIN, ...desktopOrigins],
 		emailAndPassword: { enabled: true },
+		session: {
+			expiresIn: 60 * 60 * 24 * 365,
+			updateAge: 60 * 60 * 24,
+		},
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
 		advanced: {

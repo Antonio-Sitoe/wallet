@@ -15,20 +15,64 @@ function getServerUrl(url: string) {
 export const isDesktop =
 	typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
-const DESKTOP_TOKEN_KEY = "wallet.auth-token";
+const LEGACY_TOKEN_KEY = "wallet.auth-token";
 
-export function readDesktopToken() {
+const keychain = async <T>(command: string, args?: Record<string, unknown>) => {
+	const { invoke } = await import("@tauri-apps/api/core");
+	return invoke<T>(command, args);
+};
+
+const readLegacyToken = () => {
 	try {
-		return localStorage.getItem(DESKTOP_TOKEN_KEY) ?? "";
+		return localStorage.getItem(LEGACY_TOKEN_KEY) ?? "";
 	} catch {
 		return "";
 	}
+};
+
+const writeLegacyToken = (token: string) => {
+	try {
+		if (token) localStorage.setItem(LEGACY_TOKEN_KEY, token);
+		else localStorage.removeItem(LEGACY_TOKEN_KEY);
+	} catch {}
+};
+
+async function loadDesktopToken() {
+	try {
+		const stored = await keychain<string | null>("auth_token_get");
+		if (stored) return stored;
+	} catch {
+		return readLegacyToken();
+	}
+	const legacy = readLegacyToken();
+	if (legacy) {
+		try {
+			await keychain("auth_token_set", { token: legacy });
+			writeLegacyToken("");
+		} catch {}
+	}
+	return legacy;
+}
+
+let desktopToken: Promise<string> | null = null;
+
+export function readDesktopToken() {
+	desktopToken ??= loadDesktopToken();
+	return desktopToken;
+}
+
+function saveDesktopToken(token: string) {
+	desktopToken = Promise.resolve(token);
+	keychain("auth_token_set", { token }).then(
+		() => writeLegacyToken(""),
+		() => writeLegacyToken(token),
+	);
 }
 
 export function clearDesktopToken() {
-	try {
-		localStorage.removeItem(DESKTOP_TOKEN_KEY);
-	} catch {}
+	desktopToken = Promise.resolve("");
+	writeLegacyToken("");
+	keychain("auth_token_delete").catch(() => undefined);
 }
 
 export const authClient = createAuthClient({
@@ -38,11 +82,7 @@ export const authClient = createAuthClient({
 				auth: { type: "Bearer", token: readDesktopToken },
 				onSuccess: (ctx) => {
 					const token = ctx.response.headers.get("set-auth-token");
-					if (token) {
-						try {
-							localStorage.setItem(DESKTOP_TOKEN_KEY, token);
-						} catch {}
-					}
+					if (token) saveDesktopToken(token);
 				},
 			}
 		: undefined,
