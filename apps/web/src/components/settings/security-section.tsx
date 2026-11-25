@@ -1,3 +1,4 @@
+import { PIN_LENGTH } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Input } from "@wallet/ui/components/input";
 import { LockIcon, ShieldCheckIcon } from "lucide-react";
@@ -98,7 +99,8 @@ export function SecuritySection({ onLock }: { onLock: () => void }) {
 	);
 }
 
-const digitsOnly = (value: string) => value.replace(/\D/g, "").slice(0, 8);
+const digitsOnly = (value: string, max = 8) =>
+	value.replace(/\D/g, "").slice(0, max);
 
 function pinErrorMessage(error: unknown) {
 	if (error instanceof ApiError && error.code === "WRONG_PIN") {
@@ -128,7 +130,7 @@ function PinDialog({ mode, onClose }: { mode: PinMode; onClose: () => void }) {
 	const mismatch = needsNew && repeat.length > 0 && repeat !== next;
 	const valid =
 		(!needsCurrent || current.length >= 4) &&
-		(!needsNew || (next.length >= 4 && next === repeat));
+		(!needsNew || (next.length === PIN_LENGTH && next === repeat));
 	const pending = setPin.isPending || removePin.isPending;
 
 	async function save() {
@@ -163,7 +165,7 @@ function PinDialog({ mode, onClose }: { mode: PinMode; onClose: () => void }) {
 			open
 			onOpenChange={(open) => !open && onClose()}
 			title={title}
-			description="4 a 8 dígitos"
+			description={`${PIN_LENGTH} dígitos`}
 			width={380}
 			footer={
 				<>
@@ -209,7 +211,7 @@ function PinDialog({ mode, onClose }: { mode: PinMode; onClose: () => void }) {
 								autoComplete="off"
 								autoFocus={!needsCurrent}
 								value={next}
-								onChange={(e) => setNext(digitsOnly(e.target.value))}
+								onChange={(e) => setNext(digitsOnly(e.target.value, PIN_LENGTH))}
 								className="num tracking-[.4em]"
 							/>
 						</Field>
@@ -222,7 +224,9 @@ function PinDialog({ mode, onClose }: { mode: PinMode; onClose: () => void }) {
 								inputMode="numeric"
 								autoComplete="off"
 								value={repeat}
-								onChange={(e) => setRepeat(digitsOnly(e.target.value))}
+								onChange={(e) =>
+									setRepeat(digitsOnly(e.target.value, PIN_LENGTH))
+								}
 								className="num tracking-[.4em]"
 							/>
 						</Field>

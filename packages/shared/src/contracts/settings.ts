@@ -87,7 +87,9 @@ export const deleteProfileInput = z.object({
 	email: z.string().trim().min(1),
 });
 
-const pin = z.string().regex(/^\d{4,8}$/, "O PIN tem 4 a 8 dígitos");
+export const PIN_LENGTH = 4;
+
+const pin = z.string().regex(/^\d{4}$/, "O PIN tem 4 dígitos");
 
 export const setPinInput = z.object({
 	pin,
