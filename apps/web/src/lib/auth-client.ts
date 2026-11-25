@@ -58,8 +58,28 @@ function saveDesktopToken(token: string) {
 	);
 }
 
+const OFFLINE_USER_KEY = "wallet.offline-user";
+
+export function rememberOfflineUser(userId: string) {
+	try {
+		localStorage.setItem(OFFLINE_USER_KEY, userId);
+	} catch {}
+}
+
+export async function offlineUserId() {
+	if (!isDesktop || !(await readDesktopToken())) return null;
+	try {
+		return localStorage.getItem(OFFLINE_USER_KEY);
+	} catch {
+		return null;
+	}
+}
+
 export function clearDesktopToken() {
 	resetSession();
+	try {
+		localStorage.removeItem(OFFLINE_USER_KEY);
+	} catch {}
 	desktopToken = Promise.resolve("");
 	writeLegacyToken("");
 	keychain("auth_token_delete").catch(() => undefined);
@@ -83,10 +103,16 @@ type SessionResult = Awaited<ReturnType<typeof authClient.getSession>>;
 let cachedSession: Promise<SessionResult> | null = null;
 
 export function getSession() {
-	cachedSession ??= authClient.getSession().then((result) => {
-		if (!result.data) cachedSession = null;
-		return result;
-	});
+	cachedSession ??= authClient.getSession().then(
+		(result) => {
+			if (!result.data) cachedSession = null;
+			return result;
+		},
+		(error: unknown) => {
+			cachedSession = null;
+			throw error;
+		},
+	);
 	return cachedSession;
 }
 

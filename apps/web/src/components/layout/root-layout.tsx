@@ -1,9 +1,10 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@wallet/ui/components/sonner";
 import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Outlet, useMatches } from "react-router";
+import { queryClient } from "@/lib/query-client";
 
 function usePageTitle() {
 	const matches = useMatches();
@@ -18,14 +19,6 @@ function usePageTitle() {
 
 export function RootLayout() {
 	usePageTitle();
-	const [queryClient] = useState(
-		() =>
-			new QueryClient({
-				defaultOptions: {
-					queries: { staleTime: 15_000, refetchOnWindowFocus: false },
-				},
-			}),
-	);
 	return (
 		<ThemeProvider
 			attribute="class"

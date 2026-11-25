@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Segmented } from "@/components/ui/segmented";
 import { authClient } from "@/lib/auth-client";
+import { offlineEnabled } from "@/lib/offline/flag";
+import { loadOffline } from "@/lib/offline/registry";
 
 export function LoginPage() {
 	const navigate = useNavigate();
@@ -39,6 +41,7 @@ export function LoginPage() {
 			);
 			return;
 		}
+		if (offlineEnabled) await (await loadOffline()).resetOfflineCollections();
 		queryClient.clear();
 		navigate("/");
 	}

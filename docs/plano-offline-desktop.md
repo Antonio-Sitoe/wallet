@@ -25,7 +25,12 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 - **Conflitos:** a última escrita ganha.
 - **Apagados:** ao voltar a ligação faz-se refetch completo das tabelas de leitura e da janela de transacções. Sem `deleted_at` nesta fase.
 - **Janela local de transacções:** últimos 12 meses.
-- **Activação:** só quando `isDesktop`; atrás de uma flag para poder desligar.
+- **Activação:** só no build do desktop (`VITE_DESKTOP=1`, posto pelo `tauri.conf.json`) e quando `isDesktop`. Na web o código offline nem entra no bundle.
+- **Uma base local por utilizador:** `wallet-offline-<userId>.sqlite`, para nunca mostrar dados de outra conta.
+- **Entrar sem rede:** no desktop, se o servidor não responder e houver token guardado, usa-se o último utilizador. Um 401 continua a mandar para o login.
+- **SQLite no Tauri:** comandos próprios (`offline_db_*` em `src-tauri/src/offline_db.rs`) com uma ligação por ficheiro, em vez do `tauri-plugin-sql`. O pool do plugin mandava o `BEGIN` e o `COMMIT` do TanStack para ligações diferentes e as coleções falhavam.
+- **Abrir sem rede:** as coleções usam `initialRender: { strategy: "network-first" }`; se a rede falhar ou passar de 3 s, abrem com o que está no disco.
+- **Preferências:** ficam com TanStack Query por agora (são um objecto só, com escrita optimista própria); entram mais tarde.
 
 ## Passos
 

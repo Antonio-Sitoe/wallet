@@ -50,6 +50,8 @@ import { usePreferencesContext } from "@/contexts/preferences-context";
 import { useOpenSettings } from "@/contexts/settings-context";
 import { ApiError } from "@/lib/api";
 import { authClient, clearDesktopToken } from "@/lib/auth-client";
+import { offlineEnabled } from "@/lib/offline/flag";
+import { loadOffline } from "@/lib/offline/registry";
 import { formatCombo, useShortcutMap, useShortcuts } from "@/lib/shortcuts";
 
 export const NAV = [
@@ -178,8 +180,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 	const signOut = () =>
 		authClient.signOut({
 			fetchOptions: {
-				onSuccess: () => {
+				onSuccess: async () => {
 					clearDesktopToken();
+					if (offlineEnabled) await (await loadOffline()).resetOfflineCollections();
 					queryClient.clear();
 					navigate("/login");
 				},
