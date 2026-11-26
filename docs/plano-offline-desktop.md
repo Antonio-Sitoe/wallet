@@ -88,11 +88,10 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 - Ao entrar com outro utilizador: base local separada por utilizador ou apagada.
 - **Verificação:** terminar sessão, entrar com outra conta, não aparece nenhum dado da anterior.
 
-### 7b. Arranque lento sem servidor (por resolver)
-- Abrir o app sem servidor demora 10 a 20 s até aparecer o Painel.
-- Causa provável: o retry do TanStack Query (por omissão 3 tentativas com espera crescente) nas queries que o arranque espera, incluindo as das coleções.
-- Corrigir: sem retry quando o erro é de rede (ou quando `isOnline()` é falso), e confirmar se a sessão (`getSession`) e o keychain também atrasam.
-- **Verificação:** com o servidor parado, o Painel aparece em poucos segundos.
+### 7b. Arranque lento sem servidor
+- Causa 1: o `PinGate` espera pelas preferências, e o retry do TanStack Query (3 tentativas, 1 s + 2 s + 4 s) atrasava o erro. No desktop, erros de rede e pedidos já sem ligação deixam de ser repetidos (`src/lib/query-client.ts`).
+- Causa 2 (só em desenvolvimento): cada build de debug tem assinatura nova e o macOS pede outra vez acesso ao keychain; o app fica à espera dessa resposta. Num build de produção com assinatura estável não deve repetir-se (confirmar no passo 8).
+- **Verificação:** com o servidor parado, o Painel offline aparece em cerca de 3 s (antes 10 a 20 s); online continua igual.
 
 ### 8. Fecho
 - Testes manuais do fluxo completo no build de produção.
