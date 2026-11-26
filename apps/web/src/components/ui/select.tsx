@@ -45,7 +45,7 @@ export function Select({
 				size={size === "sm" ? "sm" : "default"}
 				aria-label={ariaLabel}
 				className={cn(
-					"w-full min-w-0",
+					"w-full min-w-0 max-md:text-sm max-md:data-[size=default]:h-11",
 					size === "md" && "data-[size=default]:h-8",
 					size === "sm" && "text-xs",
 					className,
@@ -55,7 +55,11 @@ export function Select({
 			</SelectTrigger>
 			<SelectContent>
 				{items.map((item) => (
-					<SelectItem key={item.value} value={item.value}>
+					<SelectItem
+						key={item.value}
+						value={item.value}
+						className="max-md:min-h-11 max-md:text-[15px]"
+					>
 						{item.label}
 					</SelectItem>
 				))}

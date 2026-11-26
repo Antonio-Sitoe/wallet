@@ -21,6 +21,7 @@ import { useUpdatePlan } from "@/actions/plan/use-update-plan";
 import { CreatePlan } from "@/components/plan/create-plan";
 import { Legend } from "@/components/plan/legend";
 import { PlanItemDialog } from "@/components/plan/plan-item-dialog";
+import { PlanMobileList } from "@/components/plan/plan-mobile-list";
 import { STICKY_COLUMN, Th } from "@/components/plan/th";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -205,7 +206,16 @@ export function PlanPage() {
 								os sazonais e os de uma vez.
 							</EmptyState>
 						) : (
-							<Card className="overflow-x-auto">
+							<>
+							<PlanMobileList
+								year={year}
+								items={data.items}
+								nowMonth={nowMonth}
+								describe={describeFrequency}
+								categoryName={categoryName}
+								onEdit={setEditing}
+							/>
+							<Card className="overflow-x-auto max-md:hidden">
 								<Table className="w-full min-w-[980px] border-collapse text-[13px]">
 									<TableHeader>
 										<TableRow className="bg-panel-2 border-0 hover:bg-transparent">
@@ -352,6 +362,7 @@ export function PlanPage() {
 									</span>
 								</div>
 							</Card>
+							</>
 						)}
 					</>
 				)}

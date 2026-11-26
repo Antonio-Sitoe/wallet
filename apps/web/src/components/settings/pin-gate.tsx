@@ -124,7 +124,7 @@ function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 	const seconds = String(secondsLeft % 60).padStart(2, "0");
 
 	return (
-		<main className="bg-canvas text-fg flex min-h-svh flex-col items-center justify-center gap-7 p-6">
+		<main className="bg-canvas text-fg flex min-h-svh flex-col items-center justify-center gap-7 p-6 max-md:pt-[max(24px,var(--safe-top))] max-md:pb-[max(24px,var(--safe-bottom))]">
 			<div className="flex flex-col items-center gap-3 text-center">
 				<BrandMark />
 				<h1 className="text-[17px] font-semibold">Wallet bloqueado</h1>
@@ -169,7 +169,7 @@ function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 				)}
 			</p>
 
-			<div className="grid w-[248px] grid-cols-3 gap-2.5">
+			<div className="grid w-[248px] grid-cols-3 gap-2.5 max-md:w-[280px] max-md:gap-3.5">
 				{KEYS.map((key) =>
 					key === "" ? (
 						<span key="blank" />
@@ -180,7 +180,7 @@ function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 							disabled={locked}
 							aria-label={key === "⌫" ? "Apagar" : key}
 							onClick={() => press(key)}
-							className="border-line bg-panel hover:bg-hover num flex h-14 cursor-pointer items-center justify-center rounded-xl border text-xl disabled:cursor-not-allowed disabled:opacity-40"
+							className="border-line bg-panel hover:bg-hover num flex h-14 cursor-pointer items-center justify-center rounded-xl border text-xl disabled:cursor-not-allowed disabled:opacity-40 max-md:h-16 max-md:rounded-full max-md:text-[26px]"
 						>
 							{key === "⌫" ? <DeleteIcon className="size-5" /> : key}
 						</button>
@@ -192,7 +192,7 @@ function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 				type="button"
 				onClick={submit}
 				disabled={pin.length < PIN_LENGTH || locked || verify.isPending}
-				className="bg-money text-money-ink hover:bg-money-2 h-input rounded-control w-[248px] cursor-pointer font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+				className="bg-money text-money-ink hover:bg-money-2 h-input rounded-control w-[248px] cursor-pointer font-semibold disabled:cursor-not-allowed disabled:opacity-40 max-md:h-[52px] max-md:w-[280px] max-md:rounded-2xl"
 			>
 				Desbloquear
 			</button>
