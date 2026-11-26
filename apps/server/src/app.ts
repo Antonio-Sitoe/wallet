@@ -19,6 +19,7 @@ import { createSearchModule } from "./modules/search";
 import { createSettingsModule } from "./modules/settings";
 import { createShoppingModule } from "./modules/shopping";
 import { createTransactionsModule } from "./modules/transactions";
+import { createWhatsappModule, type WhatsappConfig } from "./modules/whatsapp";
 import { errorHandler } from "./shared/errors/error-handler";
 import { createAuthGuard, toHeaders } from "./shared/middleware/auth-guard";
 import { createBasicVerifier } from "./shared/middleware/basic-auth";
@@ -29,9 +30,13 @@ export type AppOptions = {
 	corsOrigins: string[];
 	logger?: FastifyServerOptions["logger"];
 	jobs?: { connectionString: string };
+	whatsapp?: Partial<WhatsappConfig>;
 };
 
-export function buildModules(db: Database) {
+export function buildModules(
+	db: Database,
+	whatsappConfig: Partial<WhatsappConfig> = {},
+) {
 	let transactions: ReturnType<typeof createTransactionsModule> | undefined;
 	let budgets: ReturnType<typeof createBudgetsModule> | undefined;
 	let imports: ReturnType<typeof createImportsModule> | undefined;
@@ -208,6 +213,26 @@ export function buildModules(db: Database) {
 				analytics.service.overview(userId, from, to),
 		},
 	});
+	const whatsapp = createWhatsappModule(
+		db,
+		{
+			accounts: {
+				list: (userId) =>
+					accounts.service.list(userId, { includeArchived: false }),
+			},
+			categories: { list: (userId) => categories.service.list(userId) },
+			transactions: {
+				create: (userId, input) => transactions.service.create(userId, input),
+				createTransfer: (userId, input) =>
+					transactions.service.createTransfer(userId, input),
+			},
+		},
+		{
+			sender: whatsappConfig.sender ?? null,
+			botNumber: whatsappConfig.botNumber ?? null,
+			webhookSecret: whatsappConfig.webhookSecret ?? null,
+		},
+	);
 	return {
 		accounts,
 		categories,
@@ -224,6 +249,7 @@ export function buildModules(db: Database) {
 		search,
 		assistant,
 		notifications,
+		whatsapp,
 	};
 }
 
@@ -233,6 +259,7 @@ export function buildApp({
 	corsOrigins,
 	logger = true,
 	jobs,
+	whatsapp,
 }: AppOptions) {
 	const app = Fastify({ logger });
 
@@ -269,7 +296,8 @@ export function buildApp({
 
 	app.get("/", async () => "OK");
 
-	const modules = buildModules(db);
+	const modules = buildModules(db, whatsapp);
+	if (whatsapp?.webhookSecret) app.register(modules.whatsapp.webhookRoutes);
 	app.decorateRequest("userId", "");
 	app.register(
 		async (api) => {
