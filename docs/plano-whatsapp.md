@@ -1,4 +1,16 @@
-# WhatsApp → Wallet com Evolution API + n8n
+# WhatsApp → Wallet
+
+## Fase 2 — vários utilizadores (actual)
+Cada pessoa liga o seu WhatsApp em **Definições › WhatsApp** e escreve para o número do Wallet (258833204038). Ninguém precisa de dois WhatsApp: o número do bot é partilhado.
+
+- **Ligar:** o app pede o número, o servidor normaliza-o (9 dígitos começados por 8 ganham 258), o bot envia um código de 6 dígitos válido 10 minutos e a pessoa escreve-o no app. Um número só pode estar verificado numa conta. Limites: 1 código por minuto e 5 por hora; 5 tentativas erradas invalidam o código.
+- **Usar:** a Evolution manda as mensagens para `POST /webhooks/whatsapp` no servidor (header `x-wallet-secret`). O servidor encontra a conta pelo número de quem escreveu, interpreta o comando (mesma sintaxe da fase 1), grava com o `id` derivado da mensagem e responde com 🤖. Mensagens repetidas não gravam nem respondem duas vezes. Números não ligados recebem um aviso no máximo uma vez por dia; texto que não é comando é ignorado.
+- **Código:** `apps/server/src/modules/whatsapp/` (interpretador, leitura do payload, cliente Evolution, ligação e webhook), tabelas `whatsapp_links`, `whatsapp_inbox`, `whatsapp_unknown_replies`, secção `apps/web/src/components/settings/whatsapp-section.tsx`.
+- **Configuração do servidor** (todas opcionais; sem elas a secção mostra "Indisponível" e o webhook não existe): `WHATSAPP_WEBHOOK_SECRET` (mín. 32 caracteres), `EVOLUTION_URL`, `EVOLUTION_INSTANCE` (MCEL), `EVOLUTION_API_KEY`, `WHATSAPP_BOT_NUMBER`.
+- **Passagem:** depois do deploy, mudar o webhook da instância MCEL para `https://walletapi.buntry.com/webhooks/whatsapp` com um segredo novo (o mesmo de `WHATSAPP_WEBHOOK_SECRET`) e desactivar o workflow do n8n. Cada pessoa, incluindo o dono, liga o número em Definições.
+- **Risco:** a Evolution com Baileys não é oficial; com muitas pessoas o número pode ser bloqueado. Para escalar, trocar o cliente Evolution pela WhatsApp Cloud API (a lógica no servidor mantém-se).
+
+## Fase 1 — só o dono, via n8n (substituída pela fase 2)
 
 ## Contexto
 Fase 10 da checklist. O utilizador já tem Evolution API (gateway WhatsApp) e n8n. Quer só: saldos, entradas/saídas, transferências. **Não precisa de "bot" à parte**: a Evolution API recebe/envia mensagens e o n8n é o bot (fluxo). O servidor wallet já tem os endpoints; só falta uma mudança pequena na autenticação (Basic Auth, ver abaixo).

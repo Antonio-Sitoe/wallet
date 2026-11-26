@@ -13,6 +13,7 @@ export * from "./contracts/search";
 export * from "./contracts/settings";
 export * from "./contracts/shopping";
 export * from "./contracts/transactions";
+export * from "./contracts/whatsapp";
 export * from "./money";
 export * from "./months";
 export * from "./schedule";

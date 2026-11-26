@@ -12,6 +12,7 @@ import {
 	InfoIcon,
 	KeyboardIcon,
 	type LucideIcon,
+	MessageCircleIcon,
 	PaletteIcon,
 	SearchIcon,
 	ShieldIcon,
@@ -39,6 +40,7 @@ import { ProfileSection } from "@/components/settings/profile-section";
 import { SecuritySection } from "@/components/settings/security-section";
 import { SessionsSection } from "@/components/settings/sessions-section";
 import { TemplatesSection } from "@/components/settings/templates-section";
+import { WhatsappSection } from "@/components/settings/whatsapp-section";
 import type { SettingsSection } from "@/contexts/settings-context";
 
 type SectionMeta = {
@@ -91,6 +93,13 @@ const SECTIONS: SectionMeta[] = [
 		icon: BellIcon,
 		group: 1,
 		keywords: "avisos lembretes pagamentos dívidas resumo",
+	},
+	{
+		id: "whatsapp",
+		label: "WhatsApp",
+		icon: MessageCircleIcon,
+		group: 1,
+		keywords: "whatsapp mensagens bot número telemóvel registar saldo",
 	},
 	{
 		id: "security",
@@ -158,6 +167,7 @@ export function SettingsDialog({
 		appearance: <AppearanceSection />,
 		templates: <TemplatesSection />,
 		notifications: <NotificationsSection />,
+		whatsapp: <WhatsappSection />,
 		security: (
 			<div className="flex flex-col gap-8">
 				<SecuritySection onLock={close} />

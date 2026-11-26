@@ -7,6 +7,7 @@ export const SETTINGS_SECTIONS = [
 	"appearance",
 	"templates",
 	"notifications",
+	"whatsapp",
 	"security",
 	"shortcuts",
 	"data",

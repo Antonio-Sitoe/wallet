@@ -11,3 +11,4 @@ export * from "./planned";
 export * from "./settings";
 export * from "./shopping";
 export * from "./transactions";
+export * from "./whatsapp";
