@@ -113,6 +113,17 @@ export function MobileTabBar({
 							className="text-fg-2 hover:bg-hover size-11 cursor-pointer rounded-full"
 						/>
 						<ThemeCycleButton className="text-fg-2 hover:bg-hover flex size-11 cursor-pointer items-center justify-center rounded-full" />
+						<button
+							type="button"
+							aria-label="Definições"
+							onClick={() => {
+								setMoreOpen(false);
+								openSettings();
+							}}
+							className="text-fg-2 hover:bg-hover flex size-11 cursor-pointer items-center justify-center rounded-full"
+						>
+							<SettingsIcon className="size-4" strokeWidth={1.8} />
+						</button>
 					</div>
 					<SheetBody className="flex flex-col gap-4 px-4 pt-2 pb-4">
 						{groupItems(rest).map(([group, items]) => (
