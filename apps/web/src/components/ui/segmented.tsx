@@ -32,7 +32,7 @@ export function Segmented<T extends string>({
 					key={o.value}
 					value={o.value}
 					size="sm"
-					className="text-fg-2 data-pressed:bg-info-bg data-pressed:text-info hover:text-fg h-7 flex-auto cursor-pointer rounded-md px-3 text-xs font-normal whitespace-nowrap data-pressed:font-medium"
+					className="text-fg-2 data-pressed:bg-info-bg data-pressed:text-info hover:text-fg h-7 flex-auto cursor-pointer rounded-md px-3 text-xs font-normal whitespace-nowrap data-pressed:font-medium max-md:h-9 max-md:text-sm"
 				>
 					{o.label}
 				</ToggleGroupItem>

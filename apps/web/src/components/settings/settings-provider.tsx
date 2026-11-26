@@ -9,9 +9,11 @@ import { useShortcuts } from "@/lib/shortcuts";
 export function SettingsProvider({ children }: { children: ReactNode }) {
 	const [open, setOpen] = useState(false);
 	const [section, setSection] = useState<SettingsSection>("profile");
+	const [direct, setDirect] = useState(false);
 
 	const openSettings = useCallback((next?: SettingsSection) => {
 		if (next) setSection(next);
+		setDirect(!!next);
 		setOpen(true);
 	}, []);
 
@@ -23,6 +25,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			<SettingsDialog
 				open={open}
 				section={section}
+				direct={direct}
 				onSectionChange={setSection}
 				onOpenChange={setOpen}
 			/>
