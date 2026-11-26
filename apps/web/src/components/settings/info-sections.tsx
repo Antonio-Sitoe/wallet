@@ -30,7 +30,7 @@ import {
 
 const SERVER = ENV.VITE_SERVER_URL.replace(/\/$/, "");
 const SERVER_LABEL = SERVER.replace(/^https?:\/\//, "");
-export const APP_VERSION = "v0.1 · mvp";
+export const APP_VERSION = "v0.3";
 
 function Kbd({ children }: { children: string }) {
 	return (

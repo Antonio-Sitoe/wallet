@@ -33,6 +33,7 @@ import {
 	CommandPalette,
 	type PaletteMode,
 } from "@/components/assistant/command-palette";
+import { RefreshButton } from "@/components/layout/refresh-button";
 import { SyncStatus } from "@/components/layout/sync-status";
 import {
 	ThemeCycleButton,
@@ -40,6 +41,7 @@ import {
 } from "@/components/layout/theme-switch";
 import { UserMenu } from "@/components/layout/user-menu";
 import { HideMoneyButton } from "@/components/settings/hide-money-button";
+import { APP_VERSION } from "@/components/settings/info-sections";
 import { NotificationsRunner } from "@/components/settings/notifications-runner";
 import {
 	type NewTransactionDefaults,
@@ -252,9 +254,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 								{session?.user.name ?? "—"}
 							</span>
 						</div>
+						<RefreshButton className="text-fg-2 hover:bg-hover ml-auto cursor-pointer rounded-md p-2" />
 						<HideMoneyButton
 							iconOnly
-							className="text-fg-2 hover:bg-hover ml-auto cursor-pointer rounded-md p-2 md:hidden"
+							className="text-fg-2 hover:bg-hover cursor-pointer rounded-md p-2 md:hidden"
 						/>
 						<ThemeCycleButton className="text-fg-2 hover:bg-hover cursor-pointer rounded-md p-2 md:hidden" />
 						<Button
@@ -359,7 +362,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 								ligado
 							</span>
 						)}
-						<span className="ml-auto">v0.1 · mvp</span>
+						<span className="ml-auto">{APP_VERSION}</span>
 					</footer>
 				</div>
 			</div>

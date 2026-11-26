@@ -131,12 +131,21 @@ async function open(userId: string): Promise<Opened> {
 	const stopWatching = subscribeConnection(() => {
 		if (isOnline()) void queryClient.invalidateQueries();
 	});
+	let lastFocus = 0;
+	const onFocus = () => {
+		const now = Date.now();
+		if (!isOnline() || now - lastFocus < 5_000) return;
+		lastFocus = now;
+		void queryClient.invalidateQueries();
+	};
+	window.addEventListener("focus", onFocus);
 	return {
 		userId,
 		collections,
 		writes,
 		close: () => {
 			stopWatching();
+			window.removeEventListener("focus", onFocus);
 			return database.close();
 		},
 	};
