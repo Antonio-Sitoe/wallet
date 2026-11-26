@@ -46,10 +46,10 @@ No n8n: credencial "Basic Auth" (utilizador = email, palavra-passe = a da conta)
 
 6. **Interpretar (nó Code)** — regex sobre o texto:
    - `^saldo$`
-   - `^([+-])\s*([\d.,\s]+?)\s+(\S+)\s*(.*)$`
-   - `^t\s+([\d.,\s]+?)\s+(\S+)\s+(\S+)\s*(.*)$`
-   - **Valor para cêntimos:** tirar espaços; se houver vírgula, os pontos são milhares e a vírgula é decimal (`1.500,50` → 150050); se só houver pontos e cada grupo depois do primeiro tiver 3 dígitos, são milhares (`1.500` → 150000); senão o ponto é decimal (`12.5` → 1250). Recusar zero e negativos.
-   - **Conta por nome:** comparar sem acentos, maiúsculas, espaços e pontuação (`mpesa` = "M-Pesa"). Preferir igualdade exacta; depois "começa por". Se sobrar mais de uma (`bim` → "BIM" e "BIM (Poupança)"), responder "Qual conta? BIM / BIM (Poupança)" em vez de escolher.
+   - `^([+-])\s*([\d.,]+)\s+(\S+)\s*(.*)$`
+   - `^t\s+([\d.,]+)\s+(\S+)\s+(\S+)\s*(.*)$`
+   - **Valor para cêntimos:** sem espaços dentro do número; se houver vírgula, os pontos são milhares e a vírgula é decimal (`1.500,50` → 150050); se só houver pontos e cada grupo depois do primeiro tiver 3 dígitos, são milhares (`1.500` → 150000); senão o ponto é decimal (`12.5` → 1250). Recusar zero e negativos.
+   - **Conta por nome:** comparar sem acentos, maiúsculas, espaços e pontuação (`mpesa` = "M-Pesa"). Primeiro o nome igual (`bim` → "BIM"), depois "começa por", depois "contém". Se num destes passos houver mais de uma (`xit` → "Xitique" e "Xitique (Poupança)"), responder "Qual conta? Xitique (Poupança) / Xitique" em vez de escolher.
    - Transferência: origem e destino têm de ser diferentes.
    - Devolver `{ action, body }` ou `{ action: "erro", msg }`.
 
@@ -63,6 +63,22 @@ No n8n: credencial "Basic Auth" (utilizador = email, palavra-passe = a da conta)
 
 9. (Opcional, depois) **Confirmação antes de gravar** — guardar o pedido pendente em `$getWorkflowStaticData('global')` e só gravar quando chegar "sim". Só vale a pena se errares muitas vezes.
 
+## Importar o fluxo no n8n
+O fluxo está pronto em `docs/n8n/whatsapp-wallet.workflow.json` (Workflows › Import from File).
+
+1. Criar três credenciais no n8n:
+   - **Wallet (Basic)** — tipo *Basic Auth*: utilizador = email da conta, palavra-passe = a da conta.
+   - **Evolution apikey** — tipo *Header Auth*: nome `apikey`, valor = a API key da Evolution.
+   - **Webhook segredo** — tipo *Header Auth*: nome à escolha (ex.: `x-wallet-secret`), valor = um segredo longo.
+2. Importar o ficheiro e, em cada nó com credencial, escolher a respectiva (o n8n marca-as a vermelho até estarem escolhidas).
+3. No nó **Config**, preencher `walletUrl` (sem `/` no fim), `evolutionUrl`, `instance` e `ownerNumber` (só dígitos, com 258).
+4. Activar o workflow e copiar o *Production URL* do nó Webhook.
+5. Na Evolution, configurar o webhook da instância com esse URL, evento `MESSAGES_UPSERT`, e o header do segredo. Se a Evolution não enviar headers, mudar a autenticação do nó Webhook para *None* e pôr o segredo no `path` (ex.: `wallet-whatsapp-<segredo>`).
+
+Fluxo: Webhook → Config → Ler mensagem (filtra o teu número e mensagens de texto) → Contas → Categorias → Interpretar → Gravar? → (sim) Gravar → Contas depois → Resposta após gravar → Enviar WhatsApp; (não) → Enviar WhatsApp.
+
+O `id` de cada transacção ou transferência sai do id da mensagem (UUID determinístico, versão 5), por isso repetir a mesma mensagem não grava duas vezes.
+
 ## Quando passar a código no wallet (não agora)
 Só se quiseres: categorias automáticas, "quanto falta no mês", ou ecrã Definições › WhatsApp. Aí cria-se um módulo `whatsapp` no servidor com webhook próprio e o n8n deixa de ser necessário.
 
@@ -72,7 +88,7 @@ Só se quiseres: categorias automáticas, "quanto falta no mês", ou ecrã Defin
 - Enviar `- 1 mpesa teste` → aparece em Transacções na web; apagar depois.
 - Reenviar o mesmo webhook (re-executar a execução no n8n) → não aparece segunda transacção.
 - Enviar `- 1.500 mpesa teste` → grava 1 500 MZN, não 1,50.
-- Enviar `- 1 bim teste` com "BIM" e "BIM (Poupança)" → pergunta qual conta.
+- Enviar `- 1 xit teste` com "Xitique" e "Xitique (Poupança)" → pergunta qual conta.
 - Enviar `t 1 bci mpesa` → transferência visível nas duas contas.
 - Enviar `saldo` de outro número → nenhuma resposta.
 - Chamar o webhook do n8n sem o segredo → recusado.

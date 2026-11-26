@@ -1,0 +1,384 @@
+{
+  "name": "WhatsApp → Wallet",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wallet-whatsapp",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "add54c7f-ab6c-59f0-87c2-d14794fe723f",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "47933886-30d5-576f-a5b6-6d634e6d2cc4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Webhook segredo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6cc15ffa-b607-586a-a67a-37fa57829bc0",
+              "name": "walletUrl",
+              "value": "https://wallet.example.com",
+              "type": "string"
+            },
+            {
+              "id": "b8d159fe-107c-5a13-9806-1c29a757b5ff",
+              "name": "evolutionUrl",
+              "value": "https://evolution.example.com",
+              "type": "string"
+            },
+            {
+              "id": "bf6a3115-7097-58b8-a1cf-664538d769b2",
+              "name": "instance",
+              "value": "wallet",
+              "type": "string"
+            },
+            {
+              "id": "349797e1-bb4d-5967-b6b4-804be6360c35",
+              "name": "ownerNumber",
+              "value": "2588XXXXXXXX",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0be57f1b-022a-563d-9418-5596b093313d",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Config').first().json;\nconst body = $('Webhook').first().json.body ?? {};\nconst data = body.data ?? {};\nconst key = data.key ?? {};\nconst owner = String(config.ownerNumber ?? '').replace(/\\D/g, '');\nconst senders = [key.remoteJid, key.remoteJidAlt, key.senderPn]\n  .filter(Boolean)\n  .map((value) => String(value).split('@')[0].replace(/\\D/g, ''));\nconst text =\n  data.message?.conversation ?? data.message?.extendedTextMessage?.text ?? '';\nif (body.event && !/messages[._-]?upsert/i.test(body.event)) return [];\nif (!owner || key.fromMe || !text.trim() || !senders.includes(owner)) return [];\nreturn [{ json: { text, messageId: key.id ?? String(Date.now()), number: owner } }];"
+      },
+      "id": "c0abad35-d32f-5c01-a0d2-9c3dcf0a0986",
+      "name": "Ler mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.walletUrl }}/api/accounts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "a225a28b-c3e2-56b5-a215-0e99a08ce1e2",
+      "name": "Contas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        300
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "name": "Wallet (Basic)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.walletUrl }}/api/categories",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "52740f11-c433-5e91-a50d-3a786fe2e002",
+      "name": "Categorias",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        300
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "name": "Wallet (Basic)"
+        }
+      },
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const normalize = (value) =>\n  String(value ?? \"\")\n    .normalize(\"NFD\")\n    .replace(/[̀-ͯ]/g, \"\")\n    .toLowerCase()\n    .replace(/[^a-z0-9]/g, \"\");\n\nconst money = (cents) => {\n  const sign = cents < 0 ? \"-\" : \"\";\n  const abs = Math.abs(Math.round(cents));\n  const whole = String(Math.floor(abs / 100)).replace(/\\B(?=(\\d{3})+(?!\\d))/g, \" \");\n  return `${sign}${whole},${String(abs % 100).padStart(2, \"0\")}`;\n};\n\nconst toCents = (raw) => {\n  let text = String(raw).replace(/\\s/g, \"\");\n  if (!/^[\\d.,]+$/.test(text)) return null;\n  if (text.includes(\",\")) text = text.replace(/\\./g, \"\").replace(\",\", \".\");\n  else if (/^\\d{1,3}(\\.\\d{3})+$/.test(text)) text = text.replace(/\\./g, \"\");\n  const value = Number(text);\n  if (!Number.isFinite(value) || value <= 0) return null;\n  return Math.round(value * 100);\n};\n\nconst pick = (items, wanted, label) => {\n  const key = normalize(wanted);\n  if (!key) return { error: `Falta o nome da ${label}.` };\n  for (const test of [\n    (name) => name === key,\n    (name) => name.startsWith(key),\n    (name) => name.includes(key),\n  ]) {\n    const found = items.filter((item) => test(normalize(item.name)));\n    if (found.length === 1) return { item: found[0] };\n    if (found.length > 1)\n      return { error: `Qual ${label}? ${found.map((item) => item.name).join(\" / \")}` };\n  }\n  return {\n    error: `Não encontrei a ${label} \"${wanted}\". Opções: ${items.map((item) => item.name).join(\", \")}`,\n  };\n};\n\nconst uuidFrom = (text) => {\n  let h1 = 1779033703, h2 = 3144134277, h3 = 1013904242, h4 = 2773480762;\n  const input = `wallet-whatsapp:${text}`;\n  for (let i = 0; i < input.length; i++) {\n    const k = input.charCodeAt(i);\n    h1 = h2 ^ Math.imul(h1 ^ k, 597399067);\n    h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);\n    h3 = h4 ^ Math.imul(h3 ^ k, 951274213);\n    h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);\n  }\n  h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);\n  h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);\n  h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);\n  h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);\n  const hex = [h1 ^ h2 ^ h3 ^ h4, h2 ^ h1, h3 ^ h1, h4 ^ h1]\n    .map((h) => (h >>> 0).toString(16).padStart(8, \"0\"))\n    .join(\"\");\n  const variant = ((parseInt(hex[16], 16) & 0x3) | 0x8).toString(16);\n  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-5${hex.slice(13, 16)}-${variant}${hex.slice(17, 20)}-${hex.slice(20, 32)}`;\n};\n\nconst HELP = [\n  \"Comandos:\",\n  \"saldo\",\n  \"- 250 mpesa pão  (saída)\",\n  \"+ 5000 bci salário  (entrada)\",\n  \"t 1000 bci mpesa  (transferência)\",\n  \"Opcional: #categoria no fim, ex.: - 250 mpesa pão #alimentação\",\n].join(\"\\n\");\n\nfunction interpret({ text, messageId, accounts, categories, now }) {\n  const message = String(text ?? \"\").trim();\n  const total = accounts.reduce((sum, account) => sum + account.balance, 0);\n\n  if (/^saldo$/i.test(message)) {\n    const lines = accounts.map((account) => `${account.name}: ${money(account.balance)}`);\n    return { reply: [...lines, `Total: ${money(total)} MZN`].join(\"\\n\") };\n  }\n\n  const transfer = message.match(/^t\\s+([\\d.,]+)\\s+(\\S+)\\s+(\\S+)\\s*(.*)$/i);\n  if (transfer) {\n    const amount = toCents(transfer[1]);\n    if (!amount) return { reply: `Valor inválido: ${transfer[1]}\\n\\n${HELP}` };\n    const from = pick(accounts, transfer[2], \"conta de origem\");\n    if (from.error) return { reply: from.error };\n    const to = pick(accounts, transfer[3], \"conta de destino\");\n    if (to.error) return { reply: to.error };\n    if (from.item.id === to.item.id)\n      return { reply: \"A conta de origem e a de destino têm de ser diferentes.\" };\n    return {\n      write: {\n        path: \"/api/transfers\",\n        body: {\n          id: uuidFrom(messageId),\n          fromAccountId: from.item.id,\n          toAccountId: to.item.id,\n          amount,\n          occurredAt: now,\n          note: transfer[4].trim() || null,\n        },\n      },\n      summary: `Transferência ${money(amount)} MZN · ${from.item.name} → ${to.item.name}`,\n      accountIds: [from.item.id, to.item.id],\n    };\n  }\n\n  const entry = message.match(/^([+-])\\s*([\\d.,]+)\\s+(\\S+)\\s*(.*)$/);\n  if (entry) {\n    const type = entry[1] === \"+\" ? \"income\" : \"expense\";\n    const amount = toCents(entry[2]);\n    if (!amount) return { reply: `Valor inválido: ${entry[2]}\\n\\n${HELP}` };\n    const account = pick(accounts, entry[3], \"conta\");\n    if (account.error) return { reply: account.error };\n    const tag = entry[4].match(/(?:^|\\s)#(\\S+)/);\n    const note = entry[4].replace(/(?:^|\\s)#\\S+/g, \"\").trim() || null;\n    let categoryId = null;\n    let categoryName = \"\";\n    if (tag) {\n      const options = categories.filter((c) => c.kind === type && !c.archived);\n      const category = pick(options, tag[1], \"categoria\");\n      if (category.error) return { reply: category.error };\n      categoryId = category.item.id;\n      categoryName = ` · ${category.item.name}`;\n    }\n    return {\n      write: {\n        path: \"/api/transactions\",\n        body: {\n          id: uuidFrom(messageId),\n          type,\n          accountId: account.item.id,\n          categoryId,\n          amount,\n          occurredAt: now,\n          note,\n        },\n      },\n      summary: `${type === \"income\" ? \"Entrada\" : \"Saída\"} ${money(amount)} MZN · ${account.item.name}${categoryName}`,\n      accountIds: [account.item.id],\n    };\n  }\n\n  return { reply: HELP };\n}\n\nfunction afterWrite({ summary, accountIds, accounts, error }) {\n  if (error) return `❌ Não gravei: ${error}`;\n  const balances = accountIds\n    .map((id) => accounts.find((account) => account.id === id))\n    .filter(Boolean)\n    .map((account) => `${account.name}: ${money(account.balance)}`);\n  return [`✅ ${summary}`, \"Saldo agora:\", ...balances].join(\"\\n\");\n}\n\n\nconst rowsOf = (name) =>\n  $(name)\n    .all()\n    .flatMap((item) => (Array.isArray(item.json.data) ? item.json.data : [item.json]));\nconst message = $('Ler mensagem').first().json;\nconst result = interpret({\n  text: message.text,\n  messageId: message.messageId,\n  accounts: rowsOf('Contas'),\n  categories: rowsOf('Categorias'),\n  now: new Date().toISOString(),\n});\nreturn [{ json: { ...result, number: message.number, text: result.reply ?? '' } }];"
+      },
+      "id": "f2dfe894-b34a-5a5e-9e17-fb2c1fa9db53",
+      "name": "Interpretar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c646c7c1-65b4-54c7-a525-fcb9077be4e3",
+              "leftValue": "={{ !!$json.write }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f17128bc-07b5-5dea-81ef-685760a1f572",
+      "name": "Gravar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.walletUrl + $json.write.path }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.write.body) }}"
+      },
+      "id": "2b1d0379-cb4b-5753-a94c-c9865aee5a1d",
+      "name": "Gravar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        200
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "name": "Wallet (Basic)"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.walletUrl }}/api/accounts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "08865171-a5a6-5bdb-a139-c111bb4a654c",
+      "name": "Contas depois",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        200
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "name": "Wallet (Basic)"
+        }
+      },
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const normalize = (value) =>\n  String(value ?? \"\")\n    .normalize(\"NFD\")\n    .replace(/[̀-ͯ]/g, \"\")\n    .toLowerCase()\n    .replace(/[^a-z0-9]/g, \"\");\n\nconst money = (cents) => {\n  const sign = cents < 0 ? \"-\" : \"\";\n  const abs = Math.abs(Math.round(cents));\n  const whole = String(Math.floor(abs / 100)).replace(/\\B(?=(\\d{3})+(?!\\d))/g, \" \");\n  return `${sign}${whole},${String(abs % 100).padStart(2, \"0\")}`;\n};\n\nconst toCents = (raw) => {\n  let text = String(raw).replace(/\\s/g, \"\");\n  if (!/^[\\d.,]+$/.test(text)) return null;\n  if (text.includes(\",\")) text = text.replace(/\\./g, \"\").replace(\",\", \".\");\n  else if (/^\\d{1,3}(\\.\\d{3})+$/.test(text)) text = text.replace(/\\./g, \"\");\n  const value = Number(text);\n  if (!Number.isFinite(value) || value <= 0) return null;\n  return Math.round(value * 100);\n};\n\nconst pick = (items, wanted, label) => {\n  const key = normalize(wanted);\n  if (!key) return { error: `Falta o nome da ${label}.` };\n  for (const test of [\n    (name) => name === key,\n    (name) => name.startsWith(key),\n    (name) => name.includes(key),\n  ]) {\n    const found = items.filter((item) => test(normalize(item.name)));\n    if (found.length === 1) return { item: found[0] };\n    if (found.length > 1)\n      return { error: `Qual ${label}? ${found.map((item) => item.name).join(\" / \")}` };\n  }\n  return {\n    error: `Não encontrei a ${label} \"${wanted}\". Opções: ${items.map((item) => item.name).join(\", \")}`,\n  };\n};\n\nconst uuidFrom = (text) => {\n  let h1 = 1779033703, h2 = 3144134277, h3 = 1013904242, h4 = 2773480762;\n  const input = `wallet-whatsapp:${text}`;\n  for (let i = 0; i < input.length; i++) {\n    const k = input.charCodeAt(i);\n    h1 = h2 ^ Math.imul(h1 ^ k, 597399067);\n    h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);\n    h3 = h4 ^ Math.imul(h3 ^ k, 951274213);\n    h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);\n  }\n  h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);\n  h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);\n  h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);\n  h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);\n  const hex = [h1 ^ h2 ^ h3 ^ h4, h2 ^ h1, h3 ^ h1, h4 ^ h1]\n    .map((h) => (h >>> 0).toString(16).padStart(8, \"0\"))\n    .join(\"\");\n  const variant = ((parseInt(hex[16], 16) & 0x3) | 0x8).toString(16);\n  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-5${hex.slice(13, 16)}-${variant}${hex.slice(17, 20)}-${hex.slice(20, 32)}`;\n};\n\nconst HELP = [\n  \"Comandos:\",\n  \"saldo\",\n  \"- 250 mpesa pão  (saída)\",\n  \"+ 5000 bci salário  (entrada)\",\n  \"t 1000 bci mpesa  (transferência)\",\n  \"Opcional: #categoria no fim, ex.: - 250 mpesa pão #alimentação\",\n].join(\"\\n\");\n\nfunction interpret({ text, messageId, accounts, categories, now }) {\n  const message = String(text ?? \"\").trim();\n  const total = accounts.reduce((sum, account) => sum + account.balance, 0);\n\n  if (/^saldo$/i.test(message)) {\n    const lines = accounts.map((account) => `${account.name}: ${money(account.balance)}`);\n    return { reply: [...lines, `Total: ${money(total)} MZN`].join(\"\\n\") };\n  }\n\n  const transfer = message.match(/^t\\s+([\\d.,]+)\\s+(\\S+)\\s+(\\S+)\\s*(.*)$/i);\n  if (transfer) {\n    const amount = toCents(transfer[1]);\n    if (!amount) return { reply: `Valor inválido: ${transfer[1]}\\n\\n${HELP}` };\n    const from = pick(accounts, transfer[2], \"conta de origem\");\n    if (from.error) return { reply: from.error };\n    const to = pick(accounts, transfer[3], \"conta de destino\");\n    if (to.error) return { reply: to.error };\n    if (from.item.id === to.item.id)\n      return { reply: \"A conta de origem e a de destino têm de ser diferentes.\" };\n    return {\n      write: {\n        path: \"/api/transfers\",\n        body: {\n          id: uuidFrom(messageId),\n          fromAccountId: from.item.id,\n          toAccountId: to.item.id,\n          amount,\n          occurredAt: now,\n          note: transfer[4].trim() || null,\n        },\n      },\n      summary: `Transferência ${money(amount)} MZN · ${from.item.name} → ${to.item.name}`,\n      accountIds: [from.item.id, to.item.id],\n    };\n  }\n\n  const entry = message.match(/^([+-])\\s*([\\d.,]+)\\s+(\\S+)\\s*(.*)$/);\n  if (entry) {\n    const type = entry[1] === \"+\" ? \"income\" : \"expense\";\n    const amount = toCents(entry[2]);\n    if (!amount) return { reply: `Valor inválido: ${entry[2]}\\n\\n${HELP}` };\n    const account = pick(accounts, entry[3], \"conta\");\n    if (account.error) return { reply: account.error };\n    const tag = entry[4].match(/(?:^|\\s)#(\\S+)/);\n    const note = entry[4].replace(/(?:^|\\s)#\\S+/g, \"\").trim() || null;\n    let categoryId = null;\n    let categoryName = \"\";\n    if (tag) {\n      const options = categories.filter((c) => c.kind === type && !c.archived);\n      const category = pick(options, tag[1], \"categoria\");\n      if (category.error) return { reply: category.error };\n      categoryId = category.item.id;\n      categoryName = ` · ${category.item.name}`;\n    }\n    return {\n      write: {\n        path: \"/api/transactions\",\n        body: {\n          id: uuidFrom(messageId),\n          type,\n          accountId: account.item.id,\n          categoryId,\n          amount,\n          occurredAt: now,\n          note,\n        },\n      },\n      summary: `${type === \"income\" ? \"Entrada\" : \"Saída\"} ${money(amount)} MZN · ${account.item.name}${categoryName}`,\n      accountIds: [account.item.id],\n    };\n  }\n\n  return { reply: HELP };\n}\n\nfunction afterWrite({ summary, accountIds, accounts, error }) {\n  if (error) return `❌ Não gravei: ${error}`;\n  const balances = accountIds\n    .map((id) => accounts.find((account) => account.id === id))\n    .filter(Boolean)\n    .map((account) => `${account.name}: ${money(account.balance)}`);\n  return [`✅ ${summary}`, \"Saldo agora:\", ...balances].join(\"\\n\");\n}\n\n\nconst rowsOf = (name) =>\n  $(name)\n    .all()\n    .flatMap((item) => (Array.isArray(item.json.data) ? item.json.data : [item.json]));\nconst plan = $('Interpretar').first().json;\nconst saved = $('Gravar').first().json;\nlet error = null;\nif (saved.error) {\n  const raw = String(saved.error.message ?? saved.error.description ?? saved.error);\n  error = raw.match(/\"message\":\"([^\"]+)\"/)?.[1] ?? raw;\n}\nreturn [{\n  json: {\n    number: plan.number,\n    text: afterWrite({\n      summary: plan.summary,\n      accountIds: plan.accountIds,\n      accounts: rowsOf('Contas depois'),\n      error,\n    }),\n  },\n}];"
+      },
+      "id": "8b8037fb-67e3-548b-9a5f-52223aaeff74",
+      "name": "Resposta após gravar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.evolutionUrl }}/message/sendText/{{ $('Config').first().json.instance }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.number, text: $json.text }) }}",
+        "options": {}
+      },
+      "id": "0927692f-55b5-5286-a1ae-f96a7ebf938b",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2200,
+        380
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Evolution apikey"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Ler mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler mensagem": {
+      "main": [
+        [
+          {
+            "node": "Contas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contas": {
+      "main": [
+        [
+          {
+            "node": "Categorias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categorias": {
+      "main": [
+        [
+          {
+            "node": "Interpretar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interpretar": {
+      "main": [
+        [
+          {
+            "node": "Gravar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gravar?": {
+      "main": [
+        [
+          {
+            "node": "Gravar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gravar": {
+      "main": [
+        [
+          {
+            "node": "Contas depois",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contas depois": {
+      "main": [
+        [
+          {
+            "node": "Resposta após gravar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resposta após gravar": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
