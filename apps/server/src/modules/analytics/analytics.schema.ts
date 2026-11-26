@@ -9,6 +9,7 @@ export {
 	type CategoryBreakdown,
 	type ComparisonPoint,
 	categoriesQuery,
+	type FirstDay,
 	type Overview,
 	periodQuery,
 	trendQuery,

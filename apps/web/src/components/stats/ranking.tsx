@@ -33,10 +33,12 @@ export function Ranking({
 	data,
 	label,
 	linkOf,
+	compare = true,
 }: {
 	data: Breakdown;
 	label: string;
 	linkOf: (slice: BreakdownSlice) => RowLink | null;
+	compare?: boolean;
 }) {
 	const colors = distinctColors(data.items.map((item) => item.color));
 	const top = data.items[0]?.value ?? 1;
@@ -49,7 +51,7 @@ export function Ranking({
 				<col />
 				<col className="hidden w-[32%] sm:table-column" />
 				<col className="w-[110px]" />
-				<col className="hidden w-[160px] sm:table-column" />
+				{compare ? <col className="hidden w-[160px] sm:table-column" /> : null}
 			</colgroup>
 			<thead>
 				<tr className="border-line border-b">
@@ -62,9 +64,14 @@ export function Ranking({
 					<th scope="col" className={`${HEAD} text-right`}>
 						Valor
 					</th>
-					<th scope="col" className={`${HEAD} hidden text-right sm:table-cell`}>
-						vs anterior
-					</th>
+					{compare ? (
+						<th
+							scope="col"
+							className={`${HEAD} hidden text-right sm:table-cell`}
+						>
+							vs anterior
+						</th>
+					) : null}
 				</tr>
 			</thead>
 			<tbody>
@@ -111,15 +118,17 @@ export function Ranking({
 								</span>
 							</td>
 							<td className="num px-3.5 text-right">{money(item.value)}</td>
-							<td className="hidden px-3.5 sm:table-cell">
-								<span className="flex justify-end">
-									<Delta
-										now={item.value}
-										before={item.previousValue}
-										goodWhenUp={goodWhenUp}
-									/>
-								</span>
-							</td>
+							{compare ? (
+								<td className="hidden px-3.5 sm:table-cell">
+									<span className="flex justify-end">
+										<Delta
+											now={item.value}
+											before={item.previousValue}
+											goodWhenUp={goodWhenUp}
+										/>
+									</span>
+								</td>
+							) : null}
 						</tr>
 					);
 				})}
@@ -133,7 +142,7 @@ export function Ranking({
 						</th>
 						<td className="hidden sm:table-cell" />
 						<td className="num px-3.5 text-right">{money(data.others)}</td>
-						<td className="hidden sm:table-cell" />
+						{compare ? <td className="hidden sm:table-cell" /> : null}
 					</tr>
 				) : null}
 			</tbody>

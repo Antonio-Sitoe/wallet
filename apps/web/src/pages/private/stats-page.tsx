@@ -9,6 +9,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { Period } from "@/@types/period";
 import { useBreakdown } from "@/actions/analytics/use-breakdown";
 import { useCashflow } from "@/actions/analytics/use-cashflow";
+import { useFirstDay } from "@/actions/analytics/use-first-day";
 import { useOverview } from "@/actions/analytics/use-overview";
 import { Delta } from "@/components/charts/delta";
 import { GroupedBars } from "@/components/charts/grouped-bars";
@@ -60,7 +61,18 @@ const EMPTY_TEXT: Record<BreakdownDimension, string> = {
 		"Nenhuma transacção com etiquetas neste período. Junte etiquetas (Obra, Festa, nomes…) ao registar ou editar uma transacção.",
 };
 
-function transactionsPeriod(kind: Kind, period: Period): RowLink["search"] {
+type StatsKind = Kind | "all";
+
+const STATS_KINDS: Record<StatsKind, string> = { ...KINDS, all: "tudo" };
+
+function yearsBetween(p: Period) {
+	return Number(p.to.slice(0, 4)) - Number(p.from.slice(0, 4));
+}
+
+function transactionsPeriod(
+	kind: StatsKind,
+	period: Period,
+): RowLink["search"] {
 	if (kind === "year" && period.from.slice(0, 4) === todayInput().slice(0, 4))
 		return { period: "year" };
 	if (kind === "month" && period.from.slice(0, 7) === currentMonth())
@@ -71,8 +83,18 @@ function transactionsPeriod(kind: Kind, period: Period): RowLink["search"] {
 export function StatsPage() {
 	const search = usePageSearch("stats");
 	const navigate = usePageNavigate("stats");
-	const kind: Kind = search.period ?? "year";
-	const period = periodOf(kind, search.from);
+	const kind: StatsKind = search.period ?? "year";
+	const all = kind === "all";
+	const firstDay = useFirstDay(all);
+	const today = todayInput();
+	const period: Period = all
+		? { from: firstDay.data?.day ?? today, to: today }
+		: periodOf(kind, search.from);
+	const label = all
+		? firstDay.data?.day
+			? `desde ${firstDay.data.day.slice(0, 4)}`
+			: "tudo"
+		: periodLabel(kind, period);
 	const by = search.by ?? "category";
 	const flow = search.flow ?? "expense";
 	const set = (patch: Partial<typeof search>) =>
@@ -91,57 +113,106 @@ export function StatsPage() {
 		<>
 			<PageHeader crumb={["estatísticas"]}>
 				<div className="flex items-center gap-1">
-					<Button
-						variant="neutral"
-						aria-label="Período anterior"
-						className="w-[30px] px-0"
-						onClick={() => set({ from: shift(kind, period, -1) })}
-					>
-						<ChevronLeftIcon className="size-4" />
-					</Button>
+					{all ? null : (
+						<Button
+							variant="neutral"
+							aria-label="Período anterior"
+							className="w-[30px] px-0"
+							onClick={() => set({ from: shift(kind, period, -1) })}
+						>
+							<ChevronLeftIcon className="size-4" />
+						</Button>
+					)}
 					<Select
 						size="md"
 						aria-label="Tipo de período"
 						className="num w-auto"
 						value={kind}
 						onValueChange={(value) =>
-							set({ period: value as Kind, from: undefined })
+							set({ period: value as StatsKind, from: undefined })
 						}
-						items={(Object.keys(KINDS) as Kind[]).map((k) => ({
+						items={(Object.keys(STATS_KINDS) as StatsKind[]).map((k) => ({
 							value: k,
-							label: `período: ${KINDS[k]}`,
+							label: `período: ${STATS_KINDS[k]}`,
 						}))}
 					/>
 					<span className="num min-w-[120px] px-2 text-center text-xs whitespace-nowrap">
-						{periodLabel(kind, period)}
+						{label}
 					</span>
-					<Button
-						variant="neutral"
-						aria-label="Período seguinte"
-						className="w-[30px] px-0"
-						onClick={() => set({ from: shift(kind, period, 1) })}
-					>
-						<ChevronRightIcon className="size-4" />
-					</Button>
+					{all ? null : (
+						<Button
+							variant="neutral"
+							aria-label="Período seguinte"
+							className="w-[30px] px-0"
+							onClick={() => set({ from: shift(kind, period, 1) })}
+						>
+							<ChevronRightIcon className="size-4" />
+						</Button>
+					)}
 				</div>
 			</PageHeader>
 			<Page>
 				<PageTitle
 					title="Estatísticas"
-					meta={`${periodLabel(kind, period).toLowerCase()} · comparado com o período anterior`}
+					meta={
+						all
+							? `${label} · todas as transacções`
+							: `${label.toLowerCase()} · comparado com o período anterior`
+					}
 				/>
-				<Totals period={period} />
+				{all && !firstDay.data ? (
+					firstDay.error ? (
+						<ErrorNote error={firstDay.error} />
+					) : (
+						<Skeleton className="rounded-card h-[104px]" />
+					)
+				) : (
+					<StatsBody
+						kind={kind}
+						period={period}
+						by={by}
+						flow={flow}
+						set={set}
+						linkOf={linkOf}
+					/>
+				)}
+			</Page>
+		</>
+	);
+}
+
+function evolutionBucket(kind: StatsKind, period: Period) {
+	if (kind === "all") return yearsBetween(period) >= 3 ? "year" : "month";
+	return kind === "year" ? "month" : "week";
+}
+
+function StatsBody({
+	kind,
+	period,
+	by,
+	flow,
+	set,
+	linkOf,
+}: {
+	kind: StatsKind;
+	period: Period;
+	by: BreakdownDimension;
+	flow: MoneyFlow;
+	set: (patch: { by?: BreakdownDimension; flow?: MoneyFlow }) => void;
+	linkOf: (slice: BreakdownSlice) => RowLink | null;
+}) {
+	const all = kind === "all";
+	const bucket = evolutionBucket(kind, period);
+	return (
+		<>
+				<Totals period={period} compare={!all} />
 				<Card>
 					<CardHeader
 						title="Evolução"
-						meta={
-							kind === "year"
-								? "entradas e saídas por mês"
-								: "entradas e saídas por semana"
-						}
+						meta={`entradas e saídas por ${BUCKET_LABEL[bucket]}`}
 					/>
 					<div className="p-3.5">
-						<Evolution period={period} kind={kind} />
+						<Evolution period={period} bucket={bucket} />
 					</div>
 				</Card>
 				<Card>
@@ -163,14 +234,25 @@ export function StatsPage() {
 							</>
 						}
 					/>
-					<Breakdown period={period} by={by} flow={flow} linkOf={linkOf} />
+					<Breakdown
+						period={period}
+						by={by}
+						flow={flow}
+						compare={!all}
+						linkOf={linkOf}
+					/>
 				</Card>
-			</Page>
 		</>
 	);
 }
 
-function Totals({ period }: { period: Period }) {
+const BUCKET_LABEL = {
+	year: "ano",
+	month: "mês",
+	week: "semana",
+} as const;
+
+function Totals({ period, compare }: { period: Period; compare: boolean }) {
 	const overview = useOverview(period);
 	if (overview.error) return <ErrorNote error={overview.error} />;
 	const o = overview.data;
@@ -232,20 +314,28 @@ function Totals({ period }: { period: Period }) {
 					<span className={`num text-[22px] whitespace-nowrap ${t.tone ?? ""}`}>
 						{t.value}
 					</span>
-					{t.delta}
+					{compare ? t.delta : null}
 				</div>
 			))}
 		</Card>
 	);
 }
 
-function Evolution({ period, kind }: { period: Period; kind: Kind }) {
-	const trend = useCashflow(period, kind === "year" ? "month" : "week");
+function Evolution({
+	period,
+	bucket,
+}: {
+	period: Period;
+	bucket: keyof typeof BUCKET_LABEL;
+}) {
+	const trend = useCashflow(period, bucket);
 	if (trend.error) return <ErrorNote error={trend.error} />;
 	const data = trend.data;
 	if (!data) return <Skeleton className="h-[260px]" />;
 	const short = (d: string) =>
-		data.bucket === "month"
+		data.bucket === "year"
+			? d.slice(0, 4)
+			: data.bucket === "month"
 			? (MONTH_SHORT[Number(d.slice(5, 7)) - 1] ?? d)
 			: `${Number(d.slice(8))} ${MONTH_SHORT[Number(d.slice(5, 7)) - 1]}`;
 	return (
@@ -260,7 +350,9 @@ function Evolution({ period, kind }: { period: Period; kind: Kind }) {
 			points={data.points.map((p) => ({
 				label: short(p.start),
 				title:
-					data.bucket === "month"
+					data.bucket === "year"
+						? p.start.slice(0, 4)
+						: data.bucket === "month"
 						? monthLabel(p.start.slice(0, 7))
 						: `${dayLabel(p.start)} – ${dayLabel(p.end)}`,
 				values: [p.income, p.expense],
@@ -273,11 +365,13 @@ function Breakdown({
 	period,
 	by,
 	flow,
+	compare,
 	linkOf,
 }: {
 	period: Period;
 	by: BreakdownDimension;
 	flow: MoneyFlow;
+	compare: boolean;
 	linkOf: (slice: BreakdownSlice) => RowLink | null;
 }) {
 	const breakdown = useBreakdown(period, by, flow, 20);
@@ -308,7 +402,11 @@ function Breakdown({
 				<span>
 					total <span className="text-fg text-[15px]">{money(data.total)}</span>
 				</span>
-				<span className="text-dim">anterior {money(data.previousTotal)}</span>
+				{compare ? (
+					<span className="text-dim">
+						anterior {money(data.previousTotal)}
+					</span>
+				) : null}
 				{by === "label" ? (
 					<span className="text-dim">
 						uma transacção com várias etiquetas conta em cada uma
@@ -319,6 +417,7 @@ function Breakdown({
 				data={data}
 				label={`${data.flow === "income" ? "Entradas" : "Saídas"} por ${VIEWS.find((v) => v.value === by)?.label.toLowerCase()}`}
 				linkOf={linkOf}
+				compare={compare}
 			/>
 		</>
 	);

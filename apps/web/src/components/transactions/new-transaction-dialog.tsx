@@ -430,10 +430,14 @@ export function NewTransactionDialog({
 				showCloseButton={false}
 				initialFocus={amountRef}
 				onKeyDown={onKeyDown}
-				className="bg-panel text-fg rounded-overlay border-line-overlay shadow-overlay flex max-h-[88vh] w-[calc(100vw-32px)] max-w-[680px] flex-col gap-0 border p-0 text-[13px] ring-0 sm:max-w-[680px]"
+				className="bg-panel text-fg rounded-overlay border-line-overlay shadow-overlay max-md:data-open:slide-in-from-bottom max-md:data-open:zoom-in-100 max-md:data-closed:slide-out-to-bottom max-md:data-closed:zoom-out-100 flex max-h-[88vh] w-[calc(100vw-32px)] max-w-[680px] flex-col gap-0 border p-0 text-[13px] ring-0 max-md:top-auto max-md:bottom-0 max-md:left-0 max-md:h-[calc(100svh-var(--safe-top)-10px)] max-md:max-h-none max-md:w-full max-md:max-w-none max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-t-[28px] max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 max-md:text-[15px] max-md:duration-250 sm:max-w-[680px]"
 			>
 				<DialogTitle className="sr-only">Nova transacção</DialogTitle>
 
+				<div
+					aria-hidden="true"
+					className="bg-line-strong mx-auto mt-2 mb-1 h-[5px] w-[38px] shrink-0 rounded-full md:hidden"
+				/>
 				<div className="border-line flex items-stretch border-b">
 					<DialogClose
 						aria-label="Fechar"
@@ -450,7 +454,7 @@ export function NewTransactionDialog({
 								aria-selected={k === kind}
 								onClick={() => changeKind(k)}
 								className={cn(
-									"text-dim hover:text-fg-2 h-10 flex-1 cursor-pointer border-b-2 border-transparent text-xs font-semibold tracking-[.02em] uppercase sm:text-[13px]",
+									"text-dim hover:text-fg-2 h-10 flex-1 cursor-pointer border-b-2 border-transparent text-xs font-semibold tracking-[.02em] uppercase max-md:h-11 sm:text-[13px]",
 									k === kind && "bg-surface-sunken",
 								)}
 								style={
@@ -471,8 +475,8 @@ export function NewTransactionDialog({
 					</span>
 				</div>
 
-				<div className="grid min-h-0 grid-cols-1 overflow-y-auto sm:grid-cols-[1fr_236px]">
-					<div className="border-line relative flex min-w-0 flex-col gap-4 p-5 sm:border-r">
+				<div className="grid min-h-0 grid-cols-1 overflow-y-auto max-md:flex max-md:flex-1 max-md:flex-col max-md:overflow-hidden sm:grid-cols-[1fr_236px]">
+					<div className="border-line relative flex min-w-0 flex-col gap-4 p-5 max-md:min-h-0 max-md:flex-1 max-md:overflow-y-auto max-md:overscroll-contain max-md:border-r-0 max-md:px-4 max-md:pt-4 sm:border-r">
 						<fieldset
 							ref={amountRef}
 							tabIndex={-1}
@@ -603,7 +607,7 @@ export function NewTransactionDialog({
 								<span className="num text-dim text-[11px] tracking-[.06em] uppercase">
 									Modelos
 								</span>
-								<div className="flex flex-wrap gap-1.5">
+								<div className="no-scrollbar flex flex-wrap gap-1.5 max-md:-mx-4 max-md:flex-nowrap max-md:overflow-x-auto max-md:px-4">
 									{savedTemplates.map((t) => (
 										<button
 											key={t.id}
@@ -621,7 +625,7 @@ export function NewTransactionDialog({
 												if (t.payee || t.note) setShowExtras(true);
 												amountRef.current?.focus();
 											}}
-											className="bg-canvas border-line-strong hover:border-money h-row inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs whitespace-nowrap"
+											className="bg-canvas border-line-strong hover:border-money h-row inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs whitespace-nowrap max-md:h-10 max-md:shrink-0 max-md:px-3.5 max-md:text-sm"
 										>
 											<i
 												className="inline-block size-2 rounded-full"
@@ -642,7 +646,7 @@ export function NewTransactionDialog({
 								<span className="num text-dim text-[11px] tracking-[.06em] uppercase">
 									Da lista do mês
 								</span>
-								<div className="flex flex-wrap gap-1.5">
+								<div className="no-scrollbar flex flex-wrap gap-1.5 max-md:-mx-4 max-md:flex-nowrap max-md:overflow-x-auto max-md:px-4">
 									{templates.map((t) => (
 										<button
 											key={t.item.id}
@@ -665,7 +669,7 @@ export function NewTransactionDialog({
 												}
 												setPickerOpen(false);
 											}}
-											className="bg-canvas border-line-strong hover:border-info-2 h-row inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs whitespace-nowrap"
+											className="bg-canvas border-line-strong hover:border-info-2 h-row inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs whitespace-nowrap max-md:h-10 max-md:shrink-0 max-md:px-3.5 max-md:text-sm"
 										>
 											<i
 												className="inline-block size-2 rounded-[2px]"
@@ -746,7 +750,7 @@ export function NewTransactionDialog({
 						) : null}
 					</div>
 
-					<div className="bg-panel-2 grid grid-cols-4 content-start gap-1.5 p-4 sm:rounded-br-[14px]">
+					<div className="bg-panel-2 max-md:border-line grid grid-cols-4 content-start gap-1.5 p-4 max-md:shrink-0 max-md:border-t max-md:px-3 max-md:py-2.5 sm:rounded-br-[14px]">
 						{KEYS.map((k) => {
 							const op = OPS.test(k === "−" ? "-" : k) || k === "⌫";
 							return (
@@ -756,7 +760,7 @@ export function NewTransactionDialog({
 									aria-label={KEY_LABEL[k] ?? k}
 									onClick={() => setExpr((x) => press(x, k === "−" ? "-" : k))}
 									className={cn(
-										"num border-line hover:bg-surface-raised h-12 cursor-pointer rounded-lg border text-lg",
+										"num border-line hover:bg-surface-raised h-12 cursor-pointer rounded-lg border text-lg max-md:h-[46px] max-md:rounded-[12px] max-md:text-[22px]",
 										op ? "bg-panel text-fg-2" : "bg-hover text-fg",
 									)}
 								>
@@ -767,7 +771,7 @@ export function NewTransactionDialog({
 					</div>
 				</div>
 
-				<div className="border-line bg-panel-2 flex flex-wrap items-center gap-2 rounded-b-[14px] border-t px-4 py-3">
+				<div className="border-line bg-panel-2 flex flex-wrap items-center gap-2 rounded-b-[14px] border-t px-4 py-3 max-md:flex-nowrap max-md:rounded-none max-md:border-t-0 max-md:px-3 max-md:pt-0 max-md:pb-[max(12px,var(--safe-bottom))]">
 					<span className="num text-dim mr-auto hidden text-[11px] sm:inline">
 						escreve o valor no teclado · tab muda de campo
 					</span>
@@ -776,20 +780,20 @@ export function NewTransactionDialog({
 						disabled={!valid}
 						isLoading={pending && savingAgain}
 						onClick={() => void save(true)}
-						className="border-line-strong bg-hover text-fg rounded-control hover:bg-surface-raised inline-flex h-9 cursor-pointer items-center gap-2 border px-3.5 text-[13px] font-medium disabled:cursor-not-allowed disabled:opacity-45"
+						className="border-line-strong bg-hover text-fg rounded-control hover:bg-surface-raised inline-flex h-9 cursor-pointer items-center gap-2 border px-3.5 text-[13px] font-medium disabled:cursor-not-allowed disabled:opacity-45 max-md:h-[54px] max-md:flex-1 max-md:justify-center max-md:rounded-2xl max-md:text-[15px]"
 					>
 						Guardar e nova
-						<span className="num rounded bg-white/8 px-1 text-[11px]">⇧⌘↵</span>
+						<span className="num rounded bg-white/8 px-1 text-[11px] max-md:hidden">⇧⌘↵</span>
 					</Button>
 					<Button
 						variant="primary"
 						disabled={!valid}
 						isLoading={pending && !savingAgain}
 						onClick={() => void save(false)}
-						className="border-money bg-money text-money-ink hover:bg-money-2 rounded-control inline-flex h-9 cursor-pointer items-center gap-2 border px-3.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
+						className="border-money bg-money text-money-ink hover:bg-money-2 rounded-control inline-flex h-9 cursor-pointer items-center gap-2 border px-3.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-45 max-md:h-[54px] max-md:flex-[1.4] max-md:justify-center max-md:rounded-2xl max-md:text-[17px]"
 					>
 						Guardar
-						<span className="num bg-money-ink/18 rounded px-1 text-[11px]">
+						<span className="num bg-money-ink/18 rounded px-1 text-[11px] max-md:hidden">
 							⌘↵
 						</span>
 					</Button>

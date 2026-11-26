@@ -6,6 +6,7 @@ export function analyticsRoutes(
 	controller: AnalyticsController,
 ): FastifyPluginAsync {
 	return async (app) => {
+		app.get("/analytics/first-day", controller.firstDay);
 		app.get("/analytics/overview", controller.overview);
 		app.get("/analytics/cashflow", controller.cashflow);
 		app.get("/analytics/balance", controller.balance);

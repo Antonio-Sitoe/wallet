@@ -33,6 +33,7 @@ import { AccountTiles } from "@/components/dashboard/account-tiles";
 import { AddCardDialog } from "@/components/dashboard/add-card-dialog";
 import { DashboardCardFrame } from "@/components/dashboard/dashboard-card-frame";
 import { Greeting } from "@/components/dashboard/greeting";
+import { MobileHome } from "@/components/dashboard/mobile-home";
 import { OfflineDashboard } from "@/components/dashboard/offline-dashboard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Page } from "@/components/ui/page";
@@ -189,12 +190,19 @@ export function Dashboard() {
 				</div>
 				{online ? (
 					<>
-						<Link to={searchHref("budget", { month: period.to.slice(0, 7) })}>
+						<Link
+							to={searchHref("budget", { month: period.to.slice(0, 7) })}
+							className="max-md:hidden"
+						>
 							<Button variant="neutral">
 								Lista de {monthLabel(period.to.slice(0, 7)).split(" ")[0]}
 							</Button>
 						</Link>
-						<Button variant="primary" onClick={() => setAdding(true)}>
+						<Button
+							variant="primary"
+							className="max-md:hidden"
+							onClick={() => setAdding(true)}
+						>
 							<PlusIcon className="size-3.5" strokeWidth={2.6} /> Adicionar
 							carta
 						</Button>
@@ -209,7 +217,10 @@ export function Dashboard() {
 							: `${monthLabel(period.to.slice(0, 7)).toLowerCase()} · sem ligação`
 					}
 				/>
-				<AccountTiles />
+				<MobileHome budget={budget} month={period.to.slice(0, 7)} />
+				<div className="max-md:hidden">
+					<AccountTiles />
+				</div>
 
 				{unset[0] ? (
 					<div className="border-warn-line rounded-card bg-warn-bg text-warn-fg flex flex-wrap items-center gap-3 border px-4 py-3">
@@ -286,8 +297,21 @@ export function Dashboard() {
 				)}
 
 				{online && list.length > 0 ? (
-					<div className="flex flex-wrap justify-end gap-2">
-						<Button variant="quiet" size="sm" onClick={() => openNew()}>
+					<div className="flex flex-wrap justify-end gap-2 max-md:justify-center">
+						<Button
+							variant="quiet"
+							size="sm"
+							className="md:hidden"
+							onClick={() => setAdding(true)}
+						>
+							<PlusIcon className="size-3" /> Adicionar carta
+						</Button>
+						<Button
+							variant="quiet"
+							size="sm"
+							className="max-md:hidden"
+							onClick={() => openNew()}
+						>
 							Nova transacção
 						</Button>
 						<Button

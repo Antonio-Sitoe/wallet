@@ -153,6 +153,7 @@ export function TransactionsPage() {
 				/>
 
 				<div className="flex flex-wrap gap-2">
+					<div className="max-md:no-scrollbar contents max-md:order-2 max-md:-mx-4 max-md:flex max-md:w-[calc(100%+2rem)] max-md:gap-2 max-md:overflow-x-auto max-md:px-4 max-md:*:shrink-0">
 					<Select
 						className="w-auto"
 						aria-label="Período"
@@ -218,8 +219,9 @@ export function TransactionsPage() {
 							})),
 						]}
 					/>
+					</div>
 					<Input
-						className="max-w-[220px]"
+						className="max-w-[220px] max-md:order-1 max-md:max-w-none max-md:basis-full max-md:rounded-full max-md:px-4"
 						placeholder="procurar nota ou pessoa…"
 						value={q}
 						onChange={(e) => setQ(e.target.value)}

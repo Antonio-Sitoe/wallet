@@ -13,15 +13,15 @@ export const periodQuery = z
 		path: ["to"],
 	})
 	.refine(
-		(v) => (Date.parse(v.to) - Date.parse(v.from)) / 86_400_000 <= 3 * 366,
+		(v) => (Date.parse(v.to) - Date.parse(v.from)) / 86_400_000 <= 100 * 366,
 		{
-			message: "No máximo 3 anos",
+			message: "No máximo 100 anos",
 			path: ["to"],
 		},
 	);
 export type PeriodQuery = z.infer<typeof periodQuery>;
 
-export const BUCKETS = ["day", "week", "month"] as const;
+export const BUCKETS = ["day", "week", "month", "year"] as const;
 export type Bucket = (typeof BUCKETS)[number];
 
 export const trendQuery = z.object({
@@ -73,6 +73,8 @@ export type Breakdown = {
 	items: BreakdownSlice[];
 	others: number;
 };
+
+export type FirstDay = { day: string | null };
 
 export type PeriodRange = { from: string; to: string; days: number };
 

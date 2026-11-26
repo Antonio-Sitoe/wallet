@@ -13,6 +13,8 @@ import type { AnalyticsService } from "./analytics.service";
 export class AnalyticsController {
 	constructor(private readonly service: AnalyticsService) {}
 
+	firstDay = async (req: FastifyRequest) => this.service.firstDay(req.userId);
+
 	overview = async (req: FastifyRequest) => {
 		const { from, to } = parse(periodQuery, req.query);
 		return this.service.overview(req.userId, from, to);

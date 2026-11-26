@@ -290,6 +290,18 @@ export class TransactionsRepository implements ITransactionsRepository {
 			.orderBy(day);
 	}
 
+	async firstDay(userId: string) {
+		const [row] = await this.db
+			.select({
+				day: sql<
+					string | null
+				>`to_char(min(${transactions.occurredAt}) at time zone 'Africa/Maputo', 'YYYY-MM-DD')`,
+			})
+			.from(transactions)
+			.where(and(eq(transactions.userId, userId), incomeOrExpense));
+		return row?.day ?? null;
+	}
+
 	async netBefore(userId: string, at: Date, accountId?: string) {
 		const [row] = await this.db
 			.select({ total: sum(transactions.amount) })

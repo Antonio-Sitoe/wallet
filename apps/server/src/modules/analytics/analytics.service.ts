@@ -19,6 +19,7 @@ import type {
 	CashflowTrend,
 	CategoryBreakdown,
 	ComparisonPoint,
+	FirstDay,
 	Overview,
 } from "./analytics.schema";
 import type { AnalyticsDeps } from "./analytics.types";
@@ -71,6 +72,10 @@ export class AnalyticsService {
 		const account = accounts.find((a) => a.id === accountId);
 		if (!account) throw notFound("Conta");
 		return account.initialBalance + net;
+	}
+
+	async firstDay(userId: string): Promise<FirstDay> {
+		return { day: await this.deps.transactions.firstDay(userId) };
 	}
 
 	async overview(userId: string, from: string, to: string): Promise<Overview> {

@@ -21,6 +21,7 @@ import { paths } from "@/lib/paths";
 export const PAYMENT_TABS = ["next", "overdue", "done", "all"] as const;
 
 const ANALYTICS_PERIODS = ["month", "30d", "year"] as const;
+const STATS_PERIODS = [...ANALYTICS_PERIODS, "all"] as const;
 
 const parseAsYearMonth = createParser({
 	parse: (value) => (isYearMonth(value) ? value : null),
@@ -72,7 +73,7 @@ const SEARCH = {
 	},
 	budget: { month: parseAsYearMonth },
 	stats: {
-		period: parseAsStringLiteral(ANALYTICS_PERIODS),
+		period: parseAsStringLiteral(STATS_PERIODS),
 		from: parseAsIsoDay,
 		by: parseAsStringLiteral(BREAKDOWN_DIMENSIONS),
 		flow: parseAsStringLiteral(MONEY_FLOWS),

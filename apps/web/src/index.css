@@ -445,3 +445,52 @@ html[data-density="comfortable"] {
 	--spacing-input: 38px;
 	--spacing-row: 36px;
 }
+
+:root {
+	--safe-top: env(safe-area-inset-top, 0px);
+	--safe-bottom: env(safe-area-inset-bottom, 0px);
+	--tabbar-h: calc(58px + max(var(--safe-bottom), 8px));
+}
+
+@utility pt-safe {
+	padding-top: var(--safe-top);
+}
+@utility pb-safe {
+	padding-bottom: var(--safe-bottom);
+}
+@utility pb-tabbar {
+	padding-bottom: calc(var(--tabbar-h) + 16px);
+}
+@utility no-scrollbar {
+	scrollbar-width: none;
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+@media (width < 48rem) {
+	html {
+		font-size: 15px;
+		--spacing-input: 44px;
+		--spacing-row: 44px;
+		-webkit-tap-highlight-color: transparent;
+		-webkit-text-size-adjust: 100%;
+	}
+	html,
+	body {
+		font-size: 15px;
+		overscroll-behavior-y: none;
+	}
+	html[data-density="comfortable"],
+	html[data-density="comfortable"] body {
+		font-size: 17px;
+		--spacing-input: 48px;
+		--spacing-row: 48px;
+	}
+	input,
+	textarea,
+	select,
+	[contenteditable="true"] {
+		font-size: max(16px, 1em);
+	}
+}

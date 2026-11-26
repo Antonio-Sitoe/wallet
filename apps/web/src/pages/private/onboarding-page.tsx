@@ -45,7 +45,7 @@ export function OnboardingPage() {
 	const year = new Date().getFullYear();
 
 	return (
-		<div className="bg-canvas flex min-h-svh flex-col text-[13px]">
+		<div className="bg-canvas max-md:pt-safe max-md:pb-safe flex min-h-svh flex-col text-[13px]">
 			<header className="border-hover flex h-10 items-center justify-end border-b px-3.5">
 				<span className="num text-dim text-[11px]">primeiro uso · 1 de 4</span>
 			</header>

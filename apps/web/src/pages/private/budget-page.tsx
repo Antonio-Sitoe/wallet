@@ -1,4 +1,8 @@
-import { BUDGET_GROUPS, type MonthItem } from "@wallet/shared";
+import {
+	BUDGET_GROUPS,
+	type BudgetGroup,
+	type MonthItem,
+} from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { Skeleton } from "@wallet/ui/components/skeleton";
 import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "lucide-react";
@@ -10,8 +14,10 @@ import { useMonthBudget } from "@/actions/budgets/use-month-budget";
 import { usePayMonthItem } from "@/actions/budgets/use-pay-month-item";
 import { useUnpayMonthItem } from "@/actions/budgets/use-unpay-month-item";
 import { useCategories } from "@/actions/categories/use-categories";
+import { BudgetSummaryCard } from "@/components/budgets/budget-summary-card";
 import { EditMonthItemDialog } from "@/components/budgets/edit-month-item-dialog";
 import { GroupCard } from "@/components/budgets/group-card";
+import { GroupChips } from "@/components/budgets/group-chips";
 import { NoListState } from "@/components/budgets/no-list-state";
 import { PayDialog } from "@/components/budgets/pay-dialog";
 import { UnplannedItemDialog } from "@/components/budgets/unplanned-item-dialog";
@@ -23,6 +29,7 @@ import { Stat } from "@/components/ui/stat";
 import { StatRow } from "@/components/ui/stat-row";
 import { useConfirm } from "@/contexts/confirm-context";
 import { usePreferencesContext } from "@/contexts/preferences-context";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import {
 	searchHref,
 	usePageNavigate,
@@ -47,6 +54,8 @@ export function BudgetPage() {
 	const [paying, setPaying] = useState<MonthItem | null>(null);
 	const [editing, setEditing] = useState<MonthItem | null>(null);
 	const [addingUnplanned, setAddingUnplanned] = useState(false);
+	const [groupFilter, setGroupFilter] = useState<BudgetGroup | "all">("all");
+	const isMobile = useIsMobile();
 	const unpay = useUnpayMonthItem();
 	const pay = usePayMonthItem();
 	const { preferences } = usePreferencesContext();
@@ -83,7 +92,7 @@ export function BudgetPage() {
 					<Button
 						variant="neutral"
 						aria-label="Mês anterior"
-						className="w-[30px] px-0"
+						className="w-[30px] px-0 max-md:size-11 max-md:rounded-full"
 						onClick={() => go(-1)}
 					>
 						<ChevronLeftIcon className="size-4" />
@@ -91,13 +100,13 @@ export function BudgetPage() {
 					<Button
 						variant="neutral"
 						aria-label="Mês seguinte"
-						className="w-[30px] px-0"
+						className="w-[30px] px-0 max-md:size-11 max-md:rounded-full"
 						onClick={() => go(1)}
 					>
 						<ChevronRightIcon className="size-4" />
 					</Button>
 				</div>
-				<div className="num flex gap-1 text-[11px]">
+				<div className="num flex gap-1 text-[11px] max-md:hidden">
 					{[-2, -1, 0, 1, 2].map((d) => {
 						const m = addMonths(month, d);
 						return (
@@ -112,7 +121,11 @@ export function BudgetPage() {
 					})}
 				</div>
 				{data?.hasList ? (
-					<Button variant="primary" onClick={() => setAddingUnplanned(true)}>
+					<Button
+						variant="primary"
+						className="max-md:h-11 max-md:rounded-full max-md:px-4"
+						onClick={() => setAddingUnplanned(true)}
+					>
 						<PlusIcon className="size-3.5" strokeWidth={2.6} /> Item não
 						planeado
 					</Button>
@@ -134,6 +147,8 @@ export function BudgetPage() {
 					<Skeleton className="h-96" />
 				) : (
 					<>
+						{data.hasList ? <BudgetSummaryCard data={data} /> : null}
+						<div className={data.hasList ? "max-md:hidden" : undefined}>
 						<StatRow>
 							<Stat
 								label="Salário previsto"
@@ -182,11 +197,21 @@ export function BudgetPage() {
 								note="previsto − planeado"
 							/>
 						</StatRow>
+						</div>
+						{data.hasList ? (
+							<GroupChips
+								items={data.items}
+								value={groupFilter}
+								onChange={setGroupFilter}
+							/>
+						) : null}
 
 						{data.hasList ? (
 							BUDGET_GROUPS.map((group) => {
 								const items = data.items.filter((i) => i.group === group);
 								if (items.length === 0) return null;
+								if (isMobile && groupFilter !== "all" && groupFilter !== group)
+									return null;
 								return (
 									<GroupCard
 										key={group}
