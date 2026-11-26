@@ -37,9 +37,10 @@ No n8n: credencial "Basic Auth" (utilizador = email, palavra-passe = a da conta)
 
 3. **Proteger o webhook** — o nó Webhook do n8n com autenticação (Header Auth com um segredo). Sem isto, quem souber o URL pode forjar uma mensagem "do teu número". Confirmar se a Evolution envia headers personalizados no webhook; se não, pôr o segredo no URL.
 
-4. **Filtro de remetente (nó IF)** — continuar só se:
-   - o remetente for o teu número (`data.key.remoteJid` == `2588XXXXXXXX@s.whatsapp.net`; confirmar com uma mensagem real, porque o WhatsApp pode mandar `...@lid` e o número noutro campo)
-   - `data.key.fromMe` == false
+4. **Filtro de remetente (nó "Ler mensagem")** — aceita dois casos:
+   - instância no teu próprio número: mensagens `fromMe` na conversa contigo mesmo ("Mensagem para mim");
+   - instância num número de bot: mensagens que não são `fromMe`, vindas do teu número.
+   As respostas do bot começam por 🤖 e mensagens que começam assim são ignoradas, para o bot não responder a si próprio. Texto que não é comando também é ignorado (a ajuda só com "ajuda" ou "?"). Confirmar com uma mensagem real, porque o WhatsApp pode mandar `...@lid` e o número noutro campo.
    Texto vem em `data.message.conversation` (ou `extendedTextMessage.text`).
 
 5. **Buscar contas (HTTP Request)** — `GET {SERVER}/api/accounts` com a credencial Basic. Usado por todos os comandos (saldo e para resolver nome → id).
@@ -57,7 +58,7 @@ No n8n: credencial "Basic Auth" (utilizador = email, palavra-passe = a da conta)
    - `saldo` → formatar texto com nome + saldo de cada conta
    - `transacao` → `POST /api/transactions` com `occurredAt: new Date().toISOString()` e `id` gerado a partir do id da mensagem (`data.key.id`, ex.: UUID v5), para um webhook repetido não gravar duas vezes
    - `transferencia` → `POST /api/transfers`, com o mesmo `id` derivado da mensagem
-   - `erro` → mensagem de ajuda com os exemplos
+   - `erro` → explica o que falhou (valor, conta, categoria)
 
 8. **Responder (HTTP Request para Evolution)** — `POST {EVOLUTION}/message/sendText/{instancia}` com header `apikey` e body `{ number: "2588XXXXXXXX", text: "..." }`. Para "saldo agora X", voltar a pedir `GET /api/accounts` depois de gravar. Ex.: "✅ Saída 250,00 MZN · M-Pesa · saldo agora X".
 
