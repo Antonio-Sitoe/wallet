@@ -10,9 +10,10 @@ export function normalizePhone(raw: string): string | null {
 	return /^\d{10,15}$/.test(digits) ? digits : null;
 }
 
-export function formatPhone(phone: string): string {
-	const match = phone.match(/^258(\d{2})(\d{3})(\d{4})$/);
-	return match ? `+258 ${match[1]} ${match[2]} ${match[3]}` : `+${phone}`;
+export function formatPhone(phone: string | number): string {
+	const digits = String(phone).replace(/\D/g, "");
+	const match = digits.match(/^258(\d{2})(\d{3})(\d{4})$/);
+	return match ? `+258 ${match[1]} ${match[2]} ${match[3]}` : `+${digits}`;
 }
 
 export const linkWhatsappInput = z.object({

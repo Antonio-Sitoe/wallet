@@ -7,8 +7,8 @@ const evolution =
 	ENV.EVOLUTION_URL && ENV.EVOLUTION_INSTANCE && ENV.EVOLUTION_API_KEY
 		? createEvolutionSender({
 				url: ENV.EVOLUTION_URL,
-				instance: ENV.EVOLUTION_INSTANCE,
-				apiKey: ENV.EVOLUTION_API_KEY,
+				instance: String(ENV.EVOLUTION_INSTANCE),
+				apiKey: String(ENV.EVOLUTION_API_KEY),
 			})
 		: null;
 
@@ -19,8 +19,13 @@ const app = buildApp({
 	jobs: { connectionString: ENV.DATABASE_URL },
 	whatsapp: {
 		sender: evolution,
-		botNumber: ENV.WHATSAPP_BOT_NUMBER ?? null,
-		webhookSecret: evolution ? (ENV.WHATSAPP_WEBHOOK_SECRET ?? null) : null,
+		botNumber: ENV.WHATSAPP_BOT_NUMBER
+			? String(ENV.WHATSAPP_BOT_NUMBER).replace(/\D/g, "")
+			: null,
+		webhookSecret:
+			evolution && ENV.WHATSAPP_WEBHOOK_SECRET
+				? String(ENV.WHATSAPP_WEBHOOK_SECRET)
+				: null,
 	},
 });
 
