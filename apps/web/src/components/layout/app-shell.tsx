@@ -33,6 +33,7 @@ import {
 	CommandPalette,
 	type PaletteMode,
 } from "@/components/assistant/command-palette";
+import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
 import { RefreshButton } from "@/components/layout/refresh-button";
 import { SyncStatus } from "@/components/layout/sync-status";
 import {
@@ -244,7 +245,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 			<div className="bg-canvas flex min-h-svh flex-col md:flex-row">
 				<nav
 					aria-label="Menu principal"
-					className="border-line bg-panel md:w-sidebar flex w-full flex-col gap-3 border-b px-2.5 pt-3.5 pb-3 md:sticky md:top-0 md:h-svh md:shrink-0 md:gap-[18px] md:border-r md:border-b-0"
+					className="border-line bg-panel md:w-sidebar hidden w-full flex-col gap-3 border-b px-2.5 pt-3.5 pb-3 md:sticky md:top-0 md:flex md:h-svh md:shrink-0 md:gap-[18px] md:border-r md:border-b-0"
 				>
 					<div className="flex items-center gap-2.5 px-1.5">
 						<BrandMark />
@@ -350,10 +351,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 				<div
 					id="conteudo"
 					tabIndex={-1}
-					className="flex min-h-svh min-w-0 flex-1 flex-col outline-none"
+					className="max-md:pt-safe max-md:pb-tabbar flex min-h-svh min-w-0 flex-1 flex-col outline-none"
 				>
 					{children}
-					<footer className="num border-line bg-panel text-dim mt-auto flex min-h-7 flex-wrap items-center gap-4 border-t px-4 text-[11px]">
+					<footer className="num border-line bg-panel text-dim mt-auto hidden min-h-7 flex-wrap items-center gap-4 border-t px-4 text-[11px] md:flex">
 						{offlineEnabled ? (
 							<SyncStatus />
 						) : (
@@ -366,6 +367,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 					</footer>
 				</div>
 			</div>
+			<MobileTabBar
+				nav={nav}
+				userName={session?.user.name}
+				onNew={() => openNew()}
+				onSignOut={signOut}
+			/>
 			<NewTransactionDialog
 				open={dialog.open}
 				defaults={dialog.defaults}

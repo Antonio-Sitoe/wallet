@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import { useEffect } from "react";
 import { Outlet, useMatches } from "react-router";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { queryClient } from "@/lib/query-client";
 
 function usePageTitle() {
@@ -19,6 +20,7 @@ function usePageTitle() {
 
 export function RootLayout() {
 	usePageTitle();
+	const isMobile = useIsMobile();
 	return (
 		<ThemeProvider
 			attribute="class"
@@ -32,7 +34,14 @@ export function RootLayout() {
 					<Outlet />
 				</QueryClientProvider>
 			</NuqsAdapter>
-			<Toaster richColors position="bottom-right" />
+			<Toaster
+				richColors
+				position={isMobile ? "top-center" : "bottom-right"}
+				offset={isMobile ? { top: "calc(var(--safe-top) + 8px)" } : undefined}
+				mobileOffset={
+					isMobile ? { top: "calc(var(--safe-top) + 8px)" } : undefined
+				}
+			/>
 		</ThemeProvider>
 	);
 }

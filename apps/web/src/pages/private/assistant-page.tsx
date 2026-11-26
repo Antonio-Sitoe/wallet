@@ -70,7 +70,7 @@ function History({
 	return (
 		<aside
 			aria-label="Histórico de conversas"
-			className="border-line bg-panel-2 flex max-h-[40vh] flex-col border-b md:max-h-none md:w-[288px] md:shrink-0 md:border-r md:border-b-0"
+			className="border-line bg-panel-2 flex max-h-[40vh] flex-col border-b max-md:max-h-[26svh] md:max-h-none md:w-[288px] md:shrink-0 md:border-r md:border-b-0"
 		>
 			<div className="border-line flex flex-col gap-2.5 border-b px-3 pt-3.5 pb-2.5">
 				<div className="flex items-center justify-between">
@@ -190,7 +190,7 @@ export function AssistantPage() {
 	const empty = chat.messages.length === 0 && !chat.pending;
 
 	return (
-		<div className="flex min-h-svh min-w-0 flex-1 flex-col md:flex-row">
+		<div className="flex min-h-svh min-w-0 flex-1 flex-col max-md:h-[calc(100svh-var(--safe-top)-var(--tabbar-h)-16px)] max-md:min-h-0 md:flex-row">
 			<History current={id} onOpen={open} onNew={() => open()} />
 			<main className="flex min-h-0 min-w-0 flex-1 flex-col md:h-svh">
 				<header className="border-line bg-panel-2 flex min-h-[52px] flex-wrap items-center justify-between gap-2.5 border-b px-5 py-2">

@@ -34,7 +34,7 @@ export function OccurrenceRow({
 	return (
 		<div
 			className={cn(
-				"border-hover hover:bg-hover flex items-center gap-3 border-b px-3.5 py-2.5 last:border-0",
+				"border-hover hover:bg-hover flex items-center gap-3 border-b px-3.5 py-2.5 last:border-0 max-md:gap-2 max-md:px-3",
 				selected && "bg-hover",
 			)}
 		>
@@ -67,7 +67,9 @@ export function OccurrenceRow({
 						>
 							{occurrence.name}
 						</span>
-						<Pill>{FREQUENCY_LABEL[occurrence.frequency]}</Pill>
+						<span className="max-md:hidden">
+							<Pill>{FREQUENCY_LABEL[occurrence.frequency]}</Pill>
+						</span>
 					</span>
 					<span className="num text-dim truncate text-[11px]">{route}</span>
 				</span>
@@ -82,7 +84,7 @@ export function OccurrenceRow({
 				<Button
 					variant="primary"
 					size="sm"
-					className="min-w-[96px]"
+					className="min-w-[96px] max-md:h-10 max-md:min-w-0 max-md:px-3"
 					disabled={busy}
 					onClick={onConfirm}
 					aria-label={`Confirmar ${occurrence.name}`}
@@ -93,7 +95,7 @@ export function OccurrenceRow({
 				<Button
 					variant="quiet"
 					size="sm"
-					className="min-w-[96px]"
+					className="min-w-[96px] max-md:h-10 max-md:min-w-0 max-md:px-3"
 					disabled={busy}
 					onClick={onUndo}
 					aria-label={`Desfazer ${occurrence.name}`}
