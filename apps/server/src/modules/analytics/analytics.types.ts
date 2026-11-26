@@ -5,6 +5,7 @@ export type AnalyticsDeps = {
 			from: Date,
 			to: Date,
 		): Promise<{ day: string; income: number; expense: number }[]>;
+		firstDay(userId: string): Promise<string | null>;
 		netBefore(userId: string, at: Date, accountId?: string): Promise<number>;
 		dailyNet(
 			userId: string,

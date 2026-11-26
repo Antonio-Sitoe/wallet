@@ -39,6 +39,7 @@ export function autoBucket(from: string, to: string): Bucket {
 export function bucketStart(day: string, bucket: Bucket) {
 	if (bucket === "day") return day;
 	if (bucket === "month") return `${day.slice(0, 7)}-01`;
+	if (bucket === "year") return `${day.slice(0, 4)}-01-01`;
 	const weekday = (new Date(toUtc(day)).getUTCDay() + 6) % 7;
 	return addDays(day, -weekday);
 }
@@ -53,9 +54,11 @@ export function buckets(from: string, to: string, bucket: Bucket) {
 				? addDays(first, 1)
 				: bucket === "week"
 					? addDays(first, 7)
-					: fromUtc(
-							Date.UTC(Number(first.slice(0, 4)), Number(first.slice(5, 7)), 1),
-						);
+					: bucket === "year"
+						? fromUtc(Date.UTC(Number(first.slice(0, 4)) + 1, 0, 1))
+						: fromUtc(
+								Date.UTC(Number(first.slice(0, 4)), Number(first.slice(5, 7)), 1),
+							);
 		const last = addDays(next, -1);
 		out.push({ start: cursor, end: last < to ? last : to });
 		cursor = next;

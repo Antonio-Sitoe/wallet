@@ -21,6 +21,7 @@ function serviceWith(
 	const deps: AnalyticsDeps = {
 		transactions: {
 			dailyTotals: async () => [],
+			firstDay: async () => null,
 			netBefore: async () => 0,
 			dailyNet: async () => [],
 			categoryTotals: async (_u, from, to) => inRange(from, to),

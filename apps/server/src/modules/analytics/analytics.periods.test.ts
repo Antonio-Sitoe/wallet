@@ -56,6 +56,11 @@ describe("periods", () => {
 			{ start: "2026-11-30", end: "2026-12-01" },
 		]);
 		expect(buckets("2026-12-30", "2027-01-01", "day")).toHaveLength(3);
+		expect(buckets("2024-03-05", "2026-11-26", "year")).toEqual([
+			{ start: "2024-03-05", end: "2024-12-31" },
+			{ start: "2025-01-01", end: "2025-12-31" },
+			{ start: "2026-01-01", end: "2026-11-26" },
+		]);
 	});
 
 	it("accumulates day by day", () => {

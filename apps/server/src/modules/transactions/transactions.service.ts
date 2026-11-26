@@ -379,6 +379,10 @@ export class TransactionsService {
 		}));
 	}
 
+	async firstDay(userId: string) {
+		return this.repository.firstDay(userId);
+	}
+
 	async netBefore(userId: string, at: Date, accountId?: string) {
 		return this.repository.netBefore(userId, at, accountId);
 	}
