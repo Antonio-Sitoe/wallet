@@ -75,7 +75,8 @@ export function CreatePlan({
 				<Button
 					type="submit"
 					variant="primary"
-					disabled={cents === null || create.isPending}
+					disabled={cents === null}
+					isLoading={create.isPending}
 					className="self-start"
 				>
 					Criar plano {year}

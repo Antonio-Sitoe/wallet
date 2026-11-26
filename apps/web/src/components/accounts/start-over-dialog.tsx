@@ -50,7 +50,8 @@ export function StartOverDialog({
 					<div>
 						<Button
 							variant="primary"
-							disabled={nonZero.length === 0 || zero.isPending}
+							disabled={nonZero.length === 0}
+							isLoading={zero.isPending}
 							onClick={async () => {
 								await zero.mutateAsync({});
 								toast.success("Saldos a 0. Pode começar a registar.");
@@ -78,7 +79,8 @@ export function StartOverDialog({
 					<div>
 						<Button
 							variant="danger"
-							disabled={typed !== "APAGAR" || reset.isPending}
+							disabled={typed !== "APAGAR"}
+							isLoading={reset.isPending}
 							onClick={async () => {
 								const r = await reset.mutateAsync();
 								toast.success(

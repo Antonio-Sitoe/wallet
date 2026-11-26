@@ -89,7 +89,10 @@ export function GoalParts({ goal }: { goal: GoalDetail }) {
 					onChange={(e) => setAmount(e.target.value)}
 					placeholder="0"
 				/>
-				<Button type="submit" variant="neutral" disabled={!canAdd}>
+				<Button type="submit" variant="neutral"
+					disabled={!canAdd}
+					isLoading={add.isPending}
+				>
 					Adicionar
 				</Button>
 			</form>

@@ -239,7 +239,8 @@ function TemplateDialog({
 					<Button
 						variant="primary"
 						onClick={save}
-						disabled={!name.trim() || amountInvalid || sameAccount || pending}
+						disabled={!name.trim() || amountInvalid || sameAccount}
+						isLoading={pending}
 					>
 						Guardar
 					</Button>

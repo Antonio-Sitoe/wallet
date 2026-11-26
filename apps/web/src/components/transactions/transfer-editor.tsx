@@ -179,9 +179,9 @@ export function TransferEditor({
 						disabled={
 							cents === null ||
 							cents <= 0 ||
-							form.from === form.to ||
-							update.isPending
+							form.from === form.to
 						}
+						isLoading={update.isPending}
 					>
 						Guardar
 					</Button>

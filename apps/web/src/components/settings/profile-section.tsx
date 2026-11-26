@@ -212,7 +212,8 @@ function DeleteAccountDialog({
 					</Button>
 					<Button
 						variant="danger"
-						disabled={!matches || remove.isPending}
+						disabled={!matches}
+						isLoading={remove.isPending}
 						onClick={confirm}
 					>
 						Apagar tudo

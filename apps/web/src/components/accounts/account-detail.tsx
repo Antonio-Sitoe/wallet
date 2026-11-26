@@ -113,9 +113,9 @@ export function AccountDetail({
 					type="submit"
 					disabled={
 						balanceCents === null ||
-						balanceCents === account.balance ||
-						reconcile.isPending
+						balanceCents === account.balance
 					}
+					isLoading={reconcile.isPending}
 				>
 					Acertar
 				</Button>

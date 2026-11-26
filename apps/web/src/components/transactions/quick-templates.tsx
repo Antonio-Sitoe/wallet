@@ -1,6 +1,7 @@
 import type { TransactionTemplate } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
 import { ZapIcon } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useTemplates } from "@/actions/settings/use-templates";
 import { useCreateTransaction } from "@/actions/transactions/use-create-transaction";
@@ -23,6 +24,7 @@ export function QuickTemplates() {
 	const createTx = useCreateTransaction();
 	const createTransfer = useCreateTransfer();
 	const pending = createTx.isPending || createTransfer.isPending;
+	const [runningId, setRunningId] = useState<string | null>(null);
 
 	async function run(t: TransactionTemplate) {
 		if (!isComplete(t) || !t.amount || !t.accountId)
@@ -33,6 +35,7 @@ export function QuickTemplates() {
 				toAccountId: t.toAccountId ?? undefined,
 				categoryId: t.categoryId ?? undefined,
 			});
+		setRunningId(t.id);
 		const occurredAt = new Date().toISOString();
 		if (t.type === "transfer" && t.toAccountId)
 			await createTransfer.mutateAsync({
@@ -67,6 +70,7 @@ export function QuickTemplates() {
 			key={t.id}
 			variant="neutral"
 			disabled={pending}
+			isLoading={pending && runningId === t.id}
 			onClick={() => run(t)}
 			title={
 				isComplete(t)

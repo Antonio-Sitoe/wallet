@@ -70,7 +70,7 @@ export function SheetImport({
 							<Button
 								size="sm"
 								variant="primary"
-								disabled={upload.isPending}
+								isLoading={upload.isPending}
 								onClick={() => inputRef.current?.click()}
 							>
 								{upload.isPending ? "A ler…" : "Escolher .xlsx"}

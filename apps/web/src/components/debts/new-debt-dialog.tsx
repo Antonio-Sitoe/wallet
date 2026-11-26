@@ -61,6 +61,7 @@ export function NewDebtDialog({
 						form={FORM_ID}
 						variant="primary"
 						disabled={!canSubmit}
+						isLoading={create.isPending}
 					>
 						Criar dívida
 					</Button>

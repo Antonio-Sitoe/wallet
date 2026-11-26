@@ -323,11 +323,11 @@ export function SheetReview({ preview }: { preview: SheetPreview }) {
 					>
 						<Button
 							variant="primary"
+							isLoading={commit.isPending}
 							disabled={
 								(included.length === 0 &&
 									includedGoals.length === 0 &&
 									includedDebts.length === 0) ||
-								commit.isPending ||
 								(paying.length > 0 && !accountId) ||
 								(includedGoals.length > 0 && !goalAccountId)
 							}

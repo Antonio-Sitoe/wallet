@@ -72,7 +72,7 @@ async function signUp(name: string): Promise<Client> {
 const lastTo = (phone: string) =>
 	[...sent].reverse().find((message) => message.phone === phone)?.text ?? "";
 const codeFor = (phone: string) =>
-	lastTo(phone).match(/Código Wallet: (\d{6})/)?.[1] ?? "";
+	lastTo(phone).match(/código de verificação Wallet é (\d{6})/)?.[1] ?? "";
 
 let counter = 0;
 async function incoming(
@@ -169,7 +169,7 @@ describe.runIf(dbUp)("whatsapp link and webhook", () => {
 		const ok = await alice("POST", "/whatsapp/verify", { code });
 		expect(ok.status).toBe(200);
 		expect(ok.body).toMatchObject({ phone: PHONE_A, verified: true });
-		expect(lastTo(PHONE_A)).toContain("Número ligado");
+		expect(lastTo(PHONE_A)).toContain("foi associado");
 	});
 
 	it("does not let another account take a verified number", async () => {
@@ -216,7 +216,7 @@ describe.runIf(dbUp)("whatsapp link and webhook", () => {
 		await incoming(PHONE_A, "- 12 caixa teste", { id: `E2E-${RUN}-dup` });
 		await incoming(PHONE_A, "- 12 caixa teste", { id: `E2E-${RUN}-dup` });
 		expect(sent.length).toBe(before + 1);
-		expect(lastTo(PHONE_A)).toContain("✅ Saída 12,00 MZN · Caixa Alice");
+		expect(lastTo(PHONE_A)).toContain("Registado: Saída 12,00 MZN · Caixa Alice");
 		const rows = await db
 			.select({ id: transactions.id })
 			.from(transactions)
@@ -229,7 +229,7 @@ describe.runIf(dbUp)("whatsapp link and webhook", () => {
 		await incoming(PHONE_UNKNOWN, "saldo");
 		await incoming(PHONE_UNKNOWN, "saldo");
 		expect(sent.length).toBe(before + 1);
-		expect(lastTo(PHONE_UNKNOWN)).toContain("não está ligado");
+		expect(lastTo(PHONE_UNKNOWN)).toContain("não está associado");
 	});
 
 	it("stays quiet on plain text", async () => {

@@ -1,8 +1,23 @@
 import { formatPhone, WHATSAPP_CODE_LENGTH } from "@wallet/shared";
 import { Button } from "@wallet/ui/components/button";
-import { Input } from "@wallet/ui/components/input";
-import { CheckCircle2Icon, MessageCircleIcon } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@wallet/ui/components/collapsible";
+import {
+	InputOTP,
+	InputOTPGroup,
+	InputOTPSeparator,
+	InputOTPSlot,
+} from "@wallet/ui/components/input-otp";
+import {
+	CheckCircle2Icon,
+	ChevronDownIcon,
+	MessageCircleIcon,
+	SmartphoneIcon,
+} from "lucide-react";
+import { type FormEvent, type ReactNode, useState } from "react";
 import { toast } from "sonner";
 import {
 	useLinkWhatsapp,
@@ -10,12 +25,10 @@ import {
 	useVerifyWhatsapp,
 	useWhatsapp,
 } from "@/actions/settings/use-whatsapp";
-import {
-	SettingsRow,
-	SettingsSection,
-} from "@/components/settings/settings-row";
+import { SettingsSection } from "@/components/settings/settings-row";
 import { useConfirm } from "@/contexts/confirm-context";
 import { errorMessage } from "@/lib/api";
+import { openExternal } from "@/lib/open-external";
 
 const COMMANDS = [
 	["saldo", "saldo de todas as contas"],
@@ -26,18 +39,80 @@ const COMMANDS = [
 	["ajuda", "lista de comandos"],
 ] as const;
 
+const LOCAL_PHONE_LENGTH = 9;
+const COUNTRY_CODE = "258";
+
+function localDigits(value: string) {
+	let digits = value.replace(/\D/g, "");
+	if (digits.startsWith("00")) digits = digits.slice(2);
+	if (digits.startsWith(COUNTRY_CODE) && digits.length > LOCAL_PHONE_LENGTH)
+		digits = digits.slice(COUNTRY_CODE.length);
+	return digits.slice(0, LOCAL_PHONE_LENGTH);
+}
+
+function formatLocalPhone(digits: string) {
+	return [digits.slice(0, 2), digits.slice(2, 5), digits.slice(5)]
+		.filter(Boolean)
+		.join(" ");
+}
+
+function Card({ children }: { children: ReactNode }) {
+	return (
+		<div className="border-line bg-panel rounded-card flex flex-col gap-4 border p-4">
+			{children}
+		</div>
+	);
+}
+
+function CardHeader({
+	icon,
+	title,
+	description,
+	badge,
+}: {
+	icon: ReactNode;
+	title: ReactNode;
+	description: ReactNode;
+	badge?: ReactNode;
+}) {
+	return (
+		<div className="flex items-start gap-3">
+			<span className="bg-money-bg text-money flex size-9 shrink-0 items-center justify-center rounded-full">
+				{icon}
+			</span>
+			<div className="flex min-w-0 flex-col gap-0.5">
+				<span className="text-fg inline-flex flex-wrap items-center gap-2 text-[13px] font-medium">
+					{title}
+					{badge}
+				</span>
+				<span className="text-dim text-[12px] leading-relaxed">
+					{description}
+				</span>
+			</div>
+		</div>
+	);
+}
+
 function Commands() {
 	return (
-		<ul className="flex flex-col gap-1.5">
-			{COMMANDS.map(([command, meaning]) => (
-				<li key={command} className="flex flex-wrap items-baseline gap-2">
-					<code className="num bg-panel-2 border-line rounded border px-1.5 py-px text-[12px]">
-						{command}
-					</code>
-					<span className="text-dim text-[12px]">{meaning}</span>
-				</li>
-			))}
-		</ul>
+		<Collapsible className="group border-line bg-panel rounded-card border">
+			<CollapsibleTrigger className="text-fg-2 hover:text-fg flex w-full cursor-pointer items-center justify-between px-4 py-3 text-[13px]">
+				Comandos que pode enviar
+				<ChevronDownIcon className="text-dim size-4 transition-transform group-data-open:rotate-180" />
+			</CollapsibleTrigger>
+			<CollapsibleContent>
+				<ul className="border-line flex flex-col gap-2 border-t px-4 pt-3 pb-4">
+					{COMMANDS.map(([command, meaning]) => (
+						<li key={command} className="flex flex-wrap items-baseline gap-2">
+							<code className="num bg-panel-2 border-line rounded border px-1.5 py-px text-[12px]">
+								{command}
+							</code>
+							<span className="text-dim text-[12px]">{meaning}</span>
+						</li>
+					))}
+				</ul>
+			</CollapsibleContent>
+		</Collapsible>
 	);
 }
 
@@ -60,10 +135,13 @@ export function WhatsappSection() {
 	if (!data.enabled)
 		return (
 			<SettingsSection title="WhatsApp" description={description}>
-				<SettingsRow
-					title="Indisponível"
-					description="O WhatsApp ainda não está configurado neste servidor."
-				/>
+				<Card>
+					<CardHeader
+						icon={<MessageCircleIcon className="size-4" />}
+						title="Indisponível"
+						description="O WhatsApp ainda não está configurado neste servidor."
+					/>
+				</Card>
 			</SettingsSection>
 		);
 
@@ -73,10 +151,11 @@ export function WhatsappSection() {
 		!!data.codeExpiresAt &&
 		Date.parse(data.codeExpiresAt) > Date.now();
 	const botLink = data.botNumber ? `https://wa.me/${data.botNumber}` : null;
+	const phoneComplete = phone.length === LOCAL_PHONE_LENGTH;
 
 	const sendCode = async (event?: FormEvent) => {
 		event?.preventDefault();
-		const target = phone.trim() || data.phone || "";
+		const target = phone ? `${COUNTRY_CODE}${phone}` : (data.phone ?? "");
 		if (!target) return;
 		try {
 			const next = await link.mutateAsync(target);
@@ -88,12 +167,14 @@ export function WhatsappSection() {
 		}
 	};
 
-	const confirmCode = async (event: FormEvent) => {
-		event.preventDefault();
+	const confirmCode = async (event?: FormEvent) => {
+		event?.preventDefault();
+		if (code.length !== WHATSAPP_CODE_LENGTH) return;
 		try {
-			await verify.mutateAsync(code.trim());
+			await verify.mutateAsync(code);
 			toast.success("WhatsApp ligado");
 		} catch (error) {
+			setCode("");
 			toast.error(errorMessage(error));
 		}
 	};
@@ -116,128 +197,183 @@ export function WhatsappSection() {
 	if (data.verified && data.phone && !changing)
 		return (
 			<SettingsSection title="WhatsApp" description={description}>
-				<SettingsRow
-					title={
-						<span className="inline-flex items-center gap-2">
-							{formatPhone(data.phone)}
-							<span className="bg-money-bg text-money inline-flex items-center gap-1 rounded-full px-2 py-px text-[11px]">
-								<CheckCircle2Icon className="size-3" /> ligado
-							</span>
-						</span>
-					}
-					description={
-						data.botNumber
-							? `Envie mensagens deste número para ${formatPhone(data.botNumber)}.`
-							: "Envie mensagens deste número para o número do Wallet."
-					}
-				>
-					<Button variant="quiet" onClick={() => setChanging(true)}>
-						Mudar número
-					</Button>
-					<Button variant="quiet" onClick={remove} disabled={unlink.isPending}>
-						Desligar
-					</Button>
-					{botLink ? (
-						<a href={botLink} target="_blank" rel="noreferrer">
-							<Button variant="primary">
-								<MessageCircleIcon className="size-3.5" /> Abrir conversa
+				<div className="flex flex-col gap-3">
+					<Card>
+						<CardHeader
+							icon={<CheckCircle2Icon className="size-4" />}
+							title={<span className="num">{formatPhone(data.phone)}</span>}
+							badge={
+								<span className="bg-money-bg text-money rounded-full px-2 py-px text-[11px]">
+									ligado
+								</span>
+							}
+							description={
+								data.botNumber
+									? `Envie mensagens deste número para ${formatPhone(data.botNumber)}.`
+									: "Envie mensagens deste número para o número do Wallet."
+							}
+						/>
+						<div className="flex flex-wrap gap-2">
+							{botLink ? (
+								<Button
+									variant="primary"
+									size="lg"
+									onClick={() =>
+										openExternal(botLink).catch((error) =>
+											toast.error(errorMessage(error)),
+										)
+									}
+								>
+									<MessageCircleIcon className="size-3.5" /> Abrir conversa
+								</Button>
+							) : null}
+							<Button
+								variant="neutral"
+								size="lg"
+								onClick={() => {
+									setPhone("");
+									setChanging(true);
+								}}
+							>
+								Mudar número
 							</Button>
-						</a>
-					) : null}
-				</SettingsRow>
-				<SettingsRow title="Comandos" stacked>
+							<Button
+								variant="quiet"
+								size="lg"
+								onClick={remove}
+								isLoading={unlink.isPending}
+							>
+								Desligar
+							</Button>
+						</div>
+					</Card>
 					<Commands />
-				</SettingsRow>
+				</div>
 			</SettingsSection>
 		);
 
 	if (pending && !changing)
 		return (
 			<SettingsSection title="WhatsApp" description={description}>
-				<SettingsRow
-					title="Confirme o número"
-					description={`Enviámos um código de ${WHATSAPP_CODE_LENGTH} dígitos para ${formatPhone(data.phone ?? "")} pelo WhatsApp.`}
-					stacked
-				>
-					<form className="flex flex-wrap gap-2" onSubmit={confirmCode}>
-						<Input
+				<Card>
+					<CardHeader
+						icon={<MessageCircleIcon className="size-4" />}
+						title="Confirme o número"
+						description={
+							<>
+								Enviámos um código de {WHATSAPP_CODE_LENGTH} dígitos para{" "}
+								<span className="num text-fg-2">
+									{formatPhone(data.phone ?? "")}
+								</span>{" "}
+								pelo WhatsApp.
+							</>
+						}
+					/>
+					<form className="flex flex-col gap-4" onSubmit={confirmCode}>
+						<InputOTP
 							aria-label="Código"
-							inputMode="numeric"
-							autoComplete="one-time-code"
 							maxLength={WHATSAPP_CODE_LENGTH}
-							placeholder="000000"
-							className="num w-32 tracking-[.3em]"
 							value={code}
-							onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-						/>
-						<Button
-							variant="primary"
-							type="submit"
-							disabled={code.length !== WHATSAPP_CODE_LENGTH || verify.isPending}
+							onChange={(value) => setCode(value.replace(/\D/g, ""))}
+							autoFocus
+							disabled={verify.isPending}
 						>
-							Confirmar
-						</Button>
-						<Button
-							variant="quiet"
-							type="button"
-							onClick={() => sendCode()}
-							disabled={link.isPending}
-						>
-							Reenviar código
-						</Button>
-						<Button
-							variant="quiet"
-							type="button"
-							onClick={() => {
-								setPhone("");
-								setChanging(true);
-							}}
-						>
-							Mudar número
-						</Button>
+							<InputOTPGroup>
+								<InputOTPSlot index={0} />
+								<InputOTPSlot index={1} />
+								<InputOTPSlot index={2} />
+							</InputOTPGroup>
+							<InputOTPSeparator />
+							<InputOTPGroup>
+								<InputOTPSlot index={3} />
+								<InputOTPSlot index={4} />
+								<InputOTPSlot index={5} />
+							</InputOTPGroup>
+						</InputOTP>
+						<div className="flex flex-wrap gap-2">
+							<Button
+								variant="primary"
+								size="lg"
+								type="submit"
+								disabled={code.length !== WHATSAPP_CODE_LENGTH}
+								isLoading={verify.isPending}
+							>
+								Confirmar
+							</Button>
+							<Button
+								variant="neutral"
+								size="lg"
+								type="button"
+								onClick={() => sendCode()}
+								isLoading={link.isPending}
+							>
+								Reenviar código
+							</Button>
+							<Button
+								variant="quiet"
+								size="lg"
+								type="button"
+								onClick={() => {
+									setPhone("");
+									setChanging(true);
+								}}
+							>
+								Mudar número
+							</Button>
+						</div>
 					</form>
-				</SettingsRow>
+				</Card>
 			</SettingsSection>
 		);
 
 	return (
 		<SettingsSection title="WhatsApp" description={description}>
-			<SettingsRow
-				title="O seu número de WhatsApp"
-				description="Enviamos um código por WhatsApp para confirmar que o número é seu."
-				stacked
-			>
-				<form className="flex flex-wrap gap-2" onSubmit={sendCode}>
-					<Input
-						aria-label="Número de WhatsApp"
-						type="tel"
-						inputMode="tel"
-						placeholder="84 123 4567"
-						className="w-56"
-						value={phone}
-						onChange={(e) => setPhone(e.target.value)}
+			<div className="flex flex-col gap-3">
+				<Card>
+					<CardHeader
+						icon={<SmartphoneIcon className="size-4" />}
+						title="O seu número de WhatsApp"
+						description="Enviamos um código por WhatsApp para confirmar que o número é seu."
 					/>
-					<Button
-						variant="primary"
-						type="submit"
-						disabled={!phone.trim() || link.isPending}
-					>
-						Enviar código
-					</Button>
-					{changing ? (
+					<form className="flex flex-wrap gap-2" onSubmit={sendCode}>
+						<label className="border-input dark:bg-background focus-within:border-ring focus-within:ring-ring/50 flex h-9 w-60 items-center rounded-md border transition-colors focus-within:ring-3">
+							<span className="num text-dim border-line flex h-full items-center border-r px-2.5 text-[13px]">
+								+{COUNTRY_CODE}
+							</span>
+							<input
+								aria-label="Número de WhatsApp"
+								type="tel"
+								inputMode="tel"
+								autoComplete="tel-national"
+								placeholder="84 123 4567"
+								className="num placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent px-2.5 text-[13px] tracking-wide outline-none"
+								value={formatLocalPhone(phone)}
+								onChange={(e) => setPhone(localDigits(e.target.value))}
+							/>
+						</label>
 						<Button
-							variant="quiet"
-							type="button"
-							onClick={() => setChanging(false)}
+							variant="primary"
+							size="lg"
+							type="submit"
+							disabled={!phoneComplete}
+							isLoading={link.isPending}
 						>
-							Cancelar
+							Enviar código
 						</Button>
-					) : null}
-				</form>
-			</SettingsRow>
-			<SettingsRow title="O que pode enviar" stacked>
+						{changing ? (
+							<Button
+								variant="quiet"
+								size="lg"
+								type="button"
+								onClick={() => setChanging(false)}
+							>
+								Cancelar
+							</Button>
+						) : null}
+					</form>
+				</Card>
 				<Commands />
-			</SettingsRow>
+			</div>
 		</SettingsSection>
 	);
 }

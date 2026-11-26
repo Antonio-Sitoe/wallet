@@ -42,6 +42,7 @@ export function NewCategoryDialog({
 						form={FORM_ID}
 						variant="primary"
 						disabled={!canSubmit}
+						isLoading={create.isPending}
 					>
 						Criar categoria
 					</Button>

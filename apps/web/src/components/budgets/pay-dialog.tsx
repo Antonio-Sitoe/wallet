@@ -74,8 +74,9 @@ export function PayDialog({
 					<Button
 						variant="primary"
 						disabled={
-							cents === null || cents <= 0 || !accountId || pay.isPending
+							cents === null || cents <= 0 || !accountId
 						}
+						isLoading={pay.isPending}
 						onClick={save}
 					>
 						Confirmar

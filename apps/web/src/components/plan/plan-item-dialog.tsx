@@ -151,7 +151,8 @@ export function PlanItemDialog({
 					</Button>
 					<Button
 						variant="primary"
-						disabled={!valid || add.isPending || update.isPending}
+						disabled={!valid}
+						isLoading={add.isPending || update.isPending}
 						onClick={save}
 					>
 						Guardar

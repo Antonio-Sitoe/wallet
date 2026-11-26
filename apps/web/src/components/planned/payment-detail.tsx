@@ -152,7 +152,7 @@ export function PaymentDetail({
 					{next ? (
 						<Button
 							variant="neutral"
-							disabled={skip.isPending}
+							isLoading={skip.isPending}
 							onClick={async () => {
 								await skip.mutateAsync({
 									id: payment.id,

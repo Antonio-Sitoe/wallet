@@ -97,7 +97,7 @@ export function ImportPage() {
 						/>
 						<Button
 							variant="primary"
-							disabled={upload.isPending}
+							isLoading={upload.isPending}
 							onClick={() => inputRef.current?.click()}
 						>
 							{upload.isPending ? "A ler…" : "Escolher ficheiros"}

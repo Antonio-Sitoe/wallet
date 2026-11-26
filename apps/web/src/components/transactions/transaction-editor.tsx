@@ -185,7 +185,8 @@ export function TransactionEditor({
 						type="submit"
 						variant="primary"
 						className="ml-auto"
-						disabled={cents === null || cents <= 0 || update.isPending}
+						disabled={cents === null || cents <= 0}
+						isLoading={update.isPending}
 					>
 						Guardar
 					</Button>

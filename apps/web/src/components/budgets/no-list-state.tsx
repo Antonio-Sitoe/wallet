@@ -25,7 +25,7 @@ export function NoListState({ month }: { month: string }) {
 					<>
 						<Button
 							variant="primary"
-							disabled={generate.isPending}
+							isLoading={generate.isPending}
 							onClick={async () => {
 								const res = await generate.mutateAsync(year);
 								toast.success(`${res.created} itens criados nos 12 meses`);
@@ -66,7 +66,7 @@ export function NoListState({ month }: { month: string }) {
 					{previous ? (
 						<Button
 							variant="primary"
-							disabled={create.isPending}
+							isLoading={create.isPending}
 							onClick={async () => {
 								await create.mutateAsync({ year, copyFrom: year - 1 });
 								toast.success(`Plano de ${year} copiado de ${year - 1}`);

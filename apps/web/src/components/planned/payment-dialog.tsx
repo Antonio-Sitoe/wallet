@@ -148,6 +148,7 @@ export function PaymentDialog({
 						form={FORM_ID}
 						variant="primary"
 						disabled={!canSubmit}
+						isLoading={busy}
 					>
 						{payment ? "Guardar" : "Criar pagamento"}
 					</Button>

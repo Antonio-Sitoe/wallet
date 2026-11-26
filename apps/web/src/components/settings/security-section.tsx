@@ -174,7 +174,8 @@ function PinDialog({ mode, onClose }: { mode: PinMode; onClose: () => void }) {
 					</Button>
 					<Button
 						variant={mode === "remove" ? "danger" : "primary"}
-						disabled={!valid || pending}
+						disabled={!valid}
+						isLoading={pending}
 						onClick={save}
 					>
 						{mode === "remove" ? "Remover" : "Guardar"}

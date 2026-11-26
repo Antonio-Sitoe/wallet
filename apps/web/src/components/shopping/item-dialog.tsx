@@ -56,6 +56,7 @@ export function ItemDialog({
 						form={FORM_ID}
 						variant="primary"
 						disabled={!canSubmit}
+						isLoading={update.isPending}
 					>
 						Guardar
 					</Button>

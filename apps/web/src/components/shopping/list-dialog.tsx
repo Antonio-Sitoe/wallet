@@ -75,6 +75,7 @@ export function ListDialog({
 						form={FORM_ID}
 						variant="primary"
 						disabled={!canSubmit}
+						isLoading={busy}
 					>
 						{list ? "Guardar" : "Criar lista"}
 					</Button>

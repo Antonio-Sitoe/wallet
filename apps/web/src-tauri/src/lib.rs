@@ -35,6 +35,7 @@ fn auth_token_delete() -> Result<(), String> {
 pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_notification::init())
+    .plugin(tauri_plugin_opener::init())
     .manage(offline_db::OfflineDb::default())
     .invoke_handler(tauri::generate_handler![
       auth_token_get,

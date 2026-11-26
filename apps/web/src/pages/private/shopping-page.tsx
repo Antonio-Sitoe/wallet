@@ -250,7 +250,7 @@ export function ShoppingPage() {
 											<Button
 												size="sm"
 												variant="neutral"
-												disabled={duplicateList.isPending}
+												isLoading={duplicateList.isPending}
 												onClick={duplicate}
 											>
 												<CopyIcon className="size-3.5" /> Duplicar

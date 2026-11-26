@@ -240,7 +240,8 @@ export function ImportReview({
 					>
 						<Button
 							variant="primary"
-							disabled={unmapped.length > 0 || commit.isPending}
+							disabled={unmapped.length > 0}
+							isLoading={commit.isPending}
 							onClick={async () => {
 								const filled = Object.fromEntries(
 									Object.entries(categoryMap).filter(([, v]) => v),

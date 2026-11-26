@@ -298,6 +298,7 @@ export function NewTransactionDialog({
 	}, [items, kind, catColor, accounts]);
 
 	const pending = createTx.isPending || createTransfer.isPending;
+	const [savingAgain, setSavingAgain] = useState(false);
 	const valid =
 		cents > 0 &&
 		!!accountId &&
@@ -307,6 +308,7 @@ export function NewTransactionDialog({
 
 	async function save(again: boolean) {
 		if (!valid || pending) return;
+		setSavingAgain(again);
 		const occurredAt = instantOf(date);
 		const itemId = linkUsable ? linkedItem!.id : null;
 		if (kind === "transfer") {
@@ -771,7 +773,8 @@ export function NewTransactionDialog({
 					</span>
 					<Button
 						variant="neutral"
-						disabled={!valid || pending}
+						disabled={!valid}
+						isLoading={pending && savingAgain}
 						onClick={() => void save(true)}
 						className="border-line-strong bg-hover text-fg rounded-control hover:bg-surface-raised inline-flex h-9 cursor-pointer items-center gap-2 border px-3.5 text-[13px] font-medium disabled:cursor-not-allowed disabled:opacity-45"
 					>
@@ -780,7 +783,8 @@ export function NewTransactionDialog({
 					</Button>
 					<Button
 						variant="primary"
-						disabled={!valid || pending}
+						disabled={!valid}
+						isLoading={pending && !savingAgain}
 						onClick={() => void save(false)}
 						className="border-money bg-money text-money-ink hover:bg-money-2 rounded-control inline-flex h-9 cursor-pointer items-center gap-2 border px-3.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
 					>

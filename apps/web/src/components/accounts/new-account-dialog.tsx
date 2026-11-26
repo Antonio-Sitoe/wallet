@@ -44,6 +44,7 @@ export function NewAccountDialog({ onClose }: { onClose: () => void }) {
 						form={FORM_ID}
 						variant="primary"
 						disabled={!canSubmit}
+						isLoading={create.isPending}
 					>
 						Criar conta
 					</Button>

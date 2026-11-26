@@ -51,6 +51,7 @@ export function PayDebtDialog({
 						form={FORM_ID}
 						variant="primary"
 						disabled={!canSubmit}
+						isLoading={pay.isPending}
 					>
 						Registar
 					</Button>

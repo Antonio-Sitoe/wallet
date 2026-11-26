@@ -57,6 +57,7 @@ export function BuyItemDialog({
 						form={FORM_ID}
 						variant="primary"
 						disabled={!canSubmit}
+						isLoading={buy.isPending}
 					>
 						Marcar comprado
 					</Button>

@@ -55,6 +55,7 @@ export function ContributeGoalDialog({
 						form={FORM_ID}
 						variant="primary"
 						disabled={!canSubmit}
+						isLoading={contribute.isPending}
 					>
 						Transferir
 					</Button>

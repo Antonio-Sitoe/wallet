@@ -20,7 +20,6 @@ import type {
 	WhatsappLinkRow,
 } from "./whatsapp.types";
 
-const MARK = "🤖";
 const MAX_CODES_PER_HOUR = 5;
 const MIN_SECONDS_BETWEEN_CODES = 60;
 const MAX_CODE_ATTEMPTS = 5;
@@ -66,7 +65,7 @@ export class WhatsappService {
 	}
 
 	private async send(phone: string, text: string) {
-		await this.config.sender?.sendText(phone, `${MARK} ${text}`);
+		await this.config.sender?.sendText(phone, text);
 	}
 
 	status = async (userId: string) =>
@@ -83,9 +82,9 @@ export class WhatsappService {
 		);
 		const last = recent.at(-1);
 		if (last && now - Date.parse(last) < MIN_SECONDS_BETWEEN_CODES * 1000)
-			throw tooMany("Espere um minuto antes de pedir outro código");
+			throw tooMany("Aguarde um minuto antes de pedir um novo código");
 		if (recent.length >= MAX_CODES_PER_HOUR)
-			throw tooMany("Pediu demasiados códigos. Tente outra vez daqui a uma hora");
+			throw tooMany("Atingiu o limite de códigos. Tente novamente dentro de uma hora");
 		if (await this.repository.verifiedElsewhere(phone, userId))
 			throw phoneTaken();
 		const code = String(randomInt(0, 10 ** WHATSAPP_CODE_LENGTH)).padStart(
@@ -95,13 +94,13 @@ export class WhatsappService {
 		try {
 			await this.send(
 				phone,
-				`Código Wallet: ${code}\nVálido ${WHATSAPP_CODE_MINUTES} minutos. Se não pediu, ignore esta mensagem.`,
+				`O seu código de verificação Wallet é ${code}.\nÉ válido durante ${WHATSAPP_CODE_MINUTES} minutos. Se não pediu este código, ignore esta mensagem.`,
 			);
 		} catch {
 			throw new AppError(
 				502,
 				"WHATSAPP_SEND_FAILED",
-				"Não consegui enviar o código pelo WhatsApp. Confirme o número",
+				"Não foi possível enviar o código pelo WhatsApp. Verifique o número",
 			);
 		}
 		await this.repository.savePending(userId, {
@@ -123,13 +122,13 @@ export class WhatsappService {
 		)
 			throw unprocessable(
 				"WHATSAPP_CODE_EXPIRED",
-				"O código expirou. Peça um novo",
+				"O código expirou. Peça um novo código",
 			);
 		if (current.codeAttempts >= MAX_CODE_ATTEMPTS)
-			throw tooMany("Demasiadas tentativas. Peça um novo código");
+			throw tooMany("Atingiu o limite de tentativas. Peça um novo código");
 		if (!sameHash(current.codeHash, hashCode(userId, code))) {
 			await this.repository.countAttempt(userId);
-			throw unprocessable("WHATSAPP_CODE_WRONG", "Código errado");
+			throw unprocessable("WHATSAPP_CODE_WRONG", "Código incorrecto");
 		}
 		try {
 			await this.repository.markVerified(userId);
@@ -139,7 +138,7 @@ export class WhatsappService {
 		}
 		await this.send(
 			current.phone,
-			`Número ligado à sua conta Wallet.\n\n${HELP}`,
+			`O seu número foi associado à sua conta Wallet.\n\n${HELP}`,
 		).catch(() => undefined);
 		return this.status(userId);
 	};
@@ -167,7 +166,7 @@ export class WhatsappService {
 			if (await this.repository.claimUnknownReply(message.phone, since))
 				await this.send(
 					message.phone,
-					"Este número não está ligado a uma conta Wallet. Ligue-o no app em Definições › WhatsApp.",
+					"Este número não está associado a nenhuma conta Wallet. Para o associar, abra a aplicação e aceda a Definições › WhatsApp.",
 				);
 			return;
 		}
@@ -202,7 +201,7 @@ export class WhatsappService {
 				});
 		} catch (error) {
 			const reason = error instanceof Error ? error.message : "erro inesperado";
-			return this.send(message.phone, `❌ Não gravei: ${reason}`);
+			return this.send(message.phone, `Não foi possível registar a operação: ${reason}`);
 		}
 		const after = await this.deps.accounts.list(userId);
 		return this.send(

@@ -51,6 +51,7 @@ export function UnplannedItemDialog({
 						form={FORM_ID}
 						variant="primary"
 						disabled={!canSubmit}
+						isLoading={add.isPending}
 					>
 						Adicionar
 					</Button>

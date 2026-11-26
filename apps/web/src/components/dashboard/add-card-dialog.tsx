@@ -82,6 +82,7 @@ export function AddCardDialog({
 											variant="primary"
 											className="shadow-lg"
 											disabled={add.isPending}
+											isLoading={add.isPending && add.variables?.type === type}
 											onClick={async () => {
 												await add.mutateAsync({
 													type,

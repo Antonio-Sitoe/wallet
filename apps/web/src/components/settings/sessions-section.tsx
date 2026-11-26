@@ -123,6 +123,7 @@ export function SessionsSection() {
 								<Button
 									variant="quiet"
 									disabled={revoke.isPending}
+									isLoading={revoke.isPending && revoke.variables === session.token}
 									onClick={() => end(session.token)}
 								>
 									Terminar
@@ -139,7 +140,7 @@ export function SessionsSection() {
 				>
 					<Button
 						variant="danger"
-						disabled={revokeOthers.isPending}
+						isLoading={revokeOthers.isPending}
 						onClick={endOthers}
 					>
 						Terminar {others} {others === 1 ? "sessão" : "sessões"}

@@ -65,11 +65,11 @@ describe("interpret", () => {
 		expect(run("- 1 bim x")).toMatchObject({ accountId: "a1" });
 		const unsure = run("- 1 xit x");
 		expect(unsure.kind === "reply" && unsure.text).toContain(
-			"Qual conta? Xitique (Poupança) / Xitique",
+			"Há mais de uma conta possível: Xitique (Poupança), Xitique. Indique qual pretende.",
 		);
 		const missing = run("- 1 nada x");
 		expect(missing.kind === "reply" && missing.text).toContain(
-			'Não encontrei a conta "nada"',
+			'Não foi encontrada nenhuma conta "nada"',
 		);
 	});
 
@@ -86,7 +86,7 @@ describe("interpret", () => {
 
 	it("formats the reply after a write", () => {
 		expect(afterWriteReply("Saída 1,00 MZN · M-Pesa", ["a3"], accounts)).toBe(
-			"✅ Saída 1,00 MZN · M-Pesa\nSaldo agora:\nM-Pesa: 1 100,00",
+			"Registado: Saída 1,00 MZN · M-Pesa\nSaldo actual:\nM-Pesa: 1 100,00",
 		);
 	});
 });

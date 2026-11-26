@@ -103,7 +103,8 @@ export function PlanPage() {
 						</Button>
 						<Button
 							variant="primary"
-							disabled={generate.isPending || data.items.length === 0}
+							disabled={data.items.length === 0}
+							isLoading={generate.isPending}
 							onClick={async () => {
 								const res = await generate.mutateAsync(year);
 								toast.success(

@@ -34,12 +34,13 @@ export type Interpretation =
 	| TransferCommand;
 
 export const HELP = [
-	"Comandos:",
-	"saldo",
-	"- 250 mpesa pão  (saída)",
-	"+ 5000 bci salário  (entrada)",
-	"t 1000 bci mpesa  (transferência)",
-	"Opcional: #categoria no fim, ex.: - 250 mpesa pão #alimentação",
+	"Comandos disponíveis:",
+	"saldo: saldo de todas as contas",
+	"- 250 mpesa pão: registar uma saída",
+	"+ 5000 bci salário: registar uma entrada",
+	"t 1000 bci mpesa: transferir entre contas",
+	"",
+	"Para indicar a categoria, acrescente #categoria no fim. Exemplo: - 250 mpesa pão #alimentação",
 ].join("\n");
 
 export const normalizeName = (value: string | null | undefined) =>
@@ -77,7 +78,7 @@ function pick<T extends { name: string }>(
 	label: string,
 ): Choice<T> {
 	const key = normalizeName(wanted);
-	if (!key) return { error: `Falta o nome da ${label}.` };
+	if (!key) return { error: `Indique o nome da ${label}.` };
 	const tests = [
 		(name: string) => name === key,
 		(name: string) => name.startsWith(key),
@@ -88,11 +89,11 @@ function pick<T extends { name: string }>(
 		if (found.length === 1) return { item: found[0] as T };
 		if (found.length > 1)
 			return {
-				error: `Qual ${label}? ${found.map((item) => item.name).join(" / ")}`,
+				error: `Há mais de uma ${label} possível: ${found.map((item) => item.name).join(", ")}. Indique qual pretende.`,
 			};
 	}
 	return {
-		error: `Não encontrei a ${label} "${wanted}". Opções: ${items.map((item) => item.name).join(", ")}`,
+		error: `Não foi encontrada nenhuma ${label} "${wanted}". Opções disponíveis: ${items.map((item) => item.name).join(", ")}`,
 	};
 }
 
@@ -187,5 +188,5 @@ export function afterWriteReply(
 		.map((id) => accounts.find((account) => account.id === id))
 		.filter((account): account is NamedAccount => !!account)
 		.map((account) => `${account.name}: ${formatMoney(account.balance)}`);
-	return [`✅ ${summary}`, "Saldo agora:", ...balances].join("\n");
+	return [`Registado: ${summary}`, "Saldo actual:", ...balances].join("\n");
 }
