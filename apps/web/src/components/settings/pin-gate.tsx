@@ -1,3 +1,4 @@
+import { PIN_LENGTH } from "@wallet/shared";
 import { cn } from "@wallet/ui/lib/utils";
 import { DeleteIcon, LockIcon } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
@@ -10,7 +11,6 @@ import { authClient, isDesktop } from "@/lib/auth-client";
 
 const UNLOCKED_KEY = "wallet.unlocked";
 const LOCK_EVENT = "wallet:lock";
-const MAX_PIN = 8;
 
 const readUnlocked = () => {
 	try {
@@ -79,7 +79,7 @@ function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 	const locked = secondsLeft > 0;
 
 	const submit = useCallback(async () => {
-		if (pin.length < 4 || locked || verify.isPending) return;
+		if (pin.length < PIN_LENGTH || locked || verify.isPending) return;
 		try {
 			const result = await verify.mutateAsync(pin);
 			if (result.ok) return onUnlock();
@@ -101,10 +101,14 @@ function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 			if (locked) return;
 			setError(null);
 			if (key === "⌫") return setPin((p) => p.slice(0, -1));
-			setPin((p) => (p.length >= MAX_PIN ? p : p + key));
+			setPin((p) => (p.length >= PIN_LENGTH ? p : p + key));
 		},
 		[locked],
 	);
+
+	useEffect(() => {
+		if (pin.length === PIN_LENGTH) submit();
+	}, [pin, submit]);
 
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => {
@@ -131,7 +135,7 @@ function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 			</div>
 
 			<div className="flex h-4 items-center gap-2.5" aria-hidden="true">
-				{Array.from({ length: Math.max(4, pin.length) }, (_, i) => (
+				{Array.from({ length: PIN_LENGTH }, (_, i) => (
 					<span
 						// biome-ignore lint/suspicious/noArrayIndexKey: dots are positional
 						key={i}
@@ -187,7 +191,7 @@ function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 			<button
 				type="button"
 				onClick={submit}
-				disabled={pin.length < 4 || locked || verify.isPending}
+				disabled={pin.length < PIN_LENGTH || locked || verify.isPending}
 				className="bg-money text-money-ink hover:bg-money-2 h-input rounded-control w-[248px] cursor-pointer font-semibold disabled:cursor-not-allowed disabled:opacity-40"
 			>
 				Desbloquear

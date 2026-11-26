@@ -4,13 +4,38 @@ import { ConnectionError } from "@/components/feedback/connection-error";
 import { Loader } from "@/components/feedback/loader";
 import { NotFound } from "@/components/feedback/not-found";
 import { RootLayout } from "@/components/layout/root-layout";
-import { getSession } from "@/lib/auth-client";
+import {
+	getSession,
+	offlineUserId,
+	rememberOfflineUser,
+} from "@/lib/auth-client";
+import { reportOffline } from "@/lib/connection";
 import { isFirstUse } from "@/lib/first-use";
+import { offlineEnabled } from "@/lib/offline/flag";
+import { loadOffline } from "@/lib/offline/registry";
 import { paths } from "@/lib/paths";
 
+async function sessionUserId() {
+	if (!offlineEnabled) {
+		const session = await getSession();
+		return session.data?.user.id ?? null;
+	}
+	const session = await getSession().catch(() => null);
+	if (session?.data) return session.data.user.id;
+	const status = session?.error?.status ?? 0;
+	const unreachable = !session || status === 0 || status >= 500;
+	if (!unreachable) return null;
+	reportOffline();
+	return offlineUserId();
+}
+
 async function requireSession() {
-	const session = await getSession();
-	if (!session.data) throw redirect(paths.login);
+	const userId = await sessionUserId();
+	if (!userId) throw redirect(paths.login);
+	if (offlineEnabled) {
+		rememberOfflineUser(userId);
+		await (await loadOffline()).initOfflineCollections(userId);
+	}
 	return null;
 }
 

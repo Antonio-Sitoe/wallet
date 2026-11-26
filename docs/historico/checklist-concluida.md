@@ -258,3 +258,17 @@ Retirados do plano "Wallet — Plano do App" em 2026-11-23. O que ainda falta fa
 - [x] Definições › Sobre: termos de uso escritos (conta, dados, números e sugestões, uso aceitável, garantias, alterações), abertos num diálogo
 - [x] Notificações enviadas: plugin de notificações do Tauri no desktop e Notification do browser na web, verificadas ao abrir e a cada 15 min, sem repetir; sem permissão aparecem como aviso dentro do app com «Abrir»; Definições › Notificações com estado da permissão, Permitir e Testar
 - [x] Acessibilidade: atalhos num registo único (Nova transacção, ⌘K, ⌘J, Definições, ocultar dinheiro, tema, ecrãs 1–10), editáveis em Definições › Atalhos (gravar, repor, repor todos) e mostrados com as teclas escolhidas na barra lateral e na paleta; «Saltar para o conteúdo» e anel de foco visível em todos os controlos
+
+## Fase 11 — Desktop offline-first — 2026-11-26
+
+**Backend**
+
+- [x] Sincronização entre a base local e o servidor: escritas idempotentes com `id` do cliente em `POST /transactions` e `POST /transfers`, e `DELETE` que dá sucesso quando o registo já não existe; conflitos: a última escrita ganha
+
+**Frontend**
+
+- [x] SQLite local no desktop (comandos `offline_db_*` em Rust, um ficheiro por utilizador): contas, categorias, modelos e os últimos 12 meses de transacções abrem sem ligação; criar, editar e apagar transacções e transferências offline numa fila que sobrevive a fechar o app e é enviada quando a ligação volta
+- [x] Saldos com as alterações por enviar e Painel offline (resumo, contas, últimos registos); sem ligação a barra lateral só mostra Painel, Transacções, Contas e Categorias e as acções só online ficam escondidas
+- [x] Indicador de sincronização no rodapé (sincronizado, a enviar, sem ligação com N por enviar) e lista de alterações rejeitadas com tentar outra vez ou descartar
+- [x] Terminar sessão apaga a base local, a fila e as rejeitadas, também sem ligação, com aviso se houver alterações por enviar
+- [x] Arranque sem servidor em cerca de 3 s (sem retry de erros de rede no desktop)

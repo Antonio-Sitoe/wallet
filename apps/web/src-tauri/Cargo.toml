@@ -29,3 +29,5 @@ keyring = { version = "3", features = [
 	"windows-native",
 	"sync-secret-service",
 ] }
+sqlx = { version = "0.8", default-features = false, features = ["sqlite", "runtime-tokio"] }
+tokio = { version = "1", features = ["sync"] }

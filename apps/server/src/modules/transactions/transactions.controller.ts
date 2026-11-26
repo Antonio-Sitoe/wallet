@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 
+import { AppError } from "../../shared/errors/app-error";
 import { parse } from "../../shared/utils/validate";
 import {
 	createTransactionInput,
@@ -10,6 +11,11 @@ import {
 	updateTransferInput,
 } from "./transactions.schema";
 import type { TransactionsService } from "./transactions.service";
+
+function ignoreNotFound(error: unknown) {
+	if (error instanceof AppError && error.statusCode === 404) return;
+	throw error;
+}
 
 export class TransactionsController {
 	constructor(private readonly service: TransactionsService) {}
@@ -43,7 +49,7 @@ export class TransactionsController {
 
 	remove = async (req: FastifyRequest, reply: FastifyReply) => {
 		const { id } = parse(idParams, req.params);
-		await this.service.remove(req.userId, id);
+		await this.service.remove(req.userId, id).catch(ignoreNotFound);
 		return reply.status(204).send();
 	};
 
@@ -71,7 +77,7 @@ export class TransactionsController {
 
 	removeTransfer = async (req: FastifyRequest, reply: FastifyReply) => {
 		const { id } = parse(idParams, req.params);
-		await this.service.removeTransfer(req.userId, id);
+		await this.service.removeTransfer(req.userId, id).catch(ignoreNotFound);
 		return reply.status(204).send();
 	};
 }

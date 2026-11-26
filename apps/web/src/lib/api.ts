@@ -1,5 +1,6 @@
 import { ENV } from "@/env";
 import { isDesktop, readDesktopToken, resetSession } from "@/lib/auth-client";
+import { reportOffline, reportOnline } from "@/lib/connection";
 
 const BASE = ENV.VITE_SERVER_URL.replace(/\/$/, "");
 
@@ -44,12 +45,20 @@ export async function api<T>(
 	if (options.body !== undefined) headers["Content-Type"] = "application/json";
 	if (isDesktop) headers.Authorization = `Bearer ${await readDesktopToken()}`;
 
-	const res = await fetch(`${BASE}/api${path}${toSearch(options.query)}`, {
-		method: options.method ?? "GET",
-		headers,
-		credentials: "include",
-		body: options.body === undefined ? undefined : JSON.stringify(options.body),
-	});
+	let res: Response;
+	try {
+		res = await fetch(`${BASE}/api${path}${toSearch(options.query)}`, {
+			method: options.method ?? "GET",
+			headers,
+			credentials: "include",
+			body:
+				options.body === undefined ? undefined : JSON.stringify(options.body),
+		});
+	} catch (error) {
+		reportOffline();
+		throw error;
+	}
+	reportOnline();
 	if (res.status === 401) resetSession();
 	if (res.status === 204) return undefined as T;
 	const data = await res.json().catch(() => null);

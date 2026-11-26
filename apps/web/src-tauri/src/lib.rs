@@ -1,3 +1,5 @@
+mod offline_db;
+
 use keyring::Entry;
 
 const SERVICE: &str = "com.antoniositoe.wallet";
@@ -33,10 +35,16 @@ fn auth_token_delete() -> Result<(), String> {
 pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_notification::init())
+    .manage(offline_db::OfflineDb::default())
     .invoke_handler(tauri::generate_handler![
       auth_token_get,
       auth_token_set,
-      auth_token_delete
+      auth_token_delete,
+      offline_db::offline_db_open,
+      offline_db::offline_db_execute,
+      offline_db::offline_db_select,
+      offline_db::offline_db_close,
+      offline_db::offline_db_delete
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {

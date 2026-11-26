@@ -20,6 +20,7 @@ import { Select } from "@/components/ui/select";
 import { Swatch } from "@/components/ui/swatch";
 import { useConfirm } from "@/contexts/confirm-context";
 import { useNewTransaction } from "@/contexts/new-transaction-context";
+import { useOnline } from "@/lib/connection";
 import { searchHref } from "@/lib/search-params";
 import {
 	ACCOUNT_TYPE_LABEL,
@@ -41,6 +42,7 @@ export function AccountDetail({
 	onClose: () => void;
 }) {
 	const confirmAction = useConfirm();
+	const online = useOnline();
 	const update = useUpdateAccount();
 	const reconcile = useReconcileAccount();
 	const remove = useDeleteAccount();
@@ -82,6 +84,8 @@ export function AccountDetail({
 				</span>
 			}
 		>
+			{online ? (
+				<>
 			<AccountBalanceChart accountId={account.id} />
 
 			<form
@@ -167,6 +171,12 @@ export function AccountDetail({
 					}}
 				/>
 			</div>
+				</>
+			) : (
+				<p className="text-dim text-xs">
+					Editar a conta, acertar o saldo e ver o gráfico precisam de ligação.
+				</p>
+			)}
 
 			<div className="border-line overflow-hidden rounded-lg border">
 				<div className="border-line bg-panel-2 flex items-center justify-between border-b px-3 py-2">
@@ -211,6 +221,8 @@ export function AccountDetail({
 				>
 					Nova transacção nesta conta
 				</Button>
+				{online ? (
+				<>
 				<Button
 					variant="quiet"
 					onClick={async () => {
@@ -252,6 +264,8 @@ export function AccountDetail({
 						Apagar
 					</Button>
 				</Hint>
+				</>
+				) : null}
 			</div>
 		</Dialog>
 	);

@@ -22,6 +22,7 @@ import { Page } from "@/components/ui/page";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageTitle } from "@/components/ui/page-title";
 import { Segmented } from "@/components/ui/segmented";
+import { useOnline } from "@/lib/connection";
 import { usePageNavigate, usePageSearch } from "@/lib/search-params";
 
 export function CategoriesPage() {
@@ -30,6 +31,7 @@ export function CategoriesPage() {
 	const categories = useCategories();
 	const [tab, setTab] = useState<"all" | "expense" | "income">("all");
 	const [creating, setCreating] = useState(false);
+	const online = useOnline();
 	const list = categories.data ?? [];
 	const tops = list.filter((c) => !c.parentId);
 	const childrenOf = (pid: string) => list.filter((c) => c.parentId === pid);
@@ -42,9 +44,11 @@ export function CategoriesPage() {
 	return (
 		<>
 			<PageHeader crumb={["categorias"]}>
-				<Button variant="primary" onClick={() => setCreating(true)}>
-					<PlusIcon className="size-3.5" strokeWidth={2.6} /> Nova categoria
-				</Button>
+				{online ? (
+					<Button variant="primary" onClick={() => setCreating(true)}>
+						<PlusIcon className="size-3.5" strokeWidth={2.6} /> Nova categoria
+					</Button>
+				) : null}
 			</PageHeader>
 			<Page>
 				<PageTitle
@@ -140,7 +144,7 @@ export function CategoriesPage() {
 							</Table>
 						)}
 					</Card>
-					{selected ? (
+					{selected && online ? (
 						<CategoryDetail
 							key={selected.id}
 							category={selected}
