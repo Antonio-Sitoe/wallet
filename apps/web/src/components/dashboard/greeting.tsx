@@ -13,11 +13,11 @@ export function Greeting({ meta }: { meta: string }) {
 	const name = authClient.useSession().data?.user.name;
 	return (
 		<div className="flex flex-col gap-1">
-			<h1 className="text-[26px] font-semibold tracking-[-.01em]">
+			<h1 className="text-[26px] font-semibold tracking-[-.01em] max-md:text-[28px] max-md:font-bold max-md:tracking-[-.02em]">
 				{greeting()}
 				{name ? `, ${name.split(" ")[0]}` : ""}
 			</h1>
-			<div className="num text-dim text-xs">{meta}</div>
+			<div className="num text-dim text-xs max-md:hidden">{meta}</div>
 		</div>
 	);
 }

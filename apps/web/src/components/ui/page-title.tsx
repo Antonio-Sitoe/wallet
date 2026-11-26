@@ -13,7 +13,7 @@ export function PageTitle({
 				{title}
 			</h1>
 			{meta ? (
-				<div className="num text-dim text-xs max-md:text-[13px]">{meta}</div>
+				<div className="num text-dim text-xs max-md:font-sans max-md:text-sm">{meta}</div>
 			) : null}
 		</div>
 	);

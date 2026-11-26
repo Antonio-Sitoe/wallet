@@ -38,7 +38,9 @@ export function PageHeader({
 					))}
 				</BreadcrumbList>
 			</Breadcrumb>
-			<div className="flex flex-wrap items-center gap-2">{children}</div>
+			<div className="max-md:no-scrollbar flex flex-wrap items-center gap-2 max-md:-mx-4 max-md:w-[calc(100%+2rem)] max-md:flex-nowrap max-md:overflow-x-auto max-md:px-4 max-md:py-0.5 max-md:*:shrink-0 max-md:*:last:order-first max-md:*:last:ml-auto max-md:[&_button]:rounded-full max-md:[&_button:not([aria-label])]:px-3.5">
+				{children}
+			</div>
 		</header>
 	);
 }
