@@ -113,3 +113,27 @@ pub async fn offline_db_close(state: State<'_, OfflineDb>, name: String) -> Resu
   }
   Ok(())
 }
+
+#[tauri::command]
+pub async fn offline_db_delete<R: Runtime>(
+  app: AppHandle<R>,
+  state: State<'_, OfflineDb>,
+  name: String,
+) -> Result<(), String> {
+  if !valid_name(&name) {
+    return Err(format!("invalid database name: {name}"));
+  }
+  let connection = state.0.lock().await.remove(&name);
+  if let Some(connection) = connection {
+    connection.close().await.map_err(text)?;
+  }
+  let dir = app.path().app_data_dir().map_err(text)?;
+  for suffix in ["", "-wal", "-shm", "-journal"] {
+    match std::fs::remove_file(dir.join(format!("{name}{suffix}"))) {
+      Err(error) if error.kind() != std::io::ErrorKind::NotFound => return Err(text(error)),
+      _ => {}
+    }
+  }
+  Ok(())
+}
+

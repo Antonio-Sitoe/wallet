@@ -43,7 +43,8 @@ pub fn run() {
       offline_db::offline_db_open,
       offline_db::offline_db_execute,
       offline_db::offline_db_select,
-      offline_db::offline_db_close
+      offline_db::offline_db_close,
+      offline_db::offline_db_delete
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {

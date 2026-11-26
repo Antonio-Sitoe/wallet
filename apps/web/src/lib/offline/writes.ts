@@ -159,6 +159,7 @@ export function createOfflineWrites(
 		for (const listener of pendingListeners) listener();
 	}
 
+	let erasing = false;
 	const rejectedKey = `wallet-rejected-${userId}`;
 	const rejectedListeners = new Set<() => void>();
 	let rejected: RejectedChange[] = [];
@@ -185,6 +186,7 @@ export function createOfflineWrites(
 		publishPending();
 		void settled
 			.catch((error: unknown) => {
+				if (erasing) return;
 				setRejected([
 					...rejected.filter((change) => change.id !== entry.id),
 					{
@@ -277,7 +279,9 @@ export function createOfflineWrites(
 		});
 		const transaction = offline.mutate(apply);
 		const settled = transaction.when("settled");
-		settled.catch((error: unknown) => toast.error(errorMessage(error)));
+		settled.catch((error: unknown) => {
+			if (!erasing) toast.error(errorMessage(error));
+		});
 		track(
 			{ id: transaction.id, mutationFnName, metadata },
 			transaction.mutations as Mutation[],
@@ -319,6 +323,22 @@ export function createOfflineWrites(
 			};
 		},
 		rejected: () => rejected,
+		async erase() {
+			erasing = true;
+			for (const transaction of transactions._state.transactions.values()) {
+				if (transaction.state === "completed") continue;
+				try {
+					transaction.rollback();
+				} catch {}
+			}
+			await executor.clearOutbox();
+			pending.clear();
+			publishPending();
+			try {
+				localStorage.removeItem(rejectedKey);
+			} catch {}
+			rejected = [];
+		},
 		discard(id: string) {
 			setRejected(rejected.filter((change) => change.id !== id));
 		},

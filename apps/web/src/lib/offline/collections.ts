@@ -11,7 +11,11 @@ import type {
 import { TEMPLATES_KEY } from "@/actions/settings/keys";
 import { api } from "@/lib/api";
 import { isOnline, subscribeConnection } from "@/lib/connection";
-import { openPersistence, type Persistence } from "@/lib/offline/persistence";
+import {
+	deleteDatabase,
+	openPersistence,
+	type Persistence,
+} from "@/lib/offline/persistence";
 import { setOfflineCollections, setOfflineWrites } from "@/lib/offline/registry";
 import { windowStart } from "@/lib/offline/transaction-window";
 import { createOfflineWrites, type OfflineWrites } from "@/lib/offline/writes";
@@ -160,8 +164,26 @@ export async function resetOfflineCollections() {
 	current.writes.dispose();
 	await Promise.all(
 		Object.values(current.collections).map((collection) =>
-			collection.cleanup(),
+			collection.cleanup({ dependents: true }),
 		),
 	);
 	await current.close().catch(() => undefined);
+}
+
+export async function eraseOfflineData() {
+	const current = opened;
+	const steps: Array<() => Promise<unknown> | undefined> = [
+		() => current?.writes.erase(),
+		() => resetOfflineCollections(),
+		() => (current ? deleteDatabase(current.userId) : undefined),
+	];
+	const failures: unknown[] = [];
+	for (const step of steps) {
+		try {
+			await step();
+		} catch (error) {
+			failures.push(error);
+		}
+	}
+	if (failures.length) throw new AggregateError(failures, "Offline data not fully erased");
 }

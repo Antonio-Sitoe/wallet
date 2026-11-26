@@ -34,6 +34,7 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 - **Fila offline:** `@tanstack/offline-transactions` com IndexedDB, uma fila por utilizador (`wallet-outbox-<userId>`). Erros 4xx (fora 401/408/425/429) não se repetem e desfazem a alteração local com aviso.
 - **Estado da ligação:** vem dos pedidos à API (`src/lib/connection.ts`). Um erro de rede marca offline; a partir daí testa-se `GET /` a cada 5 s. Ao voltar, a fila é enviada e todas as queries são pedidas outra vez. O `navigator.onLine` não serve porque a API pode estar em baixo com rede.
 - **Alterações rejeitadas:** ficam guardadas por utilizador (`wallet-rejected-<userId>` no localStorage) com o pedido original; "Tentar outra vez" volta a pôr na fila, "Descartar" só tira da lista (a alteração local já foi desfeita).
+- **Terminar sessão:** apaga o ficheiro SQLite do utilizador (`offline_db_delete`), a fila e as rejeitadas, e funciona sem ligação no desktop. Se houver alterações por enviar, pede confirmação antes (perdem-se). As coleções fecham com `cleanup({ dependents: true })`, porque o ecrã ainda as está a ler.
 - **Preferências:** ficam com TanStack Query por agora (são um objecto só, com escrita optimista própria); entram mais tarde.
 
 ## Passos
@@ -87,6 +88,12 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 - Ao entrar com outro utilizador: base local separada por utilizador ou apagada.
 - **Verificação:** terminar sessão, entrar com outra conta, não aparece nenhum dado da anterior.
 
+### 7b. Arranque lento sem servidor (por resolver)
+- Abrir o app sem servidor demora 10 a 20 s até aparecer o Painel.
+- Causa provável: o retry do TanStack Query (por omissão 3 tentativas com espera crescente) nas queries que o arranque espera, incluindo as das coleções.
+- Corrigir: sem retry quando o erro é de rede (ou quando `isOnline()` é falso), e confirmar se a sessão (`getSession`) e o keychain também atrasam.
+- **Verificação:** com o servidor parado, o Painel aparece em poucos segundos.
+
 ### 8. Fecho
 - Testes manuais do fluxo completo no build de produção.
 - Actualizar a Fase 11 em `docs/check-list.md`.
@@ -96,5 +103,4 @@ Fora do âmbito offline: acertos (`adjustment`), reconciliação de contas e qua
 
 - O TanStack DB ainda está em versão pré-1.0; fixar versões exactas.
 - Os filtros de transacções que o servidor resolve (ex.: categoria com descendentes) têm de ser replicados localmente.
-- Abrir o app sem servidor demora 10 a 20 s até aparecer o Painel; falta perceber onde se perde o tempo (sessão, keychain ou coleções).
 - O tamanho da janela de 12 meses pode ser grande para quem importou muito histórico. Medido no passo 3: cerca de 1 100 transacções por conta (de 3 100 no total), 6 pedidos de 200 por sincronização completa.

@@ -46,6 +46,7 @@ import {
 	NewTransactionDialog,
 } from "@/components/transactions/new-transaction-dialog";
 import { BrandMark } from "@/components/ui/brand-mark";
+import { useConfirm } from "@/contexts/confirm-context";
 import { NewTransactionContext } from "@/contexts/new-transaction-context";
 import { usePreferencesContext } from "@/contexts/preferences-context";
 import { useOpenSettings } from "@/contexts/settings-context";
@@ -53,7 +54,7 @@ import { ApiError } from "@/lib/api";
 import { authClient, clearDesktopToken } from "@/lib/auth-client";
 import { useOnline } from "@/lib/connection";
 import { offlineEnabled } from "@/lib/offline/flag";
-import { loadOffline } from "@/lib/offline/registry";
+import { loadOffline, offlineWrites } from "@/lib/offline/registry";
 import { formatCombo, useShortcutMap, useShortcuts } from "@/lib/shortcuts";
 
 export const NAV = [
@@ -133,6 +134,7 @@ export const MOD = isMac ? "⌘" : "Ctrl+";
 export function AppShell({ children }: { children: ReactNode }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const confirmAction = useConfirm();
 	useThemeShortcut();
 	const { pathname } = useLocation();
 	const online = useOnline();
@@ -207,17 +209,27 @@ export function AppShell({ children }: { children: ReactNode }) {
 	});
 
 	const value = useMemo(() => openNew, [openNew]);
-	const signOut = () =>
-		authClient.signOut({
-			fetchOptions: {
-				onSuccess: async () => {
-					clearDesktopToken();
-					if (offlineEnabled) await (await loadOffline()).resetOfflineCollections();
-					queryClient.clear();
-					navigate("/login");
-				},
-			},
-		});
+	const signOut = async () => {
+		if (offlineEnabled) {
+			const { count } = offlineWrites().pendingState();
+			if (
+				count &&
+				!(await confirmAction({
+					title: `Tem ${count === 1 ? "1 alteração" : `${count} alterações`} por enviar. Se sair agora, perdem-se. Sair mesmo assim?`,
+				}))
+			)
+				return;
+		}
+		const result = await authClient.signOut().catch(() => null);
+		if (!offlineEnabled && !result?.data) return;
+		clearDesktopToken();
+		try {
+			if (offlineEnabled) await (await loadOffline()).eraseOfflineData();
+		} finally {
+			queryClient.clear();
+			navigate("/login");
+		}
+	};
 
 	return (
 		<NewTransactionContext.Provider value={value}>

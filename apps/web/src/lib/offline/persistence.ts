@@ -32,7 +32,13 @@ async function openDatabase(name: string) {
 	return database as TauriSQLiteDatabaseLike & { close: () => Promise<boolean> };
 }
 
+const fileOf = (userId: string) => `wallet-offline-${userId}.sqlite`;
+
+export function deleteDatabase(userId: string) {
+	return call("offline_db_delete", { name: fileOf(userId) });
+}
+
 export async function openPersistence(userId: string) {
-	const database = await openDatabase(`wallet-offline-${userId}.sqlite`);
+	const database = await openDatabase(fileOf(userId));
 	return { database, persistence: createTauriSQLitePersistence({ database }) };
 }
