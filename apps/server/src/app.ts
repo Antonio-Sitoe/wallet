@@ -21,6 +21,7 @@ import { createShoppingModule } from "./modules/shopping";
 import { createTransactionsModule } from "./modules/transactions";
 import { errorHandler } from "./shared/errors/error-handler";
 import { createAuthGuard, toHeaders } from "./shared/middleware/auth-guard";
+import { createBasicVerifier } from "./shared/middleware/basic-auth";
 
 export type AppOptions = {
 	db: Database;
@@ -274,7 +275,10 @@ export function buildApp({
 		async (api) => {
 			api.addHook(
 				"preHandler",
-				createAuthGuard((headers) => auth.api.getSession({ headers })),
+				createAuthGuard(
+					(headers) => auth.api.getSession({ headers }),
+					createBasicVerifier(db, auth),
+				),
 			);
 			for (const module of Object.values(modules))
 				await api.register(module.routes);

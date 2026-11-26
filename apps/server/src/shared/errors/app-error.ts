@@ -24,3 +24,10 @@ export const unprocessable = (
 
 export const unauthorized = () =>
 	new AppError(401, "UNAUTHORIZED", "Sessão em falta ou expirada");
+
+export const tooManyRequests = () =>
+	new AppError(
+		429,
+		"TOO_MANY_ATTEMPTS",
+		"Demasiadas tentativas falhadas. Tente outra vez daqui a um minuto.",
+	);
