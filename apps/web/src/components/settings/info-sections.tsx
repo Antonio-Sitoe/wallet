@@ -21,6 +21,7 @@ import { TERMS_UPDATED, TermsDialog } from "@/components/settings/terms";
 import { usePreferencesContext } from "@/contexts/preferences-context";
 import { ENV } from "@/env";
 import { apiDownload, errorMessage } from "@/lib/api";
+import { APP_VERSION } from "@/lib/app-version";
 import {
 	comboFromEvent,
 	formatCombo,
@@ -30,7 +31,6 @@ import {
 
 const SERVER = ENV.VITE_SERVER_URL.replace(/\/$/, "");
 const SERVER_LABEL = SERVER.replace(/^https?:\/\//, "");
-export const APP_VERSION = "v0.3";
 
 function Kbd({ children }: { children: string }) {
 	return (

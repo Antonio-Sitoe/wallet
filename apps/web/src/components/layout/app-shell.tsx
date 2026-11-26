@@ -41,7 +41,6 @@ import {
 } from "@/components/layout/theme-switch";
 import { UserMenu } from "@/components/layout/user-menu";
 import { HideMoneyButton } from "@/components/settings/hide-money-button";
-import { APP_VERSION } from "@/components/settings/info-sections";
 import { NotificationsRunner } from "@/components/settings/notifications-runner";
 import {
 	type NewTransactionDefaults,
@@ -53,6 +52,7 @@ import { NewTransactionContext } from "@/contexts/new-transaction-context";
 import { usePreferencesContext } from "@/contexts/preferences-context";
 import { useOpenSettings } from "@/contexts/settings-context";
 import { ApiError } from "@/lib/api";
+import { APP_VERSION } from "@/lib/app-version";
 import { authClient, clearDesktopToken } from "@/lib/auth-client";
 import { useOnline } from "@/lib/connection";
 import { offlineEnabled } from "@/lib/offline/flag";
